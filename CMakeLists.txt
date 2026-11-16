@@ -33,7 +33,7 @@ find_package(SuiteSparse)
 find_package(Ceres REQUIRED)
 
 # ============================= suitesparse =============================
-add_definitions (-march=native)
+add_compile_options(-march=native)
 if (SUITESPARSE_FOUND)
     # On Ubuntu the system install of SuiteSparse (v3.4.0) up to at least
     # Ubuntu 13.10 cannot be used to link shared libraries.
@@ -74,7 +74,7 @@ include_directories(
     include/features/tracking
     include/rel_pose_estimation
     include/simulation
-  ${EIGEN3_INCLUDE_DIR}
+  "${PROJECT_SOURCE_DIR}/third_party/basalt/thirdparty/basalt-headers/thirdparty/eigen"
   ${SUITESPARSE_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${PROJECT_SOURCE_DIR}/third_party/basalt/include
