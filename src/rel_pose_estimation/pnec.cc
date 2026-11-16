@@ -136,7 +136,8 @@ Sophus::SE3d PNEC::Solve(const opengv::bearingVectors_t &bvs1,
                          const Sophus::SE3d &initial_pose,
                          std::vector<int> &inliers,
                          pnec::common::FrameTiming &timing,
-                         const RefinementCovarianceUpdate &update) {
+                         const RefinementCovarianceUpdate &update,
+                         const RefinementObserver &observer) {
   opengv::bearingVectors_t in_bvs1;
   opengv::bearingVectors_t in_bvs2;
   std::vector<Eigen::Matrix3d> in_proj_covs;
@@ -192,11 +193,22 @@ Sophus::SE3d PNEC::Solve(const opengv::bearingVectors_t &bvs1,
       if (update) {
         update(in_proj_covs, inliers);
       }
+      RefinementStatus status;
       tic = std::chrono::high_resolution_clock::now();
-      solution = CeresSolver(in_bvs1, in_bvs2, in_proj_covs, ceres_init);
+      solution = CeresSolver(in_bvs1, in_bvs2, in_proj_covs, ceres_init,
+                             observer ? &status : nullptr);
       toc = std::chrono::high_resolution_clock::now();
       timing.ceres_ =
           std::chrono::duration_cast<std::chrono::milliseconds>(toc - tic);
+      if (observer) {
+        const CovarianceRefiner refine = [&](const auto &covariances) {
+          RefinementResult result;
+          result.pose = CeresSolver(in_bvs1, in_bvs2, covariances, ceres_init,
+                                    &result.status);
+          return result;
+        };
+        observer(in_proj_covs, inliers, ceres_init, {solution, status}, refine);
+      }
     } else {
       solution = ceres_init;
       timing.ceres_ = std::chrono::milliseconds(0);
@@ -353,7 +365,7 @@ Sophus::SE3d
 PNEC::CeresSolver(const opengv::bearingVectors_t &bvs1,
                   const opengv::bearingVectors_t &bvs2,
                   const std::vector<Eigen::Matrix3d> &projected_covariances,
-                  const Sophus::SE3d &initial_pose) {
+                  const Sophus::SE3d &initial_pose, RefinementStatus *status) {
   pnec::optimization::PNECCeres optimizer;
   optimizer.InitValues(Eigen::Quaterniond(initial_pose.rotationMatrix()),
                        initial_pose.translation());
@@ -368,6 +380,12 @@ PNEC::CeresSolver(const opengv::bearingVectors_t &bvs1,
   optimizer.Optimize(bvs_1, bvs_2, projected_covariances,
                      options_.regularization_);
 
+  if (status) {
+    const auto &summary = optimizer.Summary();
+    *status = {summary.IsSolutionUsable(),
+               static_cast<int>(summary.termination_type),
+               summary.initial_cost, summary.final_cost};
+  }
   return optimizer.Result();
 }
 

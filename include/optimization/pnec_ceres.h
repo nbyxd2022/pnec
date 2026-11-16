@@ -73,6 +73,7 @@ public:
   Eigen::Matrix3d Orientation() const;
   Eigen::Vector3d Translation() const;
   Sophus::SE3d Result() const;
+  const ceres::Solver::Summary &Summary() const { return summary_; }
 
 private:
   Eigen::Quaterniond orientation_;

@@ -67,31 +67,38 @@ namespace pnec {
 namespace rel_pose_estimation {
 namespace {
 
-bool MatchDiagnosticsEnabled(int target_frame) {
-  static const auto frames = [] {
-    std::set<int> selected;
-    const char *setting = std::getenv("PNEC_MATCH_DIAGNOSTICS_FRAMES");
-    if (!setting || !*setting) {
+std::set<int> DiagnosticFrames(const char *variable) {
+  std::set<int> selected;
+  const char *setting = std::getenv(variable);
+  if (!setting || !*setting) {
+    return selected;
+  }
+  std::string_view rest(setting);
+  while (true) {
+    const auto comma = rest.find(',');
+    const auto token = rest.substr(0, comma);
+    int frame = 0;
+    const auto end = token.data() + token.size();
+    const auto result = std::from_chars(token.data(), end, frame);
+    if (result.ec != std::errc() || result.ptr != end || frame < 0) {
+      throw std::invalid_argument(std::string(variable) +
+                                  " expects comma-separated frame IDs");
+    }
+    selected.insert(frame);
+    if (comma == std::string_view::npos) {
       return selected;
     }
-    std::string_view rest(setting);
-    while (true) {
-      const auto comma = rest.find(',');
-      const auto token = rest.substr(0, comma);
-      int frame = 0;
-      const auto end = token.data() + token.size();
-      const auto result = std::from_chars(token.data(), end, frame);
-      if (result.ec != std::errc() || result.ptr != end || frame < 0) {
-        throw std::invalid_argument(
-            "PNEC_MATCH_DIAGNOSTICS_FRAMES expects comma-separated frame IDs");
-      }
-      selected.insert(frame);
-      if (comma == std::string_view::npos) {
-        return selected;
-      }
-      rest.remove_prefix(comma + 1);
-    }
-  }();
+    rest.remove_prefix(comma + 1);
+  }
+}
+
+bool MatchDiagnosticsEnabled(int target_frame) {
+  static const auto frames = DiagnosticFrames("PNEC_MATCH_DIAGNOSTICS_FRAMES");
+  return frames.count(target_frame) != 0;
+}
+
+bool RefinementDiagnosticsEnabled(int target_frame) {
+  static const auto frames = DiagnosticFrames("PNEC_REFINEMENT_DIAGNOSTICS_FRAMES");
   return frames.count(target_frame) != 0;
 }
 
@@ -112,12 +119,15 @@ std::set<int> OrderedKltIds(const FeatureMatches &matches, size_t count) {
   return feature_ids;
 }
 
-void AddPhotometricIncrements(
+struct PhotometricTraces {
+  std::vector<double> values;
+  double total = 0;
+};
+
+PhotometricTraces MeasurePhotometricTraces(
     frames::BaseFrame &host, frames::BaseFrame &target,
     const FeatureMatches &matches, const opengv::bearingVectors_t &target_bvs,
-    const std::vector<int> &inliers, std::vector<Eigen::Matrix3d> &covariances,
-    photometric::Mode mode, common::FrameTiming &timing) {
-  const auto start = std::chrono::steady_clock::now();
+    const std::vector<int> &inliers) {
   const auto sorted_ids = OrderedKltIds(matches, target_bvs.size());
   const std::vector<int> ids(sorted_ids.begin(), sorted_ids.end());
   const cv::Mat image1 = host.getImage(), image2 = target.getImage();
@@ -128,9 +138,8 @@ void AddPhotometricIncrements(
   Eigen::Matrix3d intrinsic;
   cv::cv2eigen(Camera::instance().cameraParameters().intrinsic(), intrinsic);
   const Eigen::Matrix3d inverse_intrinsic = intrinsic.inverse();
-  std::vector<double> traces;
-  traces.reserve(inliers.size());
-  double total_trace = 0;
+  PhotometricTraces traces;
+  traces.values.reserve(inliers.size());
   for (int index : inliers) {
     const auto &host_point = host.keypoints().at(ids.at(index)).point_;
     const auto &target_point = target.keypoints().at(ids.at(index)).point_;
@@ -145,23 +154,90 @@ void AddPhotometricIncrements(
     const Eigen::Vector3d tangent_shift = shift - bearing * bearing.dot(shift);
     const double trace = ambiguity.ratio * tangent_shift.squaredNorm() /
                          (4 * ray.squaredNorm());
-    traces.push_back(trace);
-    total_trace += trace;
+    traces.values.push_back(trace);
+    traces.total += trace;
   }
-  if (!std::isfinite(total_trace) || covariances.size() != inliers.size()) {
+  if (!std::isfinite(traces.total)) {
+    throw std::runtime_error("Nonfinite photometric refinement increment");
+  }
+  return traces;
+}
+
+size_t AddPhotometricIncrements(
+    const PhotometricTraces &traces, const opengv::bearingVectors_t &target_bvs,
+    const std::vector<int> &inliers, std::vector<Eigen::Matrix3d> &covariances,
+    photometric::Mode mode) {
+  if (covariances.size() != inliers.size() || traces.values.size() != inliers.size()) {
     throw std::runtime_error("Invalid photometric refinement covariance input");
   }
-  const double mean_trace = traces.empty() ? 0 : total_trace / traces.size();
+  const double mean_trace = inliers.empty() ? 0 : traces.total / inliers.size();
+  size_t nonzero = 0;
   for (size_t i = 0; i < covariances.size(); ++i) {
     const auto &bearing = target_bvs.at(inliers[i]);
-    const double trace = mode == photometric::Mode::Uniform ? mean_trace : traces[i];
+    const double trace = mode == photometric::Mode::Uniform ? mean_trace : traces.values[i];
     covariances[i] += (trace / 2) *
         (Eigen::Matrix3d::Identity() - bearing * bearing.transpose());
-    timing.increment_nonzero_ += trace > 0;
+    nonzero += trace > 0;
   }
-  timing.increment_inliers_ = inliers.size();
-  timing.increment_trace_ = total_trace;
-  timing.covariance_increment_ = std::chrono::steady_clock::now() - start;
+  return nonzero;
+}
+
+void WritePoseFields(std::ostream &stream, const Sophus::SE3d &pose) {
+  const auto &t = pose.translation();
+  const auto q = pose.unit_quaternion();
+  stream << ',' << t.x() << ',' << t.y() << ',' << t.z() << ','
+         << q.x() << ',' << q.y() << ',' << q.z() << ',' << q.w();
+}
+
+void CompareRefinements(
+    frames::BaseFrame &host, frames::BaseFrame &target, const FeatureMatches &matches,
+    const opengv::bearingVectors_t &target_bvs, const std::vector<int> &inliers,
+    const std::vector<Eigen::Matrix3d> &base_covariances, const Sophus::SE3d &initial,
+    const RefinementResult &original, const CovarianceRefiner &refine,
+    const std::string &folder) {
+  const auto traces = MeasurePhotometricTraces(host, target, matches, target_bvs, inliers);
+  const auto suffix = std::to_string(target.id()) + ".csv";
+  const auto path = folder + "refinement_" + suffix;
+  std::ofstream out(path);
+  out << "host_frame,target_frame,host_time_s,target_time_s,inliers,mode,"
+         "increment_trace,nonzero_increments,"
+         "init_tx,init_ty,init_tz,init_qx,init_qy,init_qz,init_qw,"
+         "tx,ty,tz,qx,qy,qz,qw,solution_usable,termination,initial_cost,final_cost\n";
+  out << std::setprecision(17);
+  const auto write_row = [&](const char *mode, const RefinementResult &result,
+                             double trace, size_t nonzero) {
+    out << host.id() << ',' << target.id() << ',' << host.Timestamp() << ','
+        << target.Timestamp() << ',' << inliers.size() << ',' << mode << ','
+        << trace << ',' << nonzero;
+    WritePoseFields(out, initial);
+    WritePoseFields(out, result.pose);
+    out << ',' << result.status.usable << ',' << result.status.termination
+        << ',' << result.status.initial_cost << ',' << result.status.final_cost << '\n';
+  };
+  write_row("original", original, 0, 0);
+  for (auto mode : {photometric::Mode::Uniform, photometric::Mode::PerMatch}) {
+    auto covariances = base_covariances;
+    const size_t nonzero = AddPhotometricIncrements(traces, target_bvs, inliers, covariances, mode);
+    write_row(mode == photometric::Mode::Uniform ? "uniform" : "per_match",
+              refine(covariances), traces.total, nonzero);
+  }
+  out.close();
+  if (!out) {
+    throw std::runtime_error("Failed to write refinement comparison: " + path);
+  }
+
+  const auto increment_path = folder + "refinement_increments_" + suffix;
+  std::ofstream points(increment_path);
+  points << "solver_index,original_covariance_trace,per_match_increment_trace\n"
+         << std::setprecision(17);
+  for (size_t i = 0; i < inliers.size(); ++i) {
+    points << inliers[i] << ',' << base_covariances[i].trace() << ','
+           << traces.values[i] << '\n';
+  }
+  points.close();
+  if (!points) {
+    throw std::runtime_error("Failed to write refinement increments: " + increment_path);
+  }
 }
 
 void WriteMatchDiagnostics(frames::BaseFrame &host, frames::BaseFrame &target,
@@ -246,20 +322,38 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
   }
 
   const auto mode = photometric::ExperimentMode();
+  const bool active = mode == photometric::Mode::Uniform || mode == photometric::Mode::PerMatch;
+  const bool compare = RefinementDiagnosticsEnabled(frame2->id());
   RefinementCovarianceUpdate update;
-  if (mode == photometric::Mode::Uniform || mode == photometric::Mode::PerMatch) {
-    if (options_.use_nec_ || !options_.use_ransac_ || !options_.use_ceres_ ||
-        options_.noise_frame_ != common::Target) {
-      throw std::invalid_argument(
-          "Photometric increments require target-side PNEC with RANSAC and Ceres");
-    }
+  RefinementObserver observer;
+  if ((active || compare) && (options_.use_nec_ || !options_.use_ransac_ ||
+                              !options_.use_ceres_ || options_.noise_frame_ != common::Target)) {
+    throw std::invalid_argument(
+        "Photometric increments require target-side PNEC with RANSAC and Ceres");
+  }
+  if (active) {
     update = [&](auto &covariances, const auto &indices) {
-      AddPhotometricIncrements(*frame1, *frame2, matches, bvs2, indices,
-                               covariances, mode, frame_timing);
+      const auto start = std::chrono::steady_clock::now();
+      const auto traces = MeasurePhotometricTraces(*frame1, *frame2, matches, bvs2, indices);
+      frame_timing.increment_nonzero_ =
+          AddPhotometricIncrements(traces, bvs2, indices, covariances, mode);
+      frame_timing.increment_inliers_ = indices.size();
+      frame_timing.increment_trace_ = traces.total;
+      frame_timing.covariance_increment_ = std::chrono::steady_clock::now() - start;
+    };
+  }
+  if (compare) {
+    if (!ablation || mode != photometric::Mode::Original) {
+      throw std::invalid_argument("Refinement comparison requires original experiment mode and an output folder");
+    }
+    observer = [&](const auto &covariances, const auto &indices, const auto &initial,
+                   const auto &original, const auto &refine) {
+      CompareRefinements(*frame1, *frame2, matches, bvs2, indices, covariances,
+                         initial, original, refine, ablation_folder);
     };
   }
   const auto rel_pose = PNECAlign(bvs1, bvs2, proj_covs, prev_rel_pose, inliers,
-                                  frame_timing, update);
+                                  frame_timing, update, observer);
   if (ablation && MatchDiagnosticsEnabled(frame2->id())) {
     WriteMatchDiagnostics(*frame1, *frame2, matches, proj_covs, inliers,
                           options_, ablation_folder);
@@ -301,10 +395,11 @@ Sophus::SE3d Frame2Frame::PNECAlign(
     const opengv::bearingVectors_t &bvs1, const opengv::bearingVectors_t &bvs2,
     const std::vector<Eigen::Matrix3d> &projected_covs,
     Sophus::SE3d prev_rel_pose, std::vector<int> &inliers,
-    pnec::common::FrameTiming &frame_timing, const RefinementCovarianceUpdate &update) {
+    pnec::common::FrameTiming &frame_timing, const RefinementCovarianceUpdate &update,
+    const RefinementObserver &observer) {
   pnec::rel_pose_estimation::PNEC pnec(options_);
   Sophus::SE3d rel_pose = pnec.Solve(bvs1, bvs2, projected_covs, prev_rel_pose,
-                                     inliers, frame_timing, update);
+                                     inliers, frame_timing, update, observer);
 
   if (ablation_rel_poses_.count("PNEC") == 0) {
     ablation_rel_poses_["PNEC"] = {

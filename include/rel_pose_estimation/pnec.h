@@ -50,6 +50,24 @@ namespace rel_pose_estimation {
 using RefinementCovarianceUpdate =
     std::function<void(std::vector<Eigen::Matrix3d> &, const std::vector<int> &)>;
 
+struct RefinementStatus {
+  bool usable = false;
+  int termination = 0;
+  double initial_cost = 0;
+  double final_cost = 0;
+};
+
+struct RefinementResult {
+  Sophus::SE3d pose;
+  RefinementStatus status;
+};
+
+using CovarianceRefiner =
+    std::function<RefinementResult(const std::vector<Eigen::Matrix3d> &)>;
+using RefinementObserver = std::function<void(
+    const std::vector<Eigen::Matrix3d> &, const std::vector<int> &,
+    const Sophus::SE3d &, const RefinementResult &, const CovarianceRefiner &)>;
+
 class PNEC {
 public:
   PNEC(const pnec::rel_pose_estimation::Options &options);
@@ -78,7 +96,8 @@ public:
                      const Sophus::SE3d &initial_pose,
                      std::vector<int> &inliers,
                      pnec::common::FrameTiming &timing,
-                     const RefinementCovarianceUpdate &update = {});
+                     const RefinementCovarianceUpdate &update = {},
+                     const RefinementObserver &observer = {});
 
   Sophus::SE3d Eigensolver(const opengv::bearingVectors_t &bvs1,
                            const opengv::bearingVectors_t &bvs2,
@@ -95,7 +114,8 @@ public:
   CeresSolver(const opengv::bearingVectors_t &bvs1,
               const opengv::bearingVectors_t &bvs2,
               const std::vector<Eigen::Matrix3d> &projected_covariances,
-              const Sophus::SE3d &initial_pose);
+              const Sophus::SE3d &initial_pose,
+              RefinementStatus *status = nullptr);
   Sophus::SE3d
   CeresSolverFull(const opengv::bearingVectors_t &bvs1,
                   const opengv::bearingVectors_t &bvs2,

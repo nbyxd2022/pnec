@@ -126,6 +126,9 @@ target_link_libraries(${PROJECT_NAME} ${THIRD_PARTY_LIBS} opengv)
 add_executable(pnec_vo src/pnec_vo.cc ${THIRD_PARTY_FILES})
 target_link_libraries(pnec_vo ${THIRD_PARTY_LIBS} opengv ${PROJECT_NAME})
 
+add_executable(pnec_refinement_compare EXCLUDE_FROM_ALL src/pnec_vo.cc ${THIRD_PARTY_FILES})
+target_link_libraries(pnec_refinement_compare ${THIRD_PARTY_LIBS} opengv ${PROJECT_NAME})
+
 add_executable(create_experiments src/create_sim_experiments.cc ${THIRD_PARTY_FILES})
 target_link_libraries(create_experiments ${THIRD_PARTY_LIBS} opengv ${PROJECT_NAME})
 
