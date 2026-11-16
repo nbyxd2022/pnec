@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 from tempfile import mkdtemp
 from time import perf_counter
+from uuid import uuid4
 
 import numpy as np
 
@@ -26,12 +27,17 @@ def digest(path):
         return sha256(stream.read()).hexdigest()
 
 
-def restore_rotations(path, times, warmup):
+def pose_rows(path, times):
     rows = np.loadtxt(path, ndmin=2)
     if rows.shape != (len(times), 8) or not np.isfinite(rows).all():
         raise ValueError(f"{path}: invalid pose coverage")
     if not np.allclose(rows[:, 0], times, rtol=0, atol=1e-5):
         raise ValueError(f"{path}: output times differ from input")
+    return rows
+
+
+def restore_rotations(path, times, warmup):
+    rows = pose_rows(path, times)
     quaternions = rows[1 + warmup:, 4:8]
     norms = np.linalg.norm(quaternions, axis=1)
     if not np.allclose(norms, 1, atol=1e-6, rtol=0):
@@ -81,6 +87,20 @@ def rotation_metrics(reference, estimate):
     return {"rpe_1_deg": errors[0], "rpe_n_deg": sum(errors) / len(reference)}
 
 
+def reuse_slot(target, times, warmup, mode):
+    pose_rows(target / "rot_avg/poses.txt", times)
+    estimate = restore_rotations(target / "ablation/PNEC.txt", times, warmup)
+    summary = timing_summary(target / "timing.txt", len(times), warmup, mode)
+    elapsed = None
+    checkpoint = target / "wall_seconds.txt"
+    if checkpoint.is_file():
+        elapsed = float(checkpoint.read_text(encoding="utf-8"))
+        if not np.isfinite(elapsed) or elapsed < 0:
+            raise ValueError(f"{checkpoint}: invalid elapsed time")
+    return estimate, {"wall_seconds_including_baseline_ablation_methods": elapsed,
+                      "reused_existing_output": True, **summary}
+
+
 def run(args):
     repo = Path(__file__).resolve().parents[2]
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
@@ -89,44 +109,86 @@ def run(args):
     cache = (build / "CMakeCache.txt").read_text()
     if f"CMAKE_HOME_DIRECTORY:INTERNAL={repo.as_posix()}" not in cache.splitlines():
         raise ValueError("Build directory was configured for a different repository")
-    subprocess.run(["cmake", "--build", str(build), "--target", "pnec_vo", "--", "-j2"], check=True)
+    if not args.resume:
+        subprocess.run(["cmake", "--build", str(build), "--target", "pnec_vo", "--", "-j2"], check=True)
     executable = (build / "pnec_vo").resolve(strict=True)
     start, first, end = SMOKE if args.action == "smoke" else HOLDOUT
     warmup = first - start
     sequences = ("08",) if args.action == "smoke" else ("01", "08")
-    out = Path(mkdtemp(prefix=f"pnec_increment_{args.action}_", dir=args.output_root.resolve(strict=True)))
     manifest = {"git_commit": revision, "binary_sha256": digest(executable), "sequences": list(sequences),
                 "action": args.action, "replay_start": start, "evaluation_start": first, "end_exclusive": end,
-                "modes": MODES, "regularizer_and_init": "Nominal PNEC through weighted eigensolver",
+                "modes": list(MODES), "regularizer_and_init": "Nominal PNEC through weighted eigensolver",
                 "ransac_sampling": "Fixed OpenGV seed and srand(1) before each RANSAC"}
-    (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    if args.resume:
+        out = args.resume.resolve(strict=True)
+        saved = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+        original_revision = saved["git_commit"]
+        runner = Path(__file__).resolve().relative_to(repo).as_posix()
+        subprocess.run(["git", "diff", "--quiet", original_revision, revision, "--",
+                        ".", f":(exclude){runner}"], cwd=repo, check=True)
+        manifest["git_commit"] = original_revision
+        if saved != manifest:
+            raise ValueError("Resume requires the original binary and run manifest")
+    else:
+        out = Path(mkdtemp(prefix=f"pnec_increment_{args.action}_", dir=args.output_root.resolve(strict=True)))
+        (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"Run directory: {out}", flush=True)
     data = repo / "data"
     scores = {}
     for sequence in sequences:
         slot = out / sequence
         images = slot / "images"
-        images.mkdir(parents=True)
+        images.mkdir(parents=True, exist_ok=bool(args.resume))
         source = args.dataset.resolve(strict=True) / "sequences" / sequence
         times = np.loadtxt(source / "times.txt", ndmin=1)[start:end]
         if len(times) != end - start or not np.isfinite(times).all() or not np.all(np.diff(times) > 0):
             raise ValueError(f"KITTI {sequence}: clip times missing or invalid")
         times -= times[0]
         time_file = slot / "times.txt"
-        np.savetxt(time_file, times, fmt="%.12f")
+        if time_file.exists():
+            saved_times = np.loadtxt(time_file, ndmin=1)
+            if saved_times.shape != times.shape or not np.allclose(saved_times, times, rtol=0, atol=6e-13):
+                raise ValueError(f"{time_file}: resume timestamps differ")
+        else:
+            np.savetxt(time_file, times, fmt="%.12f")
+        expected_images = set()
         for index in range(start, end):
             name = f"{index:06d}.png"
-            (images / name).symlink_to((source / "image_0" / name).resolve(strict=True))
+            expected_images.add(name)
+            destination = images / name
+            original = (source / "image_0" / name).resolve(strict=True)
+            if destination.is_symlink() or destination.exists():
+                if not destination.is_symlink() or destination.resolve() != original:
+                    raise ValueError(f"{destination}: resume image target differs")
+            else:
+                destination.symlink_to(original)
+        if {path.name for path in images.glob("*.png")} != expected_images:
+            raise ValueError(f"{images}: unexpected images in replay directory")
         config = [data / CAMERA[sequence], data / "test_config.yaml",
                   data / "tracking/KITTI" / f"{sequence}.json", data / "tracking/KITTI/kitti_calib.json"]
-        (slot / "config_sha256.json").write_text(
-            json.dumps({path.name: digest(path) for path in config}, indent=2) + "\n", encoding="utf-8")
+        config_hashes = {path.name: digest(path) for path in config}
+        config_file = slot / "config_sha256.json"
+        if config_file.exists():
+            if json.loads(config_file.read_text(encoding="utf-8")) != config_hashes:
+                raise ValueError(f"{config_file}: resume configurations differ")
+        else:
+            config_file.write_text(json.dumps(config_hashes, indent=2) + "\n", encoding="utf-8")
         estimates = {}
         scores[sequence] = {}
         runs = (*MODES, "original_repeat") if args.action == "smoke" else MODES
         for label in runs:
             mode = "original" if label == "original_repeat" else label
             target = slot / label
+            if args.resume and target.exists():
+                try:
+                    estimates[label], scores[sequence][label] = reuse_slot(target, times, warmup, mode)
+                except (FileNotFoundError, ValueError) as error:
+                    preserved = slot / f"{label}.interrupted-{uuid4().hex[:8]}"
+                    target.rename(preserved)
+                    print(f"KITTI {sequence} {label}: preserved {preserved.name} ({error})", flush=True)
+                else:
+                    print(f"KITTI {sequence} {label}: reused {len(times)} validated frames", flush=True)
+                    continue
             target.mkdir()
             env = dict(os.environ, PNEC_PHOTOMETRIC_INCREMENT=mode, OPENBLAS_NUM_THREADS="1")
             env.pop("PNEC_MATCH_DIAGNOSTICS_FRAMES", None)
@@ -137,9 +199,13 @@ def run(args):
                 subprocess.run(command, cwd=repo, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
             elapsed = perf_counter() - tic
             estimates[label] = restore_rotations(target / "ablation/PNEC.txt", times, warmup)
+            pose_rows(target / "rot_avg/poses.txt", times)
             scores[sequence][label] = {
                 "wall_seconds_including_baseline_ablation_methods": elapsed,
                 **timing_summary(target / "timing.txt", len(times), warmup, mode)}
+            checkpoint = target / "wall_seconds.tmp"
+            checkpoint.write_text(f"{elapsed}\n", encoding="utf-8")
+            checkpoint.replace(target / "wall_seconds.txt")
         if args.action == "smoke":
             original = slot / "original/ablation/PNEC.txt"
             repeat = slot / "original_repeat/ablation/PNEC.txt"
@@ -155,8 +221,10 @@ def run(args):
             for mode in MODES:
                 scores[sequence][mode].update(rotation_metrics(u @ vt, estimates[mode]))
 
-    report = {"manifest": manifest, "results": scores}
-    (out / "report.json").write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    report = {"manifest": manifest, "runner_git_commit": revision, "results": scores}
+    report_tmp = out / "report.json.tmp"
+    report_tmp.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    report_tmp.replace(out / "report.json")
     print(json.dumps(scores, indent=2))
     print(f"Report: {out / 'report.json'}")
 
@@ -166,7 +234,9 @@ def main():
     parser.add_argument("action", choices=("smoke", "holdout"))
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
-    parser.add_argument("--output-root", required=True, type=Path)
+    location = parser.add_mutually_exclusive_group(required=True)
+    location.add_argument("--output-root", type=Path)
+    location.add_argument("--resume", type=Path, help="Reuse complete outputs in an existing run directory")
     run(parser.parse_args())
 
 
