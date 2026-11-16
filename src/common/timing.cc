@@ -44,7 +44,7 @@ int FrameTiming::OptimizationTime() const {
 
 int FrameTiming::TotalTime() const {
   return frame_loading_.count() + feature_creation_.count() +
-         OptimizationTime();
+         OptimizationTime() + static_cast<int>(covariance_increment_.count());
 }
 
 std::ostream &operator<<(std::ostream &os, const FrameTiming &frame_timing) {
@@ -54,7 +54,11 @@ std::ostream &operator<<(std::ostream &os, const FrameTiming &frame_timing) {
      << frame_timing.nec_es_.count() << " " << frame_timing.it_es_.count()
      << " " << frame_timing.avg_it_es_.count() << " "
      << frame_timing.ceres_.count() << " " << frame_timing.OptimizationTime()
-     << " " << frame_timing.TotalTime();
+     << " " << frame_timing.TotalTime()
+     << " " << frame_timing.covariance_increment_.count()
+     << " " << frame_timing.increment_inliers_
+     << " " << frame_timing.increment_nonzero_
+     << " " << frame_timing.increment_trace_;
   return os;
 }
 

@@ -37,7 +37,9 @@
 
 #include "math.h"
 #include <Eigen/Core>
+#include <Eigen/LU>
 #include <charconv>
+#include <chrono>
 #include <cstdlib>
 #include <boost/filesystem.hpp>
 #include <fstream>
@@ -58,6 +60,7 @@
 #include "common.h"
 #include "essential_matrix_methods.h"
 #include "odometry_output.h"
+#include "photometric_increment.h"
 #include "pnec.h"
 
 namespace pnec {
@@ -92,11 +95,7 @@ bool MatchDiagnosticsEnabled(int target_frame) {
   return frames.count(target_frame) != 0;
 }
 
-void WriteMatchDiagnostics(frames::BaseFrame &host, frames::BaseFrame &target,
-                           const FeatureMatches &matches,
-                           const std::vector<Eigen::Matrix3d> &projected_covs,
-                           const std::vector<int> &inliers,
-                           const Options &options, const std::string &folder) {
+std::set<int> OrderedKltIds(const FeatureMatches &matches, size_t count) {
   // GetFeatures assembles the solver inputs from maps sorted by keypoint ID.
   // The KLT matcher pairs the same ID across frames. Check this before mapping
   // RANSAC indices back to pixel coordinates.
@@ -104,12 +103,73 @@ void WriteMatchDiagnostics(frames::BaseFrame &host, frames::BaseFrame &target,
   for (const auto &match : matches) {
     if (match.queryIdx < 0 || match.queryIdx != match.trainIdx ||
         !feature_ids.insert(match.queryIdx).second) {
-      throw std::runtime_error("Match diagnostics require unique KLT IDs");
+      throw std::runtime_error("Expected unique KLT IDs shared by both frames");
     }
   }
-  if (projected_covs.size() != feature_ids.size()) {
-    throw std::runtime_error("Match diagnostics covariance count mismatch");
+  if (feature_ids.size() != count) {
+    throw std::runtime_error("KLT IDs and covariance count mismatch");
   }
+  return feature_ids;
+}
+
+void AddPhotometricIncrements(
+    frames::BaseFrame &host, frames::BaseFrame &target,
+    const FeatureMatches &matches, const opengv::bearingVectors_t &target_bvs,
+    const std::vector<int> &inliers, std::vector<Eigen::Matrix3d> &covariances,
+    photometric::Mode mode, common::FrameTiming &timing) {
+  const auto start = std::chrono::steady_clock::now();
+  const auto sorted_ids = OrderedKltIds(matches, target_bvs.size());
+  const std::vector<int> ids(sorted_ids.begin(), sorted_ids.end());
+  const cv::Mat image1 = host.getImage(), image2 = target.getImage();
+  const photometric::GrayImage gray1{image1.ptr<std::uint8_t>(), image1.cols,
+                                     image1.rows, image1.step[0]};
+  const photometric::GrayImage gray2{image2.ptr<std::uint8_t>(), image2.cols,
+                                     image2.rows, image2.step[0]};
+  Eigen::Matrix3d intrinsic;
+  cv::cv2eigen(Camera::instance().cameraParameters().intrinsic(), intrinsic);
+  const Eigen::Matrix3d inverse_intrinsic = intrinsic.inverse();
+  std::vector<double> traces;
+  traces.reserve(inliers.size());
+  double total_trace = 0;
+  for (int index : inliers) {
+    const auto &host_point = host.keypoints().at(ids.at(index)).point_;
+    const auto &target_point = target.keypoints().at(ids.at(index)).point_;
+    const auto ambiguity =
+        photometric::Measure(gray1, gray2, host_point.x(), host_point.y(),
+                             target_point.x(), target_point.y());
+    const auto &bearing = target_bvs.at(index);
+    const Eigen::Vector3d ray =
+        inverse_intrinsic * Eigen::Vector3d(target_point.x(), target_point.y(), 1.0);
+    const Eigen::Vector3d shift =
+        inverse_intrinsic.leftCols<2>() * Eigen::Vector2d(ambiguity.dx, ambiguity.dy);
+    const Eigen::Vector3d tangent_shift = shift - bearing * bearing.dot(shift);
+    const double trace = ambiguity.ratio * tangent_shift.squaredNorm() /
+                         (4 * ray.squaredNorm());
+    traces.push_back(trace);
+    total_trace += trace;
+  }
+  if (!std::isfinite(total_trace) || covariances.size() != inliers.size()) {
+    throw std::runtime_error("Invalid photometric refinement covariance input");
+  }
+  const double mean_trace = traces.empty() ? 0 : total_trace / traces.size();
+  for (size_t i = 0; i < covariances.size(); ++i) {
+    const auto &bearing = target_bvs.at(inliers[i]);
+    const double trace = mode == photometric::Mode::Uniform ? mean_trace : traces[i];
+    covariances[i] += (trace / 2) *
+        (Eigen::Matrix3d::Identity() - bearing * bearing.transpose());
+    timing.increment_nonzero_ += trace > 0;
+  }
+  timing.increment_inliers_ = inliers.size();
+  timing.increment_trace_ = total_trace;
+  timing.covariance_increment_ = std::chrono::steady_clock::now() - start;
+}
+
+void WriteMatchDiagnostics(frames::BaseFrame &host, frames::BaseFrame &target,
+                           const FeatureMatches &matches,
+                           const std::vector<Eigen::Matrix3d> &projected_covs,
+                           const std::vector<int> &inliers,
+                           const Options &options, const std::string &folder) {
+  const auto feature_ids = OrderedKltIds(matches, projected_covs.size());
   std::vector<bool> ransac_inlier(feature_ids.size(), false);
   for (const auto index : inliers) {
     ransac_inlier.at(index) = true;
@@ -185,8 +245,21 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
     AblationAlign(bvs1, bvs2, proj_covs, ablation_folder);
   }
 
+  const auto mode = photometric::ExperimentMode();
+  RefinementCovarianceUpdate update;
+  if (mode == photometric::Mode::Uniform || mode == photometric::Mode::PerMatch) {
+    if (options_.use_nec_ || !options_.use_ransac_ || !options_.use_ceres_ ||
+        options_.noise_frame_ != common::Target) {
+      throw std::invalid_argument(
+          "Photometric increments require target-side PNEC with RANSAC and Ceres");
+    }
+    update = [&](auto &covariances, const auto &indices) {
+      AddPhotometricIncrements(*frame1, *frame2, matches, bvs2, indices,
+                               covariances, mode, frame_timing);
+    };
+  }
   const auto rel_pose = PNECAlign(bvs1, bvs2, proj_covs, prev_rel_pose, inliers,
-                                  frame_timing, ablation_folder);
+                                  frame_timing, update);
   if (ablation && MatchDiagnosticsEnabled(frame2->id())) {
     WriteMatchDiagnostics(*frame1, *frame2, matches, proj_covs, inliers,
                           options_, ablation_folder);
@@ -228,10 +301,10 @@ Sophus::SE3d Frame2Frame::PNECAlign(
     const opengv::bearingVectors_t &bvs1, const opengv::bearingVectors_t &bvs2,
     const std::vector<Eigen::Matrix3d> &projected_covs,
     Sophus::SE3d prev_rel_pose, std::vector<int> &inliers,
-    pnec::common::FrameTiming &frame_timing, std::string ablation_folder) {
+    pnec::common::FrameTiming &frame_timing, const RefinementCovarianceUpdate &update) {
   pnec::rel_pose_estimation::PNEC pnec(options_);
   Sophus::SE3d rel_pose = pnec.Solve(bvs1, bvs2, projected_covs, prev_rel_pose,
-                                     inliers, frame_timing);
+                                     inliers, frame_timing, update);
 
   if (ablation_rel_poses_.count("PNEC") == 0) {
     ablation_rel_poses_["PNEC"] = {

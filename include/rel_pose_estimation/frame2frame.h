@@ -40,6 +40,7 @@
 #include "sophus/se3.hpp"
 
 #include "base_frame.h"
+#include "pnec.h"
 #include "pnec_config.h"
 #include "timing.h"
 
@@ -74,7 +75,7 @@ private:
                          const std::vector<Eigen::Matrix3d> &projected_covs,
                          Sophus::SE3d prev_rel_pose, std::vector<int> &inliers,
                          pnec::common::FrameTiming &frame_timing,
-                         std::string ablation_folder = "");
+                         const RefinementCovarianceUpdate &update = {});
 
   void AblationAlign(const opengv::bearingVectors_t &bvs1,
                      const opengv::bearingVectors_t &bvs2,

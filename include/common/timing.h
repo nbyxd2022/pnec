@@ -51,7 +51,8 @@ struct FrameTiming {
 
   static std::string TimingHeader() {
     return "ID FrameLoading FeatureCreation NEC-ES IT-ES AVG-IT-ES "
-           "CERES OPTIMIZATION TOTAL";
+           "CERES OPTIMIZATION TOTAL COVARIANCE_INCREMENT INCREMENT_INLIERS "
+           "INCREMENT_NONZERO INCREMENT_TRACE";
   }
 
   int OptimizationTime() const;
@@ -64,6 +65,10 @@ struct FrameTiming {
   std::chrono::milliseconds it_es_ = std::chrono::milliseconds(0);
   std::chrono::milliseconds avg_it_es_ = std::chrono::milliseconds(0);
   std::chrono::milliseconds ceres_ = std::chrono::milliseconds(0);
+  std::chrono::duration<double, std::milli> covariance_increment_{0};
+  std::size_t increment_inliers_ = 0;
+  std::size_t increment_nonzero_ = 0;
+  double increment_trace_ = 0;
 };
 
 std::ostream &operator<<(std::ostream &os, const FrameTiming &frame_timing);

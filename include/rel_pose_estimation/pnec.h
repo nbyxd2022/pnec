@@ -36,6 +36,8 @@
 #ifndef REL_POSE_ESTIMATION_PNEC_H_
 #define REL_POSE_ESTIMATION_PNEC_H_
 
+#include <functional>
+
 #include "opengv/types.hpp"
 #include "sophus/se3.hpp"
 
@@ -44,6 +46,9 @@
 
 namespace pnec {
 namespace rel_pose_estimation {
+
+using RefinementCovarianceUpdate =
+    std::function<void(std::vector<Eigen::Matrix3d> &, const std::vector<int> &)>;
 
 class PNEC {
 public:
@@ -72,7 +77,8 @@ public:
                      const std::vector<Eigen::Matrix3d> &projected_covs,
                      const Sophus::SE3d &initial_pose,
                      std::vector<int> &inliers,
-                     pnec::common::FrameTiming &timing);
+                     pnec::common::FrameTiming &timing,
+                     const RefinementCovarianceUpdate &update = {});
 
   Sophus::SE3d Eigensolver(const opengv::bearingVectors_t &bvs1,
                            const opengv::bearingVectors_t &bvs2,

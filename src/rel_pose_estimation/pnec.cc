@@ -57,6 +57,7 @@
 #include "common.h"
 #include "nec_ceres.h"
 #include "pnec_ceres.h"
+#include "photometric_increment.h"
 #include "scf.h"
 
 namespace pnec {
@@ -134,7 +135,8 @@ Sophus::SE3d PNEC::Solve(const opengv::bearingVectors_t &bvs1,
                          const std::vector<Eigen::Matrix3d> &projected_covs,
                          const Sophus::SE3d &initial_pose,
                          std::vector<int> &inliers,
-                         pnec::common::FrameTiming &timing) {
+                         pnec::common::FrameTiming &timing,
+                         const RefinementCovarianceUpdate &update) {
   opengv::bearingVectors_t in_bvs1;
   opengv::bearingVectors_t in_bvs2;
   std::vector<Eigen::Matrix3d> in_proj_covs;
@@ -187,6 +189,9 @@ Sophus::SE3d PNEC::Solve(const opengv::bearingVectors_t &bvs1,
     }
     Sophus::SE3d solution;
     if (options_.use_ceres_) {
+      if (update) {
+        update(in_proj_covs, inliers);
+      }
       tic = std::chrono::high_resolution_clock::now();
       solution = CeresSolver(in_bvs1, in_bvs2, in_proj_covs, ceres_init);
       toc = std::chrono::high_resolution_clock::now();
@@ -230,13 +235,17 @@ Sophus::SE3d PNEC::Eigensolver(const opengv::bearingVectors_t &bvs1,
                                                         init_rotation);
   Sophus::SE3d solution;
   if (options_.use_ransac_) {
+    const bool random_seed = photometric::ExperimentMode() == photometric::Mode::Disabled;
     opengv::sac::Ransac<
         opengv::sac_problems::relative_pose::EigensolverSacProblem>
         ransac;
     std::shared_ptr<opengv::sac_problems::relative_pose::EigensolverSacProblem>
         eigenproblem_ptr(
             new opengv::sac_problems::relative_pose::EigensolverSacProblem(
-                adapter, options_.ransac_sample_size_));
+                adapter, options_.ransac_sample_size_, random_seed));
+    if (!random_seed) {
+      std::srand(1);
+    }
     ransac.sac_model_ = eigenproblem_ptr;
     ransac.threshold_ = 1.0e-6;
     ransac.max_iterations_ = options_.max_ransac_iterations_;
