@@ -13,6 +13,8 @@ from run_photometric_increment import HOLDOUT, MODES, digest, restore_rotations,
 GAP_BANDS = ((1, 1), (2, 10), (11, 30), (31, 60), (61, 120), (121, 200), (201, 299))
 DETAIL_GAPS = (1, 10, 30, 60, 120, 200, 250, 299)
 WINDOW_FRAMES = 50
+SIGNED_WINDOWS = ((500, 550), (650, 700))  # Half-open ground-truth target-frame ranges.
+LARGEST_STEPS = 5
 
 
 def gap_errors(reference, estimate, gap):
@@ -32,21 +34,109 @@ def project_rotations(matrices):
     return u @ vt
 
 
-def replace_window(per_match, original, targets, lo, hi):
-    relative = per_match[:-1].swapaxes(1, 2) @ per_match[1:]
-    original_relative = original[:-1].swapaxes(1, 2) @ original[1:]
-    inside = (targets >= lo) & (targets < hi)
-    relative[inside] = original_relative[inside]
-    # Remove roundoff from recovering increments out of accumulated rotations.
-    relative = project_rotations(relative)
-    absolute = np.empty_like(per_match)
+def relative_steps(absolute):
+    return absolute[:-1].swapaxes(1, 2) @ absolute[1:]
+
+
+def compose_steps(relative):
+    absolute = np.empty((len(relative) + 1, 3, 3))
     absolute[0] = np.eye(3)
     for index, rotation in enumerate(relative, 1):
         absolute[index] = absolute[index - 1] @ rotation
     return absolute
 
 
-def analyze(run, ground_truth, sequence):
+def replace_steps(per_match, original, mask):
+    relative = relative_steps(per_match)
+    relative[mask] = relative_steps(original)[mask]
+    # Remove roundoff from recovering increments out of accumulated rotations.
+    return compose_steps(project_rotations(relative))
+
+
+def replace_window(per_match, original, targets, lo, hi):
+    return replace_steps(per_match, original, (targets >= lo) & (targets < hi))
+
+
+def rotation_vectors_deg(rotations):
+    """Signed SO(3) log in the input coordinate system, with magnitude in degrees."""
+    r = rotations
+    skew = 0.5 * np.column_stack((
+        r[:, 2, 1] - r[:, 1, 2],
+        r[:, 0, 2] - r[:, 2, 0],
+        r[:, 1, 0] - r[:, 0, 1],
+    ))
+    sine = np.linalg.norm(skew, axis=1)
+    cosine = np.clip((np.trace(r, axis1=1, axis2=2) - 1) / 2, -1, 1)
+    angle = np.arctan2(sine, cosine)
+    scale = np.divide(angle, sine, out=np.ones_like(angle), where=sine > 1e-12)
+    vectors = skew * scale[:, None]
+    for index in np.flatnonzero((cosine < 0) & (sine < 1e-6)):
+        _, axes = np.linalg.eigh((r[index] + r[index].T) / 2)
+        axis = axes[:, -1]
+        if np.dot(axis, skew[index]) < 0:
+            axis = -axis
+        vectors[index] = angle[index] * axis
+    return np.rad2deg(vectors)
+
+
+def signed_window_analysis(reference, estimates, first, per_match_rpe_n):
+    targets = np.arange(first + 1, first + len(reference))
+    anchor_reference = reference[0].T @ reference
+    # D_t = G_(t-1) R_est,t G_t^T lives in the frame-500 GT camera axes.
+    # Its chronological product equals E_t G_t^T for anchor-relative E and G.
+    transported = {mode: anchor_reference[:-1] @ relative_steps(estimate) @
+                   anchor_reference[1:].swapaxes(1, 2) for mode, estimate in estimates.items()}
+    logs = {mode: rotation_vectors_deg(steps) for mode, steps in transported.items()}
+    difference = transported["per_match"] @ transported["original"].swapaxes(1, 2)
+    changes = np.linalg.norm(rotation_vectors_deg(difference), axis=1)
+    output = []
+    for lo, hi in SIGNED_WINDOWS:
+        inside = (targets >= lo) & (targets < hi)
+        members = np.flatnonzero(inside)
+        ranked = members[np.argsort(-changes[members], kind="stable")]
+        largest = np.zeros(len(targets), dtype=bool)
+        largest[ranked[:LARGEST_STEPS]] = True
+        remaining = inside & ~largest
+        summaries = {}
+        for mode, steps in transported.items():
+            vectors = logs[mode][inside]
+            signed_sum = vectors.sum(axis=0)
+            total_angle = float(np.linalg.norm(vectors, axis=1).sum())
+            net_error = compose_steps(steps[inside])[-1]
+            remaining_vectors = logs[mode][remaining]
+            remaining_angle = float(np.linalg.norm(remaining_vectors, axis=1).sum())
+            remaining_sum = remaining_vectors.sum(axis=0)
+            summaries[mode] = {
+                "signed_step_sum_xyz_deg": signed_sum.tolist(),
+                "sum_step_angles_deg": total_angle,
+                "directional_coherence":
+                    float(np.linalg.norm(signed_sum) / total_angle) if total_angle > 1e-9 else None,
+                "net_window_error_xyz_deg": rotation_vectors_deg(net_error[None])[0].tolist(),
+                "signed_step_sum_without_largest_changes_xyz_deg": remaining_sum.tolist(),
+                "directional_coherence_without_largest_changes":
+                    float(np.linalg.norm(remaining_sum) / remaining_angle) if remaining_angle > 1e-9 else None,
+            }
+        replacement = {}
+        for name, mask in (("largest_five", largest), ("remaining", remaining), ("entire_window", inside)):
+            estimate = replace_steps(estimates["per_match"], estimates["original"], mask)
+            metrics = rotation_metrics(reference, estimate)
+            replacement[name] = {
+                "steps_replaced": int(mask.sum()),
+                **metrics,
+                "change_in_per_match_rpe_n_deg": metrics["rpe_n_deg"] - per_match_rpe_n,
+            }
+        output.append({
+            "target_frames": [lo, hi - 1], "pairs": int(inside.sum()),
+            "largest_change_target_frames": targets[ranked[:LARGEST_STEPS]].tolist(),
+            "sign_summaries": summaries, "replace_per_match_with_original": replacement,
+            "steps": [{"target_frame": int(targets[index]), "method_change_deg": float(changes[index]),
+                       "signed_error_xyz_deg": {mode: vectors[index].tolist() for mode, vectors in logs.items()}}
+                      for index in members],
+        })
+    return output
+
+
+def analyze(run, ground_truth, sequence, signed_windows=False):
     report_path = run / "report.json"
     manifest_path = run / "manifest.json"
     recorded = json.loads(report_path.read_text(encoding="utf-8"))
@@ -114,7 +204,7 @@ def analyze(run, ground_truth, sequence):
             "replacement_change_in_per_match_rpe_n_deg":
                 replay_metrics["rpe_n_deg"] - metrics["per_match"]["rpe_n_deg"],
         })
-    return {
+    report = {
         "sequence": sequence,
         "evaluation_frames": [first, end - 1],
         "input_sha256": {
@@ -127,6 +217,9 @@ def analyze(run, ground_truth, sequence):
         "gap_bands": bands,
         "windows": windows,
     }
+    if signed_windows:
+        report["signed_windows"] = signed_window_analysis(reference, estimates, first, metrics["per_match"]["rpe_n_deg"])
+    return report
 
 
 def main():
@@ -135,8 +228,9 @@ def main():
     parser.add_argument("--sequence", choices=("01", "08"), default="01")
     parser.add_argument("--gt", type=Path, required=True, help="KITTI poses for the full sequence")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--signed-windows", action="store_true", help="Analyze signed drift in the two identified windows")
     args = parser.parse_args()
-    output = analyze(args.run, args.gt, args.sequence)
+    output = analyze(args.run, args.gt, args.sequence, args.signed_windows)
     with args.output.open("x", encoding="utf-8") as stream:
         json.dump(output, stream, indent=2, allow_nan=False)
         stream.write("\n")
@@ -156,6 +250,18 @@ def main():
         print(f"{lo}-{hi} {'/'.join(f'{adjacent[m]:.4f}' for m in MODES)} "
               f"{'/'.join(f'{anchored[m]:.4f}' for m in MODES)} "
               f"{window['replacement_change_in_per_match_rpe_n_deg']:+.6f}")
+    if args.signed_windows:
+        for window in output["signed_windows"]:
+            lo, hi = window["target_frames"]
+            print(f"Signed window {lo}-{hi}; largest change targets {window['largest_change_target_frames']}")
+            print("mode sum_xyz_deg net_xyz_deg coherence coherence_without_largest_changes")
+            for mode, summary in window["sign_summaries"].items():
+                values = (summary["signed_step_sum_xyz_deg"], summary["net_window_error_xyz_deg"],
+                          summary["directional_coherence"], summary["directional_coherence_without_largest_changes"])
+                print(mode, json.dumps(values))
+            for subset, result in window["replace_per_match_with_original"].items():
+                print(f"replace_{subset}: steps={result['steps_replaced']} RPE_n={result['rpe_n_deg']:.6f} "
+                      f"delta={result['change_in_per_match_rpe_n_deg']:+.6f}")
     print(f"Report: {args.output}")
 
 
