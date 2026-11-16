@@ -37,8 +37,14 @@
 
 #include "math.h"
 #include <Eigen/Core>
+#include <charconv>
+#include <cstdlib>
 #include <boost/filesystem.hpp>
 #include <fstream>
+#include <iomanip>
+#include <set>
+#include <stdexcept>
+#include <string_view>
 #include <opencv2/core/eigen.hpp>
 #include <opengv/relative_pose/CentralRelativeAdapter.hpp>
 #include <opengv/relative_pose/CentralRelativeWeightingAdapter.hpp>
@@ -56,6 +62,100 @@
 
 namespace pnec {
 namespace rel_pose_estimation {
+namespace {
+
+bool MatchDiagnosticsEnabled(int target_frame) {
+  static const auto frames = [] {
+    std::set<int> selected;
+    const char *setting = std::getenv("PNEC_MATCH_DIAGNOSTICS_FRAMES");
+    if (!setting || !*setting) {
+      return selected;
+    }
+    std::string_view rest(setting);
+    while (true) {
+      const auto comma = rest.find(',');
+      const auto token = rest.substr(0, comma);
+      int frame = 0;
+      const auto end = token.data() + token.size();
+      const auto result = std::from_chars(token.data(), end, frame);
+      if (result.ec != std::errc() || result.ptr != end || frame < 0) {
+        throw std::invalid_argument(
+            "PNEC_MATCH_DIAGNOSTICS_FRAMES expects comma-separated frame IDs");
+      }
+      selected.insert(frame);
+      if (comma == std::string_view::npos) {
+        return selected;
+      }
+      rest.remove_prefix(comma + 1);
+    }
+  }();
+  return frames.count(target_frame) != 0;
+}
+
+void WriteMatchDiagnostics(frames::BaseFrame &host, frames::BaseFrame &target,
+                           const FeatureMatches &matches,
+                           const std::vector<Eigen::Matrix3d> &projected_covs,
+                           const std::vector<int> &inliers,
+                           const Options &options, const std::string &folder) {
+  // GetFeatures assembles the solver inputs from maps sorted by keypoint ID.
+  // The KLT matcher pairs the same ID across frames. Check this before mapping
+  // RANSAC indices back to pixel coordinates.
+  std::set<int> feature_ids;
+  for (const auto &match : matches) {
+    if (match.queryIdx < 0 || match.queryIdx != match.trainIdx ||
+        !feature_ids.insert(match.queryIdx).second) {
+      throw std::runtime_error("Match diagnostics require unique KLT IDs");
+    }
+  }
+  if (projected_covs.size() != feature_ids.size()) {
+    throw std::runtime_error("Match diagnostics covariance count mismatch");
+  }
+  std::vector<bool> ransac_inlier(feature_ids.size(), false);
+  for (const auto index : inliers) {
+    ransac_inlier.at(index) = true;
+  }
+
+  const auto path = folder + "matches_" + std::to_string(host.id()) + "_" +
+                    std::to_string(target.id()) + ".csv";
+  std::ofstream out(path);
+  out << "host_frame,target_frame,host_time_s,target_time_s,solver_index,"
+         "feature_id,host_x_px,host_y_px,target_x_px,target_y_px,"
+         "ransac_enabled,ransac_inlier,noise_frame,"
+         "host_cov00,host_cov01,host_cov10,host_cov11,"
+         "target_cov00,target_cov01,target_cov10,target_cov11,"
+         "projected_cov00,projected_cov01,projected_cov02,"
+         "projected_cov10,projected_cov11,projected_cov12,"
+         "projected_cov20,projected_cov21,projected_cov22\n";
+  out << std::setprecision(17);
+  size_t index = 0;
+  for (const auto id : feature_ids) {
+    const auto &h = host.keypoints().at(id);
+    const auto &t = target.keypoints().at(id);
+    out << host.id() << ',' << target.id() << ',' << host.Timestamp() << ','
+        << target.Timestamp() << ',' << index << ',' << id << ',' << h.point_.x()
+        << ',' << h.point_.y() << ',' << t.point_.x() << ',' << t.point_.y()
+        << ',' << options.use_ransac_ << ',' << ransac_inlier[index] << ','
+        << (options.noise_frame_ == common::Host ? "host" : "target");
+    for (const auto *cov : {&h.img_covariance_, &t.img_covariance_}) {
+      out << ',' << (*cov)(0, 0) << ',' << (*cov)(0, 1) << ',' << (*cov)(1, 0)
+          << ',' << (*cov)(1, 1);
+    }
+    const auto &cov = projected_covs[index];
+    for (int row = 0; row < 3; ++row) {
+      for (int col = 0; col < 3; ++col) {
+        out << ',' << cov(row, col);
+      }
+    }
+    out << '\n';
+    ++index;
+  }
+  out.close();
+  if (!out) {
+    throw std::runtime_error("Failed to write match diagnostics: " + path);
+  }
+}
+
+} // namespace
 
 Frame2Frame::Frame2Frame(const pnec::rel_pose_estimation::Options &options)
     : options_{options} {}
@@ -85,8 +185,13 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
     AblationAlign(bvs1, bvs2, proj_covs, ablation_folder);
   }
 
-  return PNECAlign(bvs1, bvs2, proj_covs, prev_rel_pose, inliers, frame_timing,
-                   ablation_folder);
+  const auto rel_pose = PNECAlign(bvs1, bvs2, proj_covs, prev_rel_pose, inliers,
+                                  frame_timing, ablation_folder);
+  if (ablation && MatchDiagnosticsEnabled(frame2->id())) {
+    WriteMatchDiagnostics(*frame1, *frame2, matches, proj_covs, inliers,
+                          options_, ablation_folder);
+  }
+  return rel_pose;
 }
 
 Sophus::SE3d Frame2Frame::AlignFurther(pnec::frames::BaseFrame::Ptr frame1,
