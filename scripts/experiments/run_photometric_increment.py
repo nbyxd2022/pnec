@@ -22,6 +22,7 @@ CAMERA = {
 }
 HOLDOUT = (450, 500, 800)  # replay start, evaluation start, exclusive end
 SMOKE = (0, 0, 8)
+FULL_TAIL_START = HOLDOUT[2]
 TIMING_COLUMNS = ("ID FrameLoading FeatureCreation NEC-ES IT-ES AVG-IT-ES CERES "
                   "OPTIMIZATION TOTAL COVARIANCE_INCREMENT INCREMENT_INLIERS "
                   "INCREMENT_NONZERO INCREMENT_TRACE")
@@ -106,6 +107,23 @@ def reuse_slot(target, times, warmup, mode):
                       "reused_existing_output": True, **summary}
 
 
+def full_sequence_inputs(dataset, sequence):
+    source = dataset / "sequences" / sequence
+    times_path = source / "times.txt"
+    gt_path = dataset / "poses" / f"{sequence}.txt"
+    times = np.loadtxt(times_path, ndmin=1)
+    gt = np.loadtxt(gt_path, ndmin=2)
+    if (times.ndim != 1 or len(times) < FULL_TAIL_START + 2
+            or not np.isfinite(times).all() or not np.all(np.diff(times) > 0)
+            or gt.shape != (len(times), 12) or not np.isfinite(gt).all()):
+        raise ValueError(f"KITTI {sequence}: invalid full-sequence timestamps, GT or tail coverage")
+    for frame in range(len(times)):
+        image = source / "image_0" / f"{frame:06d}.png"
+        if not image.is_file() or image.stat().st_size == 0:
+            raise FileNotFoundError(f"Missing or empty KITTI image: {image}")
+    return len(times), gt, {"times_sha256": digest(times_path), "ground_truth_sha256": digest(gt_path)}
+
+
 def run(args):
     repo = Path(__file__).resolve().parents[2]
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
@@ -114,19 +132,26 @@ def run(args):
     cache = (build / "CMakeCache.txt").read_text()
     if f"CMAKE_HOME_DIRECTORY:INTERNAL={repo.as_posix()}" not in cache.splitlines():
         raise ValueError("Build directory was configured for a different repository")
-    if not args.resume:
-        subprocess.run(["cmake", "--build", str(build), "--target", "pnec_vo", "--", "-j2"], check=True)
-    executable = (build / "pnec_vo").resolve(strict=True)
     start, first, end = SMOKE if args.action == "smoke" else HOLDOUT
-    warmup = first - start
+    full_gt = None
     if args.action == "smoke":
         sequences = ("08",)
     else:
         sequences = (args.sequence,) if args.sequence else ("01", "08")
+    if args.action == "full":
+        end, full_gt, input_hashes = full_sequence_inputs(args.dataset.resolve(strict=True), args.sequence)
+        start = first = 0
+    warmup = first - start
+
+    if not args.resume:
+        subprocess.run(["cmake", "--build", str(build), "--target", "pnec_vo", "--", "-j2"], check=True)
+    executable = (build / "pnec_vo").resolve(strict=True)
     manifest = {"git_commit": revision, "binary_sha256": digest(executable), "sequences": list(sequences),
                 "action": args.action, "replay_start": start, "evaluation_start": first, "end_exclusive": end,
                 "modes": list(MODES), "regularizer_and_init": "Nominal PNEC through weighted eigensolver",
                 "ransac_sampling": "Fixed OpenGV seed and srand(1) before each RANSAC"}
+    if args.action == "full":
+        manifest.update(tail_evaluation_start=FULL_TAIL_START, **input_hashes)
     if args.resume:
         out = args.resume.resolve(strict=True)
         saved = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
@@ -221,13 +246,22 @@ def run(args):
                 raise ValueError(f"KITTI {sequence}: repeated original poses differ")
         else:
             gt_path = args.dataset / "poses" / f"{sequence}.txt"
-            gt_rows = np.loadtxt(gt_path, ndmin=2)[first:end]
+            gt_rows = full_gt if full_gt is not None else np.loadtxt(gt_path, ndmin=2)[first:end]
             if gt_rows.shape != (end - first, 12) or not np.isfinite(gt_rows).all():
                 raise ValueError(f"KITTI {sequence}: incomplete GT coverage")
             u, _, vt = np.linalg.svd(gt_rows.reshape(-1, 3, 4)[:, :, :3])
             u[:, :, -1] *= np.where(np.linalg.det(u @ vt) < 0, -1, 1)[:, None]
+            reference = u @ vt
             for mode in MODES:
-                scores[sequence][mode].update(rotation_metrics(u @ vt, estimates[mode]))
+                estimate = estimates[mode]
+                scores[sequence][mode].update(rotation_metrics(reference, estimate))
+                if args.action == "full":
+                    # Frame 800 is the tail anchor. Reuse the continuous trajectory and timings.
+                    tail = FULL_TAIL_START
+                    scores[sequence][mode]["tail"] = {
+                        **rotation_metrics(reference[tail:], estimate[tail:]),
+                        **timing_summary(slot / mode / "timing.txt", len(times), tail, mode),
+                    }
 
     report = {"manifest": manifest, "runner_git_commit": revision, "results": scores}
     report_tmp = out / "report.json.tmp"
@@ -239,17 +273,19 @@ def run(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("smoke", "holdout"))
+    parser.add_argument("action", choices=("smoke", "holdout", "full"))
     parser.add_argument("--sequence", choices=tuple(CAMERA),
-                        help="Run a single sequence in holdout mode")
+                        help="Choose one sequence for holdout or full evaluation")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
     location.add_argument("--output-root", type=Path)
     location.add_argument("--resume", type=Path, help="Reuse complete outputs in an existing run directory")
     args = parser.parse_args()
-    if args.sequence and args.action != "holdout":
-        parser.error("--sequence requires holdout mode")
+    if args.sequence and args.action == "smoke":
+        parser.error("--sequence is only used by holdout and full")
+    if args.action == "full" and not args.sequence:
+        parser.error("full requires --sequence")
     run(args)
 
 
