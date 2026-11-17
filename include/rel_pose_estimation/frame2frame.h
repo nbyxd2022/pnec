@@ -75,7 +75,8 @@ private:
                          const std::vector<Eigen::Matrix3d> &projected_covs,
                          Sophus::SE3d prev_rel_pose, std::vector<int> &inliers,
                          pnec::common::FrameTiming &frame_timing,
-                         const RefinementCovarianceUpdate &update = {});
+                         const RefinementCovarianceUpdate &update = {},
+                         const std::vector<Eigen::Matrix3d> *host_covariances = nullptr);
 
   void AblationAlign(const opengv::bearingVectors_t &bvs1,
                      const opengv::bearingVectors_t &bvs2,
@@ -87,7 +88,8 @@ private:
                    pnec::FeatureMatches &matches,
                    opengv::bearingVectors_t &bvs1,
                    opengv::bearingVectors_t &bvs2,
-                   std::vector<Eigen::Matrix3d> &proj_covs);
+                   std::vector<Eigen::Matrix3d> &proj_covs,
+                   std::vector<Eigen::Matrix3d> *host_covariances = nullptr);
 
 protected:
   // Parameters

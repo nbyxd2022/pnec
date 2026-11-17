@@ -1,4 +1,4 @@
-"""Replay frozen KITTI clips with original, uniform and per-match PNEC refinement."""
+"""Replay frozen KITTI clips for the photometric increment or symmetric analytic comparison."""
 
 import argparse
 from hashlib import sha256
@@ -14,6 +14,7 @@ import numpy as np
 
 
 MODES = ("original", "uniform", "per_match")
+ANALYTIC_COMPARISON_MODES = ("original", "per_match", "symmetric_analytic")
 CAMERA = {
     "01": "config_kitti00-02.yaml",
     "08": "config_kitti04-10.yaml",
@@ -69,9 +70,9 @@ def timing_summary(path, frames, warmup, mode):
         raise ValueError(f"{path}: incomplete or invalid timing rows")
     # Timing corresponds to estimates of frame transitions, whose first target is after the anchor.
     total, added, inliers, nonzero, trace = rows[warmup + 1:, 8:13].T
-    if mode == "original":
+    if mode in ("original", "symmetric_analytic"):
         if np.any(rows[:, 9:]):
-            raise ValueError(f"{path}: original mode applied an increment")
+            raise ValueError(f"{path}: {mode} applied a photometric increment")
     elif (not np.any(nonzero > 0) or np.any(nonzero > inliers)
           or not np.array_equal(trace > 0, nonzero > 0)
           or (mode == "uniform" and np.any(nonzero[trace > 0] != inliers[trace > 0]))):
@@ -93,7 +94,15 @@ def rotation_metrics(reference, estimate):
     return {"rpe_1_deg": errors[0], "rpe_n_deg": sum(errors) / len(reference)}
 
 
+def validate_symmetric_activity(target, mode):
+    if mode == "symmetric_analytic":
+        with (target / "run.log").open(encoding="utf-8", errors="replace") as log:
+            if not any("Symmetric analytic Ceres refinement ran" in line for line in log):
+                raise ValueError(f"{target}: symmetric analytic refinement was not logged")
+
+
 def reuse_slot(target, times, warmup, mode):
+    validate_symmetric_activity(target, mode)
     pose_rows(target / "rot_avg/poses.txt", times)
     estimate = restore_rotations(target / "ablation/PNEC.txt", times, warmup)
     summary = timing_summary(target / "timing.txt", len(times), warmup, mode)
@@ -142,16 +151,22 @@ def run(args):
         end, full_gt, input_hashes = full_sequence_inputs(args.dataset.resolve(strict=True), args.sequence)
         start = first = 0
     warmup = first - start
+    modes = ANALYTIC_COMPARISON_MODES if args.compare_symmetric_analytic else MODES
 
     if not args.resume:
         subprocess.run(["cmake", "--build", str(build), "--target", "pnec_vo", "--", "-j2"], check=True)
     executable = (build / "pnec_vo").resolve(strict=True)
     manifest = {"git_commit": revision, "binary_sha256": digest(executable), "sequences": list(sequences),
                 "action": args.action, "replay_start": start, "evaluation_start": first, "end_exclusive": end,
-                "modes": list(MODES), "regularizer_and_init": "Nominal PNEC through weighted eigensolver",
+                "modes": list(modes), "regularizer_and_init": "Nominal PNEC through weighted eigensolver",
                 "ransac_sampling": "Fixed OpenGV seed and srand(1) before each RANSAC"}
     if args.action == "full":
         manifest.update(tail_evaluation_start=FULL_TAIL_START, **input_hashes)
+    if args.compare_symmetric_analytic:
+        manifest["symmetric_analytic_control"] = {
+            "source": "CVPR 2023, Section 3.2, equations 2-3",
+            "scope": "Host and target KLT bearing covariances in final Ceres refinement only",
+        }
     if args.resume:
         out = args.resume.resolve(strict=True)
         saved = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
@@ -208,7 +223,7 @@ def run(args):
             config_file.write_text(json.dumps(config_hashes, indent=2) + "\n", encoding="utf-8")
         estimates = {}
         scores[sequence] = {}
-        runs = (*MODES, "original_repeat") if args.action == "smoke" else MODES
+        runs = (*modes, "original_repeat") if args.action == "smoke" else modes
         for label in runs:
             mode = "original" if label == "original_repeat" else label
             target = slot / label
@@ -231,6 +246,7 @@ def run(args):
             with (target / "run.log").open("w", encoding="utf-8") as log:
                 subprocess.run(command, cwd=repo, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
             elapsed = perf_counter() - tic
+            validate_symmetric_activity(target, mode)
             estimates[label] = restore_rotations(target / "ablation/PNEC.txt", times, warmup)
             pose_rows(target / "rot_avg/poses.txt", times)
             scores[sequence][label] = {
@@ -252,7 +268,7 @@ def run(args):
             u, _, vt = np.linalg.svd(gt_rows.reshape(-1, 3, 4)[:, :, :3])
             u[:, :, -1] *= np.where(np.linalg.det(u @ vt) < 0, -1, 1)[:, None]
             reference = u @ vt
-            for mode in MODES:
+            for mode in modes:
                 estimate = estimates[mode]
                 scores[sequence][mode].update(rotation_metrics(reference, estimate))
                 if args.action == "full":
@@ -276,6 +292,8 @@ def main():
     parser.add_argument("action", choices=("smoke", "holdout", "full"))
     parser.add_argument("--sequence", choices=tuple(CAMERA),
                         help="Choose one sequence for holdout or full evaluation")
+    parser.add_argument("--compare-symmetric-analytic", action="store_true",
+                        help="Compare original, per-match, and double-sided analytic PNEC on the KITTI 08 holdout")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
@@ -286,6 +304,8 @@ def main():
         parser.error("--sequence is only used by holdout and full")
     if args.action == "full" and not args.sequence:
         parser.error("full requires --sequence")
+    if args.compare_symmetric_analytic and (args.action != "holdout" or args.sequence != "08"):
+        parser.error("--compare-symmetric-analytic requires holdout --sequence 08")
     run(args)
 
 

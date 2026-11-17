@@ -71,7 +71,8 @@ void PNECCeres::Optimize(const std::vector<Eigen::Vector3d> &bvs_1,
                          const std::vector<Eigen::Vector3d> &bvs_2,
                          const std::vector<Eigen::Matrix3d> &covs,
                          double regularization,
-                         pnec::common::NoiseFrame noise_frame) {
+                         pnec::common::NoiseFrame noise_frame,
+                         const std::vector<Eigen::Matrix3d> *host_covariances) {
 
   ceres::Problem problem;
   std::vector<double *> orientation_d =
@@ -95,7 +96,8 @@ void PNECCeres::Optimize(const std::vector<Eigen::Vector3d> &bvs_1,
           new ceres::NumericDiffCostFunction<pnec::residual::PNECResidualTarget,
                                              ceres::CENTRAL, 1, 1, 1, 4>(
               new pnec::residual::PNECResidualTarget(bvs_1[i], bvs_2[i],
-                                                     covs[i], regularization));
+                  covs[i], regularization,
+                  host_covariances ? &host_covariances->at(i) : nullptr));
       problem.AddResidualBlock(cost_function, nullptr, &theta_, &phi_,
                                orientation_.coeffs().data());
     }

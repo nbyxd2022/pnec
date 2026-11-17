@@ -80,8 +80,12 @@ private:
 
 struct PNECResidualTarget {
   PNECResidualTarget(Eigen::Vector3d bv_1, Eigen::Vector3d bv_2,
-                     Eigen::Matrix3d cov, double regularization)
-      : bv_1_{bv_1}, bv_2_{bv_2}, cov_{cov}, regularization_{regularization} {}
+                     Eigen::Matrix3d cov, double regularization,
+                     const Eigen::Matrix3d *host_covariance = nullptr)
+      : bv_1_{bv_1}, bv_2_{bv_2}, cov_{cov}, regularization_{regularization},
+        host_covariance_(host_covariance ? *host_covariance
+                                         : Eigen::Matrix3d::Zero().eval()),
+        symmetric_{host_covariance != nullptr} {}
   template <typename T>
   bool operator()(const T *const theta_ptr, const T *const phi_ptr,
                   const T *const orientation_ptr, T *residual_ptr) const {
@@ -94,12 +98,18 @@ struct PNECResidualTarget {
     const Eigen::Matrix<double, 3, 3> bv_1_hat =
         pnec::common::SkewFromVector(bv_1_);
 
+    T variance = (translation.transpose() * bv_1_hat * rotation_m * cov_ *
+                  rotation_m.transpose() * bv_1_hat.transpose() *
+                  translation)(0, 0);
+    if (symmetric_) {
+      // CVPR 2023, Section 3.2. The host bearing error is expressed in the host frame.
+      const Eigen::Matrix<T, 3, 1> host_gradient =
+          (rotation_m * bv_2_).cross(translation);
+      variance += host_gradient.dot(host_covariance_ * host_gradient);
+    }
     residual_ptr[0] =
         (translation.transpose() * bv_1_.cross(rotation_m * bv_2_))(0, 0) /
-        std::sqrt((translation.transpose() * bv_1_hat * rotation_m * cov_ *
-                   rotation_m.transpose() * bv_1_hat.transpose() *
-                   translation)(0, 0) +
-                  regularization_);
+        std::sqrt(variance + regularization_);
     return true;
   }
 
@@ -108,6 +118,8 @@ private:
   const Eigen::Matrix<double, 3, 1> bv_2_;
   const Eigen::Matrix<double, 3, 3> cov_;
   double regularization_;
+  const Eigen::Matrix3d host_covariance_;
+  const bool symmetric_;
 };
 
 } // namespace residual

@@ -239,13 +239,22 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
   opengv::bearingVectors_t bvs1;
   opengv::bearingVectors_t bvs2;
   std::vector<Eigen::Matrix3d> proj_covs;
-  GetFeatures(frame1, frame2, matches, bvs1, bvs2, proj_covs);
+  const auto mode = photometric::ExperimentMode();
+  const bool symmetric = mode == photometric::Mode::SymmetricAnalytic;
+  if (symmetric &&
+      (options_.use_nec_ || !options_.use_ransac_ || !options_.use_ceres_ ||
+       options_.noise_frame_ != common::Target)) {
+    throw std::invalid_argument(
+        "Symmetric analytic refinement requires target-side PNEC with RANSAC and Ceres");
+  }
+  std::vector<Eigen::Matrix3d> host_covariances;
+  auto *host_covs = symmetric ? &host_covariances : nullptr;
+  GetFeatures(frame1, frame2, matches, bvs1, bvs2, proj_covs, host_covs);
 
   if (ablation) {
     AblationAlign(bvs1, bvs2, proj_covs, ablation_folder);
   }
 
-  const auto mode = photometric::ExperimentMode();
   RefinementCovarianceUpdate update;
   if (mode == photometric::Mode::Uniform || mode == photometric::Mode::PerMatch) {
     if (options_.use_nec_ || !options_.use_ransac_ || !options_.use_ceres_ ||
@@ -259,7 +268,7 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
     };
   }
   const auto rel_pose = PNECAlign(bvs1, bvs2, proj_covs, prev_rel_pose, inliers,
-                                  frame_timing, update);
+                                  frame_timing, update, host_covs);
   if (ablation && MatchDiagnosticsEnabled(frame2->id())) {
     WriteMatchDiagnostics(*frame1, *frame2, matches, proj_covs, inliers,
                           options_, ablation_folder);
@@ -301,10 +310,13 @@ Sophus::SE3d Frame2Frame::PNECAlign(
     const opengv::bearingVectors_t &bvs1, const opengv::bearingVectors_t &bvs2,
     const std::vector<Eigen::Matrix3d> &projected_covs,
     Sophus::SE3d prev_rel_pose, std::vector<int> &inliers,
-    pnec::common::FrameTiming &frame_timing, const RefinementCovarianceUpdate &update) {
+    pnec::common::FrameTiming &frame_timing,
+    const RefinementCovarianceUpdate &update,
+    const std::vector<Eigen::Matrix3d> *host_covariances) {
   pnec::rel_pose_estimation::PNEC pnec(options_);
   Sophus::SE3d rel_pose = pnec.Solve(bvs1, bvs2, projected_covs, prev_rel_pose,
-                                     inliers, frame_timing, update);
+                                     inliers, frame_timing, update,
+                                     host_covariances);
 
   if (ablation_rel_poses_.count("PNEC") == 0) {
     ablation_rel_poses_["PNEC"] = {
@@ -532,7 +544,8 @@ void Frame2Frame::GetFeatures(pnec::frames::BaseFrame::Ptr host_frame,
                               pnec::FeatureMatches &matches,
                               opengv::bearingVectors_t &host_bvs,
                               opengv::bearingVectors_t &target_bvs,
-                              std::vector<Eigen::Matrix3d> &proj_covs) {
+                              std::vector<Eigen::Matrix3d> &proj_covs,
+                              std::vector<Eigen::Matrix3d> *host_covariances) {
   std::vector<size_t> host_matches;
   std::vector<size_t> target_matches;
   for (const auto &match : matches) {
@@ -559,6 +572,9 @@ void Frame2Frame::GetFeatures(pnec::frames::BaseFrame::Ptr host_frame,
     proj_covs = host_covs;
   } else {
     proj_covs = target_covs;
+  }
+  if (host_covariances) {
+    host_covariances->swap(host_covs);
   }
 }
 

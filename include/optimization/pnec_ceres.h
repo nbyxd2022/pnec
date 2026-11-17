@@ -60,7 +60,8 @@ public:
   void Optimize(const std::vector<Eigen::Vector3d> &bvs_1,
                 const std::vector<Eigen::Vector3d> &bvs_2,
                 const std::vector<Eigen::Matrix3d> &covs, double regularization,
-                pnec::common::NoiseFrame noise_frame = pnec::common::Target);
+                pnec::common::NoiseFrame noise_frame = pnec::common::Target,
+                const std::vector<Eigen::Matrix3d> *host_covariances = nullptr);
 
   void InitValues(const Eigen::Quaterniond orientation, double theta,
                   double phi);

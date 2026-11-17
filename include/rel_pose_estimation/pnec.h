@@ -78,7 +78,8 @@ public:
                      const Sophus::SE3d &initial_pose,
                      std::vector<int> &inliers,
                      pnec::common::FrameTiming &timing,
-                     const RefinementCovarianceUpdate &update = {});
+                     const RefinementCovarianceUpdate &update = {},
+                     const std::vector<Eigen::Matrix3d> *host_covariances = nullptr);
 
   Sophus::SE3d Eigensolver(const opengv::bearingVectors_t &bvs1,
                            const opengv::bearingVectors_t &bvs2,
@@ -95,7 +96,8 @@ public:
   CeresSolver(const opengv::bearingVectors_t &bvs1,
               const opengv::bearingVectors_t &bvs2,
               const std::vector<Eigen::Matrix3d> &projected_covariances,
-              const Sophus::SE3d &initial_pose);
+              const Sophus::SE3d &initial_pose,
+              const std::vector<Eigen::Matrix3d> *host_covariances = nullptr);
   Sophus::SE3d
   CeresSolverFull(const opengv::bearingVectors_t &bvs1,
                   const opengv::bearingVectors_t &bvs2,

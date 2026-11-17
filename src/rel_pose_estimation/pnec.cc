@@ -136,7 +136,8 @@ Sophus::SE3d PNEC::Solve(const opengv::bearingVectors_t &bvs1,
                          const Sophus::SE3d &initial_pose,
                          std::vector<int> &inliers,
                          pnec::common::FrameTiming &timing,
-                         const RefinementCovarianceUpdate &update) {
+                         const RefinementCovarianceUpdate &update,
+                         const std::vector<Eigen::Matrix3d> *host_covariances) {
   opengv::bearingVectors_t in_bvs1;
   opengv::bearingVectors_t in_bvs2;
   std::vector<Eigen::Matrix3d> in_proj_covs;
@@ -193,8 +194,25 @@ Sophus::SE3d PNEC::Solve(const opengv::bearingVectors_t &bvs1,
         update(in_proj_covs, inliers);
       }
       tic = std::chrono::high_resolution_clock::now();
-      solution = CeresSolver(in_bvs1, in_bvs2, in_proj_covs, ceres_init);
+      const auto *refinement_host_covariances = host_covariances;
+      std::vector<Eigen::Matrix3d> inlier_host_covariances;
+      if (host_covariances && options_.use_ransac_) {
+        inlier_host_covariances.reserve(inliers.size());
+        for (int index : inliers) {
+          inlier_host_covariances.push_back(host_covariances->at(index));
+        }
+        refinement_host_covariances = &inlier_host_covariances;
+      }
+      solution = CeresSolver(in_bvs1, in_bvs2, in_proj_covs, ceres_init,
+                             refinement_host_covariances);
       toc = std::chrono::high_resolution_clock::now();
+      if (refinement_host_covariances && !refinement_host_covariances->empty()) {
+        static const bool logged = [] {
+          BOOST_LOG_TRIVIAL(info) << "Symmetric analytic Ceres refinement ran";
+          return true;
+        }();
+        (void)logged;
+      }
       timing.ceres_ =
           std::chrono::duration_cast<std::chrono::milliseconds>(toc - tic);
     } else {
@@ -353,7 +371,8 @@ Sophus::SE3d
 PNEC::CeresSolver(const opengv::bearingVectors_t &bvs1,
                   const opengv::bearingVectors_t &bvs2,
                   const std::vector<Eigen::Matrix3d> &projected_covariances,
-                  const Sophus::SE3d &initial_pose) {
+                  const Sophus::SE3d &initial_pose,
+                  const std::vector<Eigen::Matrix3d> *host_covariances) {
   pnec::optimization::PNECCeres optimizer;
   optimizer.InitValues(Eigen::Quaterniond(initial_pose.rotationMatrix()),
                        initial_pose.translation());
@@ -366,7 +385,7 @@ PNEC::CeresSolver(const opengv::bearingVectors_t &bvs1,
     bvs_2.push_back(bv);
   }
   optimizer.Optimize(bvs_1, bvs_2, projected_covariances,
-                     options_.regularization_);
+                     options_.regularization_, common::Target, host_covariances);
 
   return optimizer.Result();
 }
