@@ -133,6 +133,37 @@ def full_sequence_inputs(dataset, sequence):
     return len(times), gt, {"times_sha256": digest(times_path), "ground_truth_sha256": digest(gt_path)}
 
 
+def replay_config(repo, sequence):
+    data = repo / "data"
+    return [data / CAMERA[sequence], data / "test_config.yaml",
+            data / "tracking/KITTI" / f"{sequence}.json", data / "tracking/KITTI/kitti_calib.json"]
+
+
+def load_full_reference(path, manifest, config):
+    run = path.resolve(strict=True)
+    raw_report = (run / "report.json").read_bytes()
+    report = json.loads(raw_report)
+    recorded = report["manifest"]
+    expected = dict(manifest, git_commit=recorded["git_commit"],
+                    binary_sha256=recorded["binary_sha256"], modes=list(MODES))
+    if recorded != expected or recorded != json.loads((run / "manifest.json").read_bytes()):
+        raise ValueError("Archived run does not match the current full-sequence protocol")
+    config_hashes = {file.name: digest(file) for file in config}
+    if config_hashes != json.loads((run / "08/config_sha256.json").read_bytes()):
+        raise ValueError("Archived run used different PNEC configuration files")
+    scores = report["results"]["08"]
+    if set(scores) != set(MODES):
+        raise ValueError("Archived run must contain original, uniform and per-match results")
+    for mode in MODES:
+        for metrics in (scores[mode], scores[mode]["tail"]):
+            values = [metrics[key] for key in ("rpe_1_deg", "rpe_n_deg", "p95_total_ms")]
+            if not np.isfinite(values).all() or any(value < 0 for value in values):
+                raise ValueError(f"Invalid archived metric for {mode}")
+    return {"run": str(run), "report_sha256": sha256(raw_report).hexdigest(),
+            "git_commit": recorded["git_commit"], "binary_sha256": recorded["binary_sha256"],
+            "runner_git_commit": report["runner_git_commit"], "scores": scores}
+
+
 def run(args):
     repo = Path(__file__).resolve().parents[2]
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
@@ -151,7 +182,11 @@ def run(args):
         end, full_gt, input_hashes = full_sequence_inputs(args.dataset.resolve(strict=True), args.sequence)
         start = first = 0
     warmup = first - start
-    modes = ANALYTIC_COMPARISON_MODES if args.compare_symmetric_analytic else MODES
+    modes = MODES
+    if args.reference_full_run:
+        modes = ("symmetric_analytic",)
+    elif args.compare_symmetric_analytic:
+        modes = ANALYTIC_COMPARISON_MODES
 
     if not args.resume:
         subprocess.run(["cmake", "--build", str(build), "--target", "pnec_vo", "--", "-j2"], check=True)
@@ -162,7 +197,11 @@ def run(args):
                 "ransac_sampling": "Fixed OpenGV seed and srand(1) before each RANSAC"}
     if args.action == "full":
         manifest.update(tail_evaluation_start=FULL_TAIL_START, **input_hashes)
-    if args.compare_symmetric_analytic:
+    full_reference = None
+    if args.reference_full_run:
+        full_reference = load_full_reference(args.reference_full_run, manifest, replay_config(repo, "08"))
+        manifest["reference_full_report_sha256"] = full_reference["report_sha256"]
+    if "symmetric_analytic" in modes:
         manifest["symmetric_analytic_control"] = {
             "source": "CVPR 2023, Section 3.2, equations 2-3",
             "scope": "Host and target KLT bearing covariances in final Ceres refinement only",
@@ -181,7 +220,6 @@ def run(args):
         out = Path(mkdtemp(prefix=f"pnec_increment_{args.action}_", dir=args.output_root.resolve(strict=True)))
         (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"Run directory: {out}", flush=True)
-    data = repo / "data"
     scores = {}
     for sequence in sequences:
         slot = out / sequence
@@ -212,8 +250,7 @@ def run(args):
                 destination.symlink_to(original)
         if {path.name for path in images.glob("*.png")} != expected_images:
             raise ValueError(f"{images}: unexpected images in replay directory")
-        config = [data / CAMERA[sequence], data / "test_config.yaml",
-                  data / "tracking/KITTI" / f"{sequence}.json", data / "tracking/KITTI/kitti_calib.json"]
+        config = replay_config(repo, sequence)
         config_hashes = {path.name: digest(path) for path in config}
         config_file = slot / "config_sha256.json"
         if config_file.exists():
@@ -280,6 +317,8 @@ def run(args):
                     }
 
     report = {"manifest": manifest, "runner_git_commit": revision, "results": scores}
+    if full_reference is not None:
+        report["reference_full_run"] = full_reference
     report_tmp = out / "report.json.tmp"
     report_tmp.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     report_tmp.replace(out / "report.json")
@@ -292,8 +331,11 @@ def main():
     parser.add_argument("action", choices=("smoke", "holdout", "full"))
     parser.add_argument("--sequence", choices=tuple(CAMERA),
                         help="Choose one sequence for holdout or full evaluation")
-    parser.add_argument("--compare-symmetric-analytic", action="store_true",
-                        help="Compare original, per-match, and double-sided analytic PNEC on the KITTI 08 holdout")
+    analytic = parser.add_mutually_exclusive_group()
+    analytic.add_argument("--compare-symmetric-analytic", action="store_true",
+                          help="Compare original, per-match, and double-sided analytic PNEC on the KITTI 08 holdout")
+    analytic.add_argument("--reference-full-run", type=Path,
+                          help="Replay only double-sided analytic PNEC and report the archived KITTI 08 full runs alongside it")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
@@ -306,6 +348,8 @@ def main():
         parser.error("full requires --sequence")
     if args.compare_symmetric_analytic and (args.action != "holdout" or args.sequence != "08"):
         parser.error("--compare-symmetric-analytic requires holdout --sequence 08")
+    if args.reference_full_run and (args.action != "full" or args.sequence != "08"):
+        parser.error("--reference-full-run requires full --sequence 08")
     run(args)
 
 
