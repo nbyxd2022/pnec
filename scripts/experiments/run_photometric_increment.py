@@ -140,6 +140,7 @@ def replay_config(repo, sequence):
 
 
 def load_full_reference(path, manifest, config):
+    sequence, = manifest["sequences"]
     run = path.resolve(strict=True)
     raw_report = (run / "report.json").read_bytes()
     report = json.loads(raw_report)
@@ -149,9 +150,9 @@ def load_full_reference(path, manifest, config):
     if recorded != expected or recorded != json.loads((run / "manifest.json").read_bytes()):
         raise ValueError("Archived run does not match the current full-sequence protocol")
     config_hashes = {file.name: digest(file) for file in config}
-    if config_hashes != json.loads((run / "08/config_sha256.json").read_bytes()):
+    if config_hashes != json.loads((run / sequence / "config_sha256.json").read_bytes()):
         raise ValueError("Archived run used different PNEC configuration files")
-    scores = report["results"]["08"]
+    scores = report["results"][sequence]
     if set(scores) != set(MODES):
         raise ValueError("Archived run must contain original, uniform and per-match results")
     for mode in MODES:
@@ -199,7 +200,8 @@ def run(args):
         manifest.update(tail_evaluation_start=FULL_TAIL_START, **input_hashes)
     full_reference = None
     if args.reference_full_run:
-        full_reference = load_full_reference(args.reference_full_run, manifest, replay_config(repo, "08"))
+        full_reference = load_full_reference(args.reference_full_run, manifest,
+                                             replay_config(repo, args.sequence))
         manifest["reference_full_report_sha256"] = full_reference["report_sha256"]
     if "symmetric_analytic" in modes:
         manifest["symmetric_analytic_control"] = {
@@ -335,7 +337,7 @@ def main():
     analytic.add_argument("--compare-symmetric-analytic", action="store_true",
                           help="Compare original, per-match, and double-sided analytic PNEC on the KITTI 08 holdout")
     analytic.add_argument("--reference-full-run", type=Path,
-                          help="Replay only double-sided analytic PNEC and report the archived KITTI 08 full runs alongside it")
+                          help="Replay only double-sided analytic PNEC and report the archived full runs for the selected KITTI sequence alongside it")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
@@ -348,8 +350,8 @@ def main():
         parser.error("full requires --sequence")
     if args.compare_symmetric_analytic and (args.action != "holdout" or args.sequence != "08"):
         parser.error("--compare-symmetric-analytic requires holdout --sequence 08")
-    if args.reference_full_run and (args.action != "full" or args.sequence != "08"):
-        parser.error("--reference-full-run requires full --sequence 08")
+    if args.reference_full_run and args.action != "full":
+        parser.error("--reference-full-run requires full --sequence")
     run(args)
 
 
