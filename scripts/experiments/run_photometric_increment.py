@@ -14,7 +14,12 @@ import numpy as np
 
 
 MODES = ("original", "uniform", "per_match")
-CAMERA = {"01": "config_kitti00-02.yaml", "08": "config_kitti04-10.yaml"}
+CAMERA = {
+    "01": "config_kitti00-02.yaml",
+    "08": "config_kitti04-10.yaml",
+    "09": "config_kitti04-10.yaml",
+    "10": "config_kitti04-10.yaml",
+}
 HOLDOUT = (450, 500, 800)  # replay start, evaluation start, exclusive end
 SMOKE = (0, 0, 8)
 TIMING_COLUMNS = ("ID FrameLoading FeatureCreation NEC-ES IT-ES AVG-IT-ES CERES "
@@ -114,7 +119,10 @@ def run(args):
     executable = (build / "pnec_vo").resolve(strict=True)
     start, first, end = SMOKE if args.action == "smoke" else HOLDOUT
     warmup = first - start
-    sequences = ("08",) if args.action == "smoke" else ("01", "08")
+    if args.action == "smoke":
+        sequences = ("08",)
+    else:
+        sequences = (args.sequence,) if args.sequence else ("01", "08")
     manifest = {"git_commit": revision, "binary_sha256": digest(executable), "sequences": list(sequences),
                 "action": args.action, "replay_start": start, "evaluation_start": first, "end_exclusive": end,
                 "modes": list(MODES), "regularizer_and_init": "Nominal PNEC through weighted eigensolver",
@@ -232,12 +240,17 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("smoke", "holdout"))
+    parser.add_argument("--sequence", choices=tuple(CAMERA),
+                        help="Run a single sequence in holdout mode")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
     location.add_argument("--output-root", type=Path)
     location.add_argument("--resume", type=Path, help="Reuse complete outputs in an existing run directory")
-    run(parser.parse_args())
+    args = parser.parse_args()
+    if args.sequence and args.action != "holdout":
+        parser.error("--sequence requires holdout mode")
+    run(args)
 
 
 if __name__ == "__main__":
