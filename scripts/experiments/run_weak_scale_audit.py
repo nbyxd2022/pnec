@@ -16,6 +16,7 @@ from run_photometric_increment import digest, rotation_metrics
 
 WEAK_SCALE = 1 / 32
 ALL_MODES = (*MODES, "weak_uniform", "weak_per_match")
+TAPER_MODES = (MODES[0], "weak_per_match", "matched_budget", "far_peak_taper")
 # Compare the reconstructed rotations with the three actual native solves of
 # each frame. This tolerance is in degrees, well below the reported RPE gaps.
 CONTROL_TOLERANCE_DEG = 1e-4
@@ -27,7 +28,7 @@ def checked_file(path, expected):
     return path
 
 
-def solve_pair(executable, inputs, initial):
+def solve_pair(executable, inputs, initial, *, taper_and_matched=None):
     rows, left, right, host_cov, target_cov = inputs
     rotation, translation = initial
     regularizer = rows["regularization"][0]
@@ -39,8 +40,15 @@ def solve_pair(executable, inputs, initial):
     np.savetxt(wire, translation[None, :], fmt="%.17g")
     records = np.column_stack((left, right, host_cov.reshape(-1, 9),
                                target_cov.reshape(-1, 9), rows["delta_trace"]))
+    command = [str(executable)]
+    expected_modes = ALL_MODES
+    if taper_and_matched is not None:
+        tapered, matched = taper_and_matched
+        records = np.column_stack((records, tapered, matched))
+        command.append("--secondary-peak")
+        expected_modes = TAPER_MODES
     np.savetxt(wire, records, fmt="%.17g")
-    raw = subprocess.run([str(executable)], input=wire.getvalue(), text=True,
+    raw = subprocess.run(command, input=wire.getvalue(), text=True,
                          stdout=subprocess.PIPE, check=True).stdout.splitlines()
     solutions = {}
     for line in raw:
@@ -53,7 +61,7 @@ def solve_pair(executable, inputs, initial):
                 or abs(np.linalg.det(matrix) - 1) > 1e-8):
             raise ValueError(f"Invalid native rotation for {label}")
         solutions[label] = matrix
-    if set(solutions) != set(ALL_MODES):
+    if set(solutions) != set(expected_modes):
         raise ValueError(f"Incomplete native modes: {list(solutions)}")
     return solutions
 
@@ -64,20 +72,25 @@ def control_difference_deg(replayed, saved):
     return float(np.rad2deg(2 * np.arcsin(np.clip(chord, 0, 1))))
 
 
+def pair_inputs(capture, hashes, target):
+    pair = f"{target - 1}_{target}"
+
+    def captured(name):
+        relative = "capture/ablation/" + name
+        return checked_file(capture / relative, hashes[relative])
+
+    inputs = read_points(captured(f"fixed_{pair}_points.csv"), captured(f"matches_{pair}.csv"))
+    return inputs, read_poses(captured(f"fixed_{pair}_poses.csv"))
+
+
 def evaluate_window(capture, hashes, window, reference, executable):
     lo, hi = window["frames"]
     rotations = {name: [] for name in ALL_MODES}
     max_difference = {name: 0.0 for name in MODES}
     observations = 0
-    def captured(name):
-        relative = "capture/ablation/" + name
-        return checked_file(capture / relative, hashes[relative])
-
     for target in range(lo + 1, hi + 1):
         pair = f"{target - 1}_{target}"
-        inputs = read_points(captured(f"fixed_{pair}_points.csv"),
-                             captured(f"matches_{pair}.csv"))
-        poses = read_poses(captured(f"fixed_{pair}_poses.csv"))
+        inputs, poses = pair_inputs(capture, hashes, target)
         try:
             solutions = solve_pair(executable, inputs, poses["initial"])
         except (ValueError, subprocess.CalledProcessError) as exc:
@@ -103,8 +116,7 @@ def evaluate_window(capture, hashes, window, reference, executable):
             "fixed_input_rotation_metrics": scores}
 
 
-def run(capture, executable):
-    repo = Path(__file__).resolve().parents[2]
+def load_capture(capture, repo):
     report = json.loads((capture / "report.json").read_bytes())
     archive = repo / "docs/experiments/results" / ARCHIVE
     if report != json.loads(archive.read_bytes()) or not report["baseline_prefix_exact_match"]:
@@ -115,6 +127,14 @@ def run(capture, executable):
     gt_path = checked_file(Path(frozen["dataset"]) / "poses/08.txt", frozen["ground_truth_sha256"])
     truth = np.loadtxt(gt_path, ndmin=2).reshape(-1, 3, 4)
     reference = project_rotations(truth[:, :, :3])
+    return report, reference
+
+
+def run(capture, executable):
+    repo = Path(__file__).resolve().parents[2]
+    report, reference = load_capture(capture, repo)
+    hashes = report["input_sha256"]
+    frozen = report["manifest"]["inputs"]
     windows = [evaluate_window(capture, hashes, w, reference, executable) for w in report["windows"]]
     result = {
         "sequence": "08", "scope": "Fixed-input development windows, baseline feedback",

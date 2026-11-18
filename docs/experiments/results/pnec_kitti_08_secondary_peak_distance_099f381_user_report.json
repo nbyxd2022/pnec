@@ -1,0 +1,115 @@
+{
+  "sequence": "08",
+  "source_capture": "/home/yangxd/pnec_research/pnec_fixed_input_windows_e3q_g3cw",
+  "source_report_sha256": "0e4c6e9d77bb4757a397d539092a69250a42a81050eb4c777dd587333c5e928d",
+  "source_manifest_sha256": "7163bd559a9ebc28117b121411282b75b7e2123046a609df2d2f65ce4907c733",
+  "ground_truth_sha256": "cd7177170c7d7ba98cdbfe9417f97bd9586da5c70cbd5ccefa5db6bf88a5fe88",
+  "script_sha256": "a5d60a4d9fe9d5ec8e707b118539d870177f824622956f4102b375a3e29b1cb0",
+  "comparison": {
+    "best_within_px": 2,
+    "near_second_at_most_px": 8,
+    "far_second_at_least_px": 12,
+    "cost_ratio_bin_width": 0.05,
+    "stratum_weight": "smaller group count in shared ratio bin of same frame",
+    "frame_weight": "equal for each comparable frame",
+    "geometry": "absolute target bearing angle to GT epipolar plane in mrad"
+  },
+  "windows": [
+    {
+      "frames": [
+        2600,
+        2800
+      ],
+      "frame_pairs": 200,
+      "comparable_frame_pairs": 200,
+      "counts": {
+        "total": 30665,
+        "missing_two_minima": 28,
+        "best_outside": 4741,
+        "invalid_plane": 0,
+        "middle": 6228,
+        "near_available": 4086,
+        "far_available": 15582,
+        "near_compared": 3696,
+        "far_compared": 11553,
+        "overlap_weight": 3465
+      },
+      "near": {
+        "cost_ratio": 0.2854238110170006,
+        "best_to_endpoint_px": 0.24022898491279976,
+        "second_to_endpoint_px": 6.121496025642739,
+        "best_to_second_px": 6.141103411418362,
+        "added_trace_rad2": 0.000004506662343388399,
+        "abs_epipolar_mrad": 0.6975038827641648,
+        "squared_epipolar_mrad2": 1.0073681970958037,
+        "rms_epipolar_mrad": 1.0036773371436678
+      },
+      "far": {
+        "cost_ratio": 0.28467882373845055,
+        "best_to_endpoint_px": 0.2917665629890448,
+        "second_to_endpoint_px": 15.935274925262526,
+        "best_to_second_px": 15.921177039414125,
+        "added_trace_rad2": 0.00002983124697470918,
+        "abs_epipolar_mrad": 0.7340677923286327,
+        "squared_epipolar_mrad2": 1.1428104881019627,
+        "rms_epipolar_mrad": 1.0690231466633278
+      },
+      "far_over_near": {
+        "added_trace_rad2": 6.619365885814318,
+        "squared_epipolar_mrad2": 1.1344516249337957
+      },
+      "frame_counts_far_larger": {
+        "added_trace_rad2": 200,
+        "squared_epipolar_mrad2": 119
+      }
+    },
+    {
+      "frames": [
+        3400,
+        3600
+      ],
+      "frame_pairs": 200,
+      "comparable_frame_pairs": 200,
+      "counts": {
+        "total": 32416,
+        "missing_two_minima": 12,
+        "best_outside": 3578,
+        "invalid_plane": 0,
+        "middle": 6805,
+        "near_available": 4678,
+        "far_available": 17343,
+        "near_compared": 4338,
+        "far_compared": 13986,
+        "overlap_weight": 4153
+      },
+      "near": {
+        "cost_ratio": 0.24490859491602288,
+        "best_to_endpoint_px": 0.2108231549092231,
+        "second_to_endpoint_px": 6.03545867497313,
+        "best_to_second_px": 6.043577041375259,
+        "added_trace_rad2": 0.000003807631970457129,
+        "abs_epipolar_mrad": 1.0270074408352032,
+        "squared_epipolar_mrad2": 2.0724600367731263,
+        "rms_epipolar_mrad": 1.4396041250194882
+      },
+      "far": {
+        "cost_ratio": 0.24311616867205615,
+        "best_to_endpoint_px": 0.2555881617244976,
+        "second_to_endpoint_px": 15.949043437506955,
+        "best_to_second_px": 15.932585725413064,
+        "added_trace_rad2": 0.000025957796152322595,
+        "abs_epipolar_mrad": 1.0763958015277018,
+        "squared_epipolar_mrad2": 2.325247690038613,
+        "rms_epipolar_mrad": 1.5248762867979202
+      },
+      "far_over_near": {
+        "added_trace_rad2": 6.817307017517821,
+        "squared_epipolar_mrad2": 1.121974681673034
+      },
+      "frame_counts_far_larger": {
+        "added_trace_rad2": 200,
+        "squared_epipolar_mrad2": 124
+      }
+    }
+  ]
+}
