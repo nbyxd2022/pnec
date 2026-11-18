@@ -1,0 +1,85 @@
+{
+  "sequence": "08",
+  "scope": "Fixed-input development windows, baseline feedback",
+  "target_increment_scale": 0.03125,
+  "control_tolerance_deg": 0.0001,
+  "git_commit": "0f1d5c8a665ac53795b5f43e87c9803bf4ac30f4",
+  "source_capture": "/home/yangxd/pnec_research/pnec_fixed_input_windows_e3q_g3cw",
+  "source_report_sha256": "0e4c6e9d77bb4757a397d539092a69250a42a81050eb4c777dd587333c5e928d",
+  "source_manifest_sha256": "7163bd559a9ebc28117b121411282b75b7e2123046a609df2d2f65ce4907c733",
+  "ground_truth_sha256": "cd7177170c7d7ba98cdbfe9417f97bd9586da5c70cbd5ccefa5db6bf88a5fe88",
+  "runner_sha256": "c79f1ad2ab491bee6dc770daa2fe7bb8ed6287d5a214557ddedd17638e39cf17",
+  "executable_sha256": "a14a834fad6050cdaad04d50ba4b3a22cc5e34d4d1d94aa880bc390cceead1ca",
+  "windows": [
+    {
+      "frames": [
+        2600,
+        2800
+      ],
+      "pairs": 200,
+      "observations": 30665,
+      "max_replayed_control_rotation_difference_deg": {
+        "symmetric_analytic": 0.0,
+        "symmetric_uniform": 0.0,
+        "symmetric_per_match": 0.0
+      },
+      "fixed_input_rotation_metrics": {
+        "symmetric_analytic": {
+          "rpe_1_deg": 0.2103287147036826,
+          "rpe_n_deg": 3.1581824685621775
+        },
+        "symmetric_uniform": {
+          "rpe_1_deg": 0.24479479895119688,
+          "rpe_n_deg": 4.404925170758707
+        },
+        "symmetric_per_match": {
+          "rpe_1_deg": 0.21199402482674215,
+          "rpe_n_deg": 3.714047453450574
+        },
+        "weak_uniform": {
+          "rpe_1_deg": 0.23880683729495503,
+          "rpe_n_deg": 4.128209206979126
+        },
+        "weak_per_match": {
+          "rpe_1_deg": 0.20864293286131336,
+          "rpe_n_deg": 3.5419178333311776
+        }
+      }
+    },
+    {
+      "frames": [
+        3400,
+        3600
+      ],
+      "pairs": 200,
+      "observations": 32416,
+      "max_replayed_control_rotation_difference_deg": {
+        "symmetric_analytic": 0.0,
+        "symmetric_uniform": 0.0,
+        "symmetric_per_match": 0.0
+      },
+      "fixed_input_rotation_metrics": {
+        "symmetric_analytic": {
+          "rpe_1_deg": 0.09323231084361316,
+          "rpe_n_deg": 0.7921833542104325
+        },
+        "symmetric_uniform": {
+          "rpe_1_deg": 0.09139222728305596,
+          "rpe_n_deg": 0.8126575933495588
+        },
+        "symmetric_per_match": {
+          "rpe_1_deg": 0.08929936794932888,
+          "rpe_n_deg": 0.4964209138121277
+        },
+        "weak_uniform": {
+          "rpe_1_deg": 0.09148001570328326,
+          "rpe_n_deg": 0.8078688377373245
+        },
+        "weak_per_match": {
+          "rpe_1_deg": 0.0900052362164323,
+          "rpe_n_deg": 0.5534376465620952
+        }
+      }
+    }
+  ]
+}
