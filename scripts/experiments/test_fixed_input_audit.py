@@ -2,8 +2,10 @@
 
 import csv
 import json
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -63,6 +65,52 @@ def write_points(folder, host, target, inputs):
 
 
 class AuditTests(unittest.TestCase):
+    def test_relative_script_entry_reaches_native_launch(self):
+        # Python 3.8 may keep __file__ relative when launched as in the runbook.
+        # Exercise the real manifest-writing path and stop before native replay.
+        repo = Path(__file__).resolve().parents[2]
+        relative_script = "scripts/experiments/run_fixed_input_audit.py"
+        class NativeLaunchReached(Exception):
+            pass
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            dataset, build = root / "dataset", root / "build"
+            images = dataset / "sequences/08/image_0"
+            images.mkdir(parents=True)
+            for frame in [0, 1]:
+                (images / f"{frame:06d}.png").write_bytes(b"fixture; native is not invoked")
+            build.mkdir()
+            (build / "CMakeCache.txt").write_text(f"CMAKE_HOME_DIRECTORY:INTERNAL={repo.as_posix()}\n")
+            (build / "pnec_vo").write_bytes(b"fixture; native is not invoked")
+            args = SimpleNamespace(action="smoke", dataset=dataset, build=build,
+                                   output_root=root, analyze_only=None)
+            inputs = {"selected_target_frames": [1]}
+            def fake_run(command, **kwargs):
+                if command[0] == str(build / "pnec_vo"):
+                    manifests = list(root.glob("pnec_fixed_input_smoke_*/manifest.json"))
+                    self.assertEqual(len(manifests), 1)
+                    saved = json.loads(manifests[0].read_bytes())
+                    hashes = saved["source_sha256"]
+                    self.assertEqual(set(hashes), {
+                        relative_script, "src/rel_pose_estimation/frame2frame.cc",
+                        "src/rel_pose_estimation/pnec.cc",
+                        "include/rel_pose_estimation/photometric_increment.h"})
+                    self.assertEqual(hashes[relative_script], audit.digest(repo / relative_script))
+                    raise NativeLaunchReached
+                self.assertIn(command[0], ("git", "cmake"))
+            previous_directory = Path.cwd()
+            try:
+                os.chdir(repo)
+                with patch.object(audit, "__file__", relative_script), \
+                     patch.object(Path, "symlink_to"), \
+                     patch.object(audit, "baseline_inputs", return_value=(inputs, np.array([0., .1]), None, [])), \
+                     patch.object(audit.subprocess, "run", side_effect=fake_run), \
+                     patch.object(audit.subprocess, "check_output", side_effect=[b"", b"fixture-revision\n"]):
+                    with self.assertRaises(NativeLaunchReached):
+                        audit.run(args)
+            finally:
+                os.chdir(previous_directory)
+
     def test_residual_variance_matches_direct_symmetric_formula(self):
         inputs = fixtures()
         rows, left, right, host, target = inputs

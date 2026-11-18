@@ -259,7 +259,7 @@ def analyze(out, dataset):
     hashes["manifest.json"] = digest(out / "manifest.json")
     report = {
         "schema": 1, "manifest": manifest, "baseline_prefix_exact_match": True,
-        "analysis_source_sha256": {name: digest(Path(__file__).parent / name) for name in (
+        "analysis_source_sha256": {name: digest(Path(__file__).resolve().parent / name) for name in (
             "run_fixed_input_audit.py", "run_photometric_increment.py",
             "analyze_photometric_drift.py", "analyze_symmetric_photometric_drift.py")},
         "interpretation": {
@@ -311,7 +311,7 @@ def run(args):
     manifest = {"git_commit": revision, "binary_sha256": digest(executable), "action": args.action,
                 "inputs": inputs, "online_mode": MODES[0], "diagnostic_modes": list(MODES),
                 "source_sha256": {str(p.relative_to(repo).as_posix()): digest(p) for p in (
-                    Path(__file__), repo / "src/rel_pose_estimation/frame2frame.cc",
+                    Path(__file__).resolve(), repo / "src/rel_pose_estimation/frame2frame.cc",
                     repo / "src/rel_pose_estimation/pnec.cc",
                     repo / "include/rel_pose_estimation/photometric_increment.h")}}
     atomic_json(out / "manifest.json", manifest)
