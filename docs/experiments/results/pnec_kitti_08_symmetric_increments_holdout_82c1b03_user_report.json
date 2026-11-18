@@ -1,0 +1,71 @@
+{
+  "manifest": {
+    "git_commit": "82c1b03aa14f93bd1609da3cb111834a5c267168",
+    "binary_sha256": "fb5770fb96db0839a7411c6ee959b69cbe42614b77c794f8589759faeef80371",
+    "sequences": [
+      "08"
+    ],
+    "action": "holdout",
+    "replay_start": 450,
+    "evaluation_start": 500,
+    "end_exclusive": 800,
+    "modes": [
+      "symmetric_analytic",
+      "symmetric_uniform",
+      "symmetric_per_match"
+    ],
+    "regularizer_and_init": "Nominal PNEC through weighted eigensolver",
+    "ransac_sampling": "Fixed OpenGV seed and srand(1) before each RANSAC",
+    "symmetric_analytic_control": {
+      "source": "CVPR 2023, Section 3.2, equations 2-3",
+      "scope": "Host and target KLT bearing covariances in final Ceres refinement only"
+    },
+    "symmetric_increment_ablation": {
+      "base": "Host and target KLT covariances in final Ceres refinement",
+      "increment": "Target-side photometric trace, uniform or per-match",
+      "search": "15x15 normalized raw SSD, +/-16px, minima separation >=4px",
+      "trace": "ratio * squared tangent displacement / (4 * squared ray norm)"
+    }
+  },
+  "runner_git_commit": "82c1b03aa14f93bd1609da3cb111834a5c267168",
+  "results": {
+    "08": {
+      "symmetric_analytic": {
+        "wall_seconds_including_baseline_ablation_methods": 48.37351191486232,
+        "median_total_ms": 60.0,
+        "p95_total_ms": 115.09999999999997,
+        "median_increment_ms": 0.0,
+        "p95_increment_ms": 0.0,
+        "pairs_with_nonzero_increment": 0,
+        "inliers_logged": 0,
+        "inliers_with_increment": 0,
+        "rpe_1_deg": 0.163496801989515,
+        "rpe_n_deg": 2.273391976744399
+      },
+      "symmetric_uniform": {
+        "wall_seconds_including_baseline_ablation_methods": 62.91483509610407,
+        "median_total_ms": 102.0,
+        "p95_total_ms": 148.09999999999997,
+        "median_increment_ms": 38.870232,
+        "p95_increment_ms": 51.94550829999999,
+        "pairs_with_nonzero_increment": 299,
+        "inliers_logged": 56238,
+        "inliers_with_increment": 56238,
+        "rpe_1_deg": 0.14270353253230345,
+        "rpe_n_deg": 2.0549287961361773
+      },
+      "symmetric_per_match": {
+        "wall_seconds_including_baseline_ablation_methods": 62.85055451793596,
+        "median_total_ms": 102.0,
+        "p95_total_ms": 148.0,
+        "median_increment_ms": 38.739438,
+        "p95_increment_ms": 51.950454799999996,
+        "pairs_with_nonzero_increment": 299,
+        "inliers_logged": 56238,
+        "inliers_with_increment": 56213,
+        "rpe_1_deg": 0.14742040747434684,
+        "rpe_n_deg": 1.8624629622744941
+      }
+    }
+  }
+}

@@ -16,6 +16,10 @@ import numpy as np
 MODES = ("original", "uniform", "per_match")
 ANALYTIC_COMPARISON_MODES = ("original", "per_match", "symmetric_analytic")
 SYMMETRIC_MODES = ("symmetric_analytic", "symmetric_uniform", "symmetric_per_match")
+SYMMETRIC_CONTROL = {
+    "source": "CVPR 2023, Section 3.2, equations 2-3",
+    "scope": "Host and target KLT bearing covariances in final Ceres refinement only",
+}
 CAMERA = {
     "01": "config_kitti00-02.yaml",
     "08": "config_kitti04-10.yaml",
@@ -140,30 +144,45 @@ def replay_config(repo, sequence):
             data / "tracking/KITTI" / f"{sequence}.json", data / "tracking/KITTI/kitti_calib.json"]
 
 
-def load_full_reference(path, manifest, config):
+def load_full_reference(path, manifest, config, reference_modes=MODES):
     sequence, = manifest["sequences"]
     run = path.resolve(strict=True)
     raw_report = (run / "report.json").read_bytes()
     report = json.loads(raw_report)
     recorded = report["manifest"]
     expected = dict(manifest, git_commit=recorded["git_commit"],
-                    binary_sha256=recorded["binary_sha256"], modes=list(MODES))
+                    binary_sha256=recorded["binary_sha256"], modes=list(reference_modes))
+    if reference_modes == ("symmetric_analytic",):
+        expected["symmetric_analytic_control"] = SYMMETRIC_CONTROL
+        if "reference_full_report_sha256" in recorded:
+            expected["reference_full_report_sha256"] = recorded["reference_full_report_sha256"]
     if recorded != expected or recorded != json.loads((run / "manifest.json").read_bytes()):
         raise ValueError("Archived run does not match the current full-sequence protocol")
     config_hashes = {file.name: digest(file) for file in config}
     if config_hashes != json.loads((run / sequence / "config_sha256.json").read_bytes()):
         raise ValueError("Archived run used different PNEC configuration files")
     scores = report["results"][sequence]
-    if set(scores) != set(MODES):
-        raise ValueError("Archived run must contain original, uniform and per-match results")
-    for mode in MODES:
+    if set(scores) != set(reference_modes):
+        raise ValueError("Archived run must contain the expected reference modes")
+    for mode in reference_modes:
         for metrics in (scores[mode], scores[mode]["tail"]):
             values = [metrics[key] for key in ("rpe_1_deg", "rpe_n_deg", "p95_total_ms")]
             if not np.isfinite(values).all() or any(value < 0 for value in values):
                 raise ValueError(f"Invalid archived metric for {mode}")
-    return {"run": str(run), "report_sha256": sha256(raw_report).hexdigest(),
-            "git_commit": recorded["git_commit"], "binary_sha256": recorded["binary_sha256"],
-            "runner_git_commit": report["runner_git_commit"], "scores": scores}
+    result = {"run": str(run), "report_sha256": sha256(raw_report).hexdigest(),
+              "git_commit": recorded["git_commit"], "binary_sha256": recorded["binary_sha256"],
+              "runner_git_commit": report["runner_git_commit"], "scores": scores}
+    if reference_modes == ("symmetric_analytic",):
+        times = np.loadtxt(run / sequence / "times.txt", ndmin=1)
+        if (times.shape != (manifest["end_exclusive"],) or not np.isfinite(times).all()
+                or not np.all(np.diff(times) > 0)):
+            raise ValueError("Archived symmetric run has incomplete timestamp coverage")
+        target = run / sequence / "symmetric_analytic"
+        restore_rotations(target / "ablation/PNEC.txt", times, 0)
+        pose_rows(target / "rot_avg/poses.txt", times)
+        result["pose_sha256"] = {
+            name: digest(target / name) for name in ("ablation/PNEC.txt", "rot_avg/poses.txt")}
+    return result
 
 
 def load_speed_reference(path, manifest, config):
@@ -210,7 +229,9 @@ def run(args):
         start = first = 0
     warmup = first - start
     modes = MODES
-    if args.compare_symmetric_increments:
+    if args.reference_symmetric_full_run:
+        modes = SYMMETRIC_MODES[1:]
+    elif args.compare_symmetric_increments:
         modes = SYMMETRIC_MODES
     elif args.reference_speed_run:
         modes = ("per_match",)
@@ -233,17 +254,20 @@ def run(args):
         full_reference = load_full_reference(args.reference_full_run, manifest,
                                              replay_config(repo, args.sequence))
         manifest["reference_full_report_sha256"] = full_reference["report_sha256"]
+    symmetric_full_reference = None
+    if args.reference_symmetric_full_run:
+        symmetric_full_reference = load_full_reference(
+            args.reference_symmetric_full_run, manifest, replay_config(repo, args.sequence),
+            reference_modes=("symmetric_analytic",))
+        manifest["reference_symmetric_full_report_sha256"] = symmetric_full_reference["report_sha256"]
     speed_reference = None
     if args.reference_speed_run:
         speed_reference = load_speed_reference(args.reference_speed_run, manifest,
                                               replay_config(repo, args.sequence))
         manifest["speed_reference_report_sha256"] = speed_reference["report_sha256"]
     if any(mode in SYMMETRIC_MODES for mode in modes):
-        manifest["symmetric_analytic_control"] = {
-            "source": "CVPR 2023, Section 3.2, equations 2-3",
-            "scope": "Host and target KLT bearing covariances in final Ceres refinement only",
-        }
-    if args.compare_symmetric_increments:
+        manifest["symmetric_analytic_control"] = SYMMETRIC_CONTROL
+    if args.compare_symmetric_increments or args.reference_symmetric_full_run:
         manifest["symmetric_increment_ablation"] = {
             "base": "Host and target KLT covariances in final Ceres refinement",
             "increment": "Target-side photometric trace, uniform or per-match",
@@ -274,10 +298,11 @@ def run(args):
         if len(times) != end - start or not np.isfinite(times).all() or not np.all(np.diff(times) > 0):
             raise ValueError(f"KITTI {sequence}: clip times missing or invalid")
         times -= times[0]
-        if speed_reference is not None:
-            saved_times = np.loadtxt(Path(speed_reference["run"]) / sequence / "times.txt", ndmin=1)
+        time_reference = speed_reference or symmetric_full_reference
+        if time_reference is not None:
+            saved_times = np.loadtxt(Path(time_reference["run"]) / sequence / "times.txt", ndmin=1)
             if saved_times.shape != times.shape or not np.allclose(saved_times, times, rtol=0, atol=6e-13):
-                raise ValueError("Speed reference timestamps differ from the dataset")
+                raise ValueError("Reference timestamps differ from the dataset")
         time_file = slot / "times.txt"
         if time_file.exists():
             saved_times = np.loadtxt(time_file, ndmin=1)
@@ -368,6 +393,8 @@ def run(args):
     report = {"manifest": manifest, "runner_git_commit": revision, "results": scores}
     if full_reference is not None:
         report["reference_full_run"] = full_reference
+    if symmetric_full_reference is not None:
+        report["reference_symmetric_full_run"] = symmetric_full_reference
     if speed_reference is not None:
         sequence = args.sequence
         current = scores[sequence]["per_match"]
@@ -412,6 +439,8 @@ def main():
                           help="Check optimized per-match computation against a recorded KITTI 08 holdout")
     analytic.add_argument("--compare-symmetric-increments", action="store_true",
                           help="Compare double-sided PNEC with uniform and per-match photometric increments")
+    analytic.add_argument("--reference-symmetric-full-run", type=Path,
+                          help="Replay only symmetric uniform/per-match increments and reuse a recorded KITTI 08 full symmetric baseline")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
@@ -431,6 +460,8 @@ def main():
     if args.compare_symmetric_increments and (
             args.action == "full" or (args.action == "holdout" and args.sequence != "08")):
         parser.error("--compare-symmetric-increments supports smoke or holdout --sequence 08")
+    if args.reference_symmetric_full_run and (args.action != "full" or args.sequence != "08"):
+        parser.error("--reference-symmetric-full-run requires full --sequence 08")
     run(args)
 
 
