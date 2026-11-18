@@ -137,7 +137,8 @@ Sophus::SE3d PNEC::Solve(const opengv::bearingVectors_t &bvs1,
                          std::vector<int> &inliers,
                          pnec::common::FrameTiming &timing,
                          const RefinementCovarianceUpdate &update,
-                         const std::vector<Eigen::Matrix3d> *host_covariances) {
+                         const std::vector<Eigen::Matrix3d> *host_covariances,
+                         const RefinementObserver &observer) {
   opengv::bearingVectors_t in_bvs1;
   opengv::bearingVectors_t in_bvs2;
   std::vector<Eigen::Matrix3d> in_proj_covs;
@@ -215,6 +216,10 @@ Sophus::SE3d PNEC::Solve(const opengv::bearingVectors_t &bvs1,
       }
       timing.ceres_ =
           std::chrono::duration_cast<std::chrono::milliseconds>(toc - tic);
+      if (observer) {
+        observer(in_bvs1, in_bvs2, in_proj_covs, refinement_host_covariances,
+                 inliers, ceres_init, solution);
+      }
     } else {
       solution = ceres_init;
       timing.ceres_ = std::chrono::milliseconds(0);

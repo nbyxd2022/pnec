@@ -112,11 +112,18 @@ std::set<int> OrderedKltIds(const FeatureMatches &matches, size_t count) {
   return feature_ids;
 }
 
+struct IncrementAuditPoint {
+  photometric::Ambiguity ambiguity;
+  photometric::Measurement measurement;
+  double trace;
+};
+
 void AddPhotometricIncrements(
     frames::BaseFrame &host, frames::BaseFrame &target,
     const FeatureMatches &matches, const opengv::bearingVectors_t &target_bvs,
     const std::vector<int> &inliers, std::vector<Eigen::Matrix3d> &covariances,
-    photometric::Mode mode, common::FrameTiming &timing) {
+    photometric::Mode mode, common::FrameTiming &timing,
+    std::vector<IncrementAuditPoint> *audit = nullptr) {
   const auto start = std::chrono::steady_clock::now();
   const auto sorted_ids = OrderedKltIds(matches, target_bvs.size());
   const std::vector<int> ids(sorted_ids.begin(), sorted_ids.end());
@@ -134,9 +141,11 @@ void AddPhotometricIncrements(
   for (int index : inliers) {
     const auto &host_point = host.keypoints().at(ids.at(index)).point_;
     const auto &target_point = target.keypoints().at(ids.at(index)).point_;
+    photometric::Measurement measurement;
     const auto ambiguity =
         photometric::Measure(gray1, gray2, host_point.x(), host_point.y(),
-                             target_point.x(), target_point.y());
+                             target_point.x(), target_point.y(),
+                             audit ? &measurement : nullptr);
     const auto &bearing = target_bvs.at(index);
     const Eigen::Vector3d ray =
         inverse_intrinsic * Eigen::Vector3d(target_point.x(), target_point.y(), 1.0);
@@ -147,6 +156,9 @@ void AddPhotometricIncrements(
                          (4 * ray.squaredNorm());
     traces.push_back(trace);
     total_trace += trace;
+    if (audit) {
+      audit->push_back({ambiguity, measurement, trace});
+    }
   }
   if (!std::isfinite(total_trace) || covariances.size() != inliers.size()) {
     throw std::runtime_error("Invalid photometric refinement covariance input");
@@ -217,6 +229,101 @@ void WriteMatchDiagnostics(frames::BaseFrame &host, frames::BaseFrame &target,
   }
 }
 
+
+void WriteFixedInputAudit(
+    frames::BaseFrame &host, frames::BaseFrame &target,
+    const FeatureMatches &matches, const opengv::bearingVectors_t &all_target_bvs,
+    const opengv::bearingVectors_t &left, const opengv::bearingVectors_t &right,
+    const std::vector<Eigen::Matrix3d> &nominal,
+    const std::vector<Eigen::Matrix3d> *source_covariances,
+    const std::vector<int> &indices, const Sophus::SE3d &init,
+    const Sophus::SE3d &baseline, const Options &options,
+    const std::string &folder) {
+  if (!source_covariances || source_covariances->size() != nominal.size() ||
+      nominal.empty() || left.size() != nominal.size() ||
+      right.size() != nominal.size() || indices.size() != nominal.size()) {
+    throw std::runtime_error("Incomplete fixed-input symmetric refinement inputs");
+  }
+  auto per_match = nominal;
+  std::vector<IncrementAuditPoint> measurements;
+  measurements.reserve(nominal.size());
+  common::FrameTiming diagnostic_timing(0);
+  AddPhotometricIncrements(host, target, matches, all_target_bvs, indices,
+                           per_match, photometric::Mode::SymmetricPerMatch,
+                           diagnostic_timing, &measurements);
+  double mean_trace = 0;
+  for (const auto &point : measurements) {
+    mean_trace += point.trace;
+  }
+  mean_trace /= measurements.size();
+  auto uniform = nominal;
+  for (size_t i = 0; i < uniform.size(); ++i) {
+    uniform[i] += (mean_trace / 2) *
+        (Eigen::Matrix3d::Identity() - right[i] * right[i].transpose());
+  }
+  PNEC solver(options);
+  const auto uniform_pose = solver.CeresSolver(left, right, uniform, init,
+                                              source_covariances);
+  const auto per_match_pose = solver.CeresSolver(left, right, per_match, init,
+                                                source_covariances);
+  const auto prefix = folder + "fixed_" + std::to_string(host.id()) + "_" +
+                      std::to_string(target.id());
+  if (boost::filesystem::exists(prefix + "_points.csv") ||
+      boost::filesystem::exists(prefix + "_poses.csv")) {
+    throw std::runtime_error("Fixed-input audit output already exists: " + prefix);
+  }
+  const auto sorted = OrderedKltIds(matches, all_target_bvs.size());
+  const std::vector<int> ids(sorted.begin(), sorted.end());
+  std::ofstream points(prefix + "_points.csv");
+  points << "solver_index,feature_id,ratio,delta_trace,mean_trace,best_cost,"
+            "second_cost,endpoint_cost,best_dx,best_dy,mode_dx,mode_dy,regularization";
+  for (const auto *name : {"host_b", "target_b"}) {
+    for (int k = 0; k < 3; ++k) points << ',' << name << k;
+  }
+  for (const auto *name : {"host_cov", "target_cov"}) {
+    for (int r = 0; r < 3; ++r)
+      for (int c = 0; c < 3; ++c) points << ',' << name << r << c;
+  }
+  points << '\n' << std::setprecision(17);
+  for (size_t i = 0; i < nominal.size(); ++i) {
+    const auto &point = measurements.at(i);
+    const auto &measure = point.measurement;
+    points << indices[i] << ',' << ids.at(indices[i]) << ',' << point.ambiguity.ratio
+           << ',' << point.trace << ',' << mean_trace << ',' << measure.best_cost
+           << ',' << measure.second_cost << ',' << measure.endpoint_cost << ','
+           << measure.best_dx << ',' << measure.best_dy << ',' << point.ambiguity.dx
+           << ',' << point.ambiguity.dy << ',' << options.regularization_;
+    for (const auto *bearing : {&left[i], &right[i]})
+      for (int k = 0; k < 3; ++k) points << ',' << (*bearing)(k);
+    for (const auto *covariance : {&source_covariances->at(i), &nominal[i]})
+      for (int r = 0; r < 3; ++r)
+        for (int c = 0; c < 3; ++c) points << ',' << (*covariance)(r, c);
+    points << '\n';
+  }
+  points.close();
+  std::ofstream poses(prefix + "_poses.csv");
+  poses << "mode";
+  for (int r = 0; r < 3; ++r)
+    for (int c = 0; c < 3; ++c) poses << ",R" << r << c;
+  poses << ",t0,t1,t2\n" << std::setprecision(17);
+  const auto write_pose = [&](const char *name, const Sophus::SE3d &pose) {
+    poses << name;
+    const auto rotation = pose.rotationMatrix();
+    for (int r = 0; r < 3; ++r)
+      for (int c = 0; c < 3; ++c) poses << ',' << rotation(r, c);
+    for (int k = 0; k < 3; ++k) poses << ',' << pose.translation()(k);
+    poses << '\n';
+  };
+  write_pose("initial", init);
+  write_pose("symmetric_analytic", baseline);
+  write_pose("symmetric_uniform", uniform_pose);
+  write_pose("symmetric_per_match", per_match_pose);
+  poses.close();
+  if (!points || !poses) {
+    throw std::runtime_error("Failed to save fixed-input audit: " + prefix);
+  }
+}
+
 } // namespace
 
 Frame2Frame::Frame2Frame(const pnec::rel_pose_estimation::Options &options)
@@ -273,8 +380,27 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
                                covariances, mode, frame_timing);
     };
   }
+  RefinementObserver observer;
+  const char *audit_setting = std::getenv("PNEC_FIXED_INPUT_AUDIT");
+  if (audit_setting && *audit_setting && std::string_view(audit_setting) != "1") {
+    throw std::invalid_argument("PNEC_FIXED_INPUT_AUDIT expects 1 or unset");
+  }
+  if (audit_setting && *audit_setting) {
+    if (!ablation || mode != photometric::Mode::SymmetricAnalytic) {
+      throw std::invalid_argument("Fixed-input audit requires the symmetric analytic baseline with ablations");
+    }
+    if (MatchDiagnosticsEnabled(frame2->id())) {
+      observer = [&](const auto &left, const auto &right, const auto &nominal,
+                     const auto *source_covs, const auto &indices,
+                     const auto &init, const auto &baseline) {
+        WriteFixedInputAudit(*frame1, *frame2, matches, bvs2, left, right,
+                             nominal, source_covs, indices, init, baseline,
+                             options_, ablation_folder);
+      };
+    }
+  }
   const auto rel_pose = PNECAlign(bvs1, bvs2, proj_covs, prev_rel_pose, inliers,
-                                  frame_timing, update, host_covs);
+                                  frame_timing, update, host_covs, observer);
   if (ablation && MatchDiagnosticsEnabled(frame2->id())) {
     WriteMatchDiagnostics(*frame1, *frame2, matches, proj_covs, inliers,
                           options_, ablation_folder);
@@ -318,11 +444,12 @@ Sophus::SE3d Frame2Frame::PNECAlign(
     Sophus::SE3d prev_rel_pose, std::vector<int> &inliers,
     pnec::common::FrameTiming &frame_timing,
     const RefinementCovarianceUpdate &update,
-    const std::vector<Eigen::Matrix3d> *host_covariances) {
+    const std::vector<Eigen::Matrix3d> *host_covariances,
+    const RefinementObserver &observer) {
   pnec::rel_pose_estimation::PNEC pnec(options_);
   Sophus::SE3d rel_pose = pnec.Solve(bvs1, bvs2, projected_covs, prev_rel_pose,
                                      inliers, frame_timing, update,
-                                     host_covariances);
+                                     host_covariances, observer);
 
   if (ablation_rel_poses_.count("PNEC") == 0) {
     ablation_rel_poses_["PNEC"] = {

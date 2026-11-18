@@ -50,6 +50,12 @@ namespace rel_pose_estimation {
 using RefinementCovarianceUpdate =
     std::function<void(std::vector<Eigen::Matrix3d> &, const std::vector<int> &)>;
 
+// Called after final refinement. Its results are diagnostic and never fed back.
+using RefinementObserver = std::function<void(
+    const opengv::bearingVectors_t &, const opengv::bearingVectors_t &,
+    const std::vector<Eigen::Matrix3d> &, const std::vector<Eigen::Matrix3d> *,
+    const std::vector<int> &, const Sophus::SE3d &, const Sophus::SE3d &)>;
+
 class PNEC {
 public:
   PNEC(const pnec::rel_pose_estimation::Options &options);
@@ -79,7 +85,8 @@ public:
                      std::vector<int> &inliers,
                      pnec::common::FrameTiming &timing,
                      const RefinementCovarianceUpdate &update = {},
-                     const std::vector<Eigen::Matrix3d> *host_covariances = nullptr);
+                     const std::vector<Eigen::Matrix3d> *host_covariances = nullptr,
+                     const RefinementObserver &observer = {});
 
   Sophus::SE3d Eigensolver(const opengv::bearingVectors_t &bvs1,
                            const opengv::bearingVectors_t &bvs2,

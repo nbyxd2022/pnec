@@ -76,7 +76,8 @@ private:
                          Sophus::SE3d prev_rel_pose, std::vector<int> &inliers,
                          pnec::common::FrameTiming &frame_timing,
                          const RefinementCovarianceUpdate &update = {},
-                         const std::vector<Eigen::Matrix3d> *host_covariances = nullptr);
+                         const std::vector<Eigen::Matrix3d> *host_covariances = nullptr,
+                         const RefinementObserver &observer = {});
 
   void AblationAlign(const opengv::bearingVectors_t &bvs1,
                      const opengv::bearingVectors_t &bvs2,

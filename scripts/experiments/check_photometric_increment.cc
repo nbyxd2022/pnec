@@ -30,6 +30,23 @@ int main() {
     std::cerr << "Photometric search differs from the Python reference\n";
     return 1;
   }
+  pnec::rel_pose_estimation::photometric::Measurement detail;
+  const auto measured = Measure(h, t, 32.375, 31.625, 30.25, 29.375, &detail);
+  const auto original = Measure(h, t, 32.375, 31.625, 30.25, 29.375);
+  if (measured.ratio != original.ratio || measured.dx != original.dx ||
+      measured.dy != original.dy || !std::isfinite(detail.best_cost) ||
+      !std::isfinite(detail.second_cost) ||
+      detail.best_cost > detail.second_cost ||
+      detail.best_cost > detail.endpoint_cost ||
+      std::abs(detail.best_dx) > 16 || std::abs(detail.best_dy) > 16) {
+    std::cerr << "Optional search measurements changed the result\n";
+    return 1;
+  }
+  Measure(h, t, 8.25, 12.125, 5.5, 11.625, &detail);
+  if (std::isfinite(detail.best_cost) || std::isfinite(detail.endpoint_cost)) {
+    std::cerr << "Unsupported patch retained stale measurements\n";
+    return 1;
+  }
   host.fill(0);
   target.fill(0);
   if (!check(Measure(h, t, 32, 31, 30, 29), 1, 4, 0)) {

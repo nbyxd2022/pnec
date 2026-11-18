@@ -80,10 +80,21 @@ struct Ambiguity {
   int dy = 0;
 };
 
+struct Measurement {
+  double best_cost = std::numeric_limits<double>::infinity();
+  double second_cost = std::numeric_limits<double>::infinity();
+  double endpoint_cost = std::numeric_limits<double>::infinity();
+  int best_dx = 0;
+  int best_dy = 0;
+};
+
 // Keep the offline 15x15 raw SSD, +/-16 px grid and 4 px mode separation.
 inline Ambiguity Measure(const GrayImage &host, const GrayImage &target,
                          double host_x, double host_y, double target_x,
-                         double target_y) {
+                         double target_y, Measurement *measurement = nullptr) {
+  if (measurement) {
+    *measurement = {};
+  }
   constexpr int patch_radius = 7;
   constexpr int search_radius = 16;
   constexpr int patch_side = 2 * patch_radius + 1;
@@ -172,6 +183,13 @@ inline Ambiguity Measure(const GrayImage &host, const GrayImage &target,
         result = {second > 0 ? best / second : 1.0, dx, dy};
       }
     }
+  }
+  if (measurement) {
+    measurement->best_cost = best;
+    measurement->second_cost = second;
+    measurement->endpoint_cost = costs[search_radius * search_side + search_radius];
+    measurement->best_dx = best_x - search_radius;
+    measurement->best_dy = best_y - search_radius;
   }
   return result;
 }
