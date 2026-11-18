@@ -1,0 +1,62 @@
+{
+  "source_capture": "pnec_fixed_input_windows_e3q_g3cw",
+  "source_report_sha256": "0e4c6e9d77bb4757a397d539092a69250a42a81050eb4c777dd587333c5e928d",
+  "source_manifest_sha256": "7163bd559a9ebc28117b121411282b75b7e2123046a609df2d2f65ce4907c733",
+  "script_sha256": "a9bbe849788ae839426d476a3406e0b18f6a00c74f6a69d3c5cff1be0c892f12",
+  "permutations_per_pair": 32,
+  "seed": 17,
+  "scope": "Geometric residual scores at ground-truth motion on two chosen development windows",
+  "interpretation": "Record-level trace shuffle within each pair; descriptive comparison, no p-value or covariance calibration claim",
+  "windows": [
+    {
+      "frames": [
+        2600,
+        2800
+      ],
+      "observations": 30665,
+      "frame_pairs": 200,
+      "mean_nll_delta_vs_nominal_equal_pair_weights": {
+        "measured_assignment": -56.618498510199416,
+        "uniform_assignment": -56.38193734888569,
+        "shuffled_assignment_median": -56.512374895942585,
+        "shuffled_assignment_min_max": [
+          -56.55297793080182,
+          -56.397077985725325
+        ]
+      },
+      "measured_beats_its_shuffled_median_pairs": 185,
+      "measured_beats_uniform_pairs": 189,
+      "median_pair_rank_correlation": {
+        "measured_assignment": 0.4532771596181201,
+        "shuffled_assignment": 0.37009367090580175,
+        "measured_defined_pairs": 200,
+        "shuffled_defined_comparisons": 6400
+      }
+    },
+    {
+      "frames": [
+        3400,
+        3600
+      ],
+      "observations": 32416,
+      "frame_pairs": 200,
+      "mean_nll_delta_vs_nominal_equal_pair_weights": {
+        "measured_assignment": -11.98675316092309,
+        "uniform_assignment": -11.859144229394024,
+        "shuffled_assignment_median": -11.841298005342075,
+        "shuffled_assignment_min_max": [
+          -11.885821841030934,
+          -11.660322341115856
+        ]
+      },
+      "measured_beats_its_shuffled_median_pairs": 188,
+      "measured_beats_uniform_pairs": 169,
+      "median_pair_rank_correlation": {
+        "measured_assignment": 0.47562536867097654,
+        "shuffled_assignment": 0.3593693615105088,
+        "measured_defined_pairs": 200,
+        "shuffled_defined_comparisons": 6400
+      }
+    }
+  ]
+}

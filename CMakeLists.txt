@@ -126,6 +126,9 @@ target_link_libraries(${PROJECT_NAME} ${THIRD_PARTY_LIBS} opengv)
 add_executable(pnec_vo src/pnec_vo.cc ${THIRD_PARTY_FILES})
 target_link_libraries(pnec_vo ${THIRD_PARTY_LIBS} opengv ${PROJECT_NAME})
 
+add_executable(pnec_fixed_refine EXCLUDE_FROM_ALL scripts/experiments/fixed_input_refine.cc)
+target_link_libraries(pnec_fixed_refine ${PROJECT_NAME})
+
 add_executable(create_experiments src/create_sim_experiments.cc ${THIRD_PARTY_FILES})
 target_link_libraries(create_experiments ${THIRD_PARTY_LIBS} opengv ${PROJECT_NAME})
 

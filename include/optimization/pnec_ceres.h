@@ -70,6 +70,7 @@ public:
                   const Eigen::Vector3d &translation);
 
   void SetOptions(const ceres::Solver::Options &options);
+  bool IsSolutionUsable() const { return summary_.IsSolutionUsable(); }
 
   Eigen::Matrix3d Orientation() const;
   Eigen::Vector3d Translation() const;
