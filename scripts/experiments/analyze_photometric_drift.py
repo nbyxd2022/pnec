@@ -138,7 +138,8 @@ def signed_window_analysis(reference, estimates, first, per_match_rpe_n):
     return output
 
 
-def full_scope(reference, estimates, first, expected):
+def full_scope(reference, estimates, first, expected, *,
+               baseline="original", uniform="uniform", candidate="per_match"):
     n = len(reference)
     curves = {mode: [rmse(gap_errors(reference, estimate, gap)) for gap in range(1, n)]
               for mode, estimate in estimates.items()}
@@ -156,8 +157,8 @@ def full_scope(reference, estimates, first, expected):
         hi = min(limit if limit is not None else n - 1, n - 1)
         contribution = {mode: sum(curve[lo - 1:hi]) / n for mode, curve in curves.items()}
         bands.append({"gap_frames": [lo, hi], "rpe_n_contribution_deg": contribution,
-                      "per_match_minus_original_deg": contribution["per_match"] - contribution["original"],
-                      "per_match_minus_uniform_deg": contribution["per_match"] - contribution["uniform"]})
+                      f"{candidate}_minus_{baseline}_deg": contribution[candidate] - contribution[baseline],
+                      f"{candidate}_minus_{uniform}_deg": contribution[candidate] - contribution[uniform]})
 
     windows = []
     # Adjacent windows share the anchor at the boundary, but each step belongs to one window.
@@ -167,20 +168,22 @@ def full_scope(reference, estimates, first, expected):
         local = {mode: rotation_metrics(reference[segment], estimate[segment])
                  for mode, estimate in estimates.items()}
         windows.append({"frames": [first + lo, first + hi], "metrics": local,
-                        "per_match_minus_original_rpe_n_deg":
-                            local["per_match"]["rpe_n_deg"] - local["original"]["rpe_n_deg"]})
+                        f"{candidate}_minus_{baseline}_rpe_n_deg":
+                            local[candidate]["rpe_n_deg"] - local[baseline]["rpe_n_deg"]})
     return {"frames": [first, first + n - 1], "recomputed_metrics": metrics,
             "per_gap_rmse_deg": curves, "gap_bands": bands, "windows": windows}
 
 
-def tail_replacements(reference, estimates, tail_result):
+def tail_replacements(reference, estimates, tail_result, *,
+                      baseline="original", candidate="per_match"):
     first = tail_result["frames"][0]
     targets = first + np.arange(1, len(reference))
-    base = estimates["original"]
-    candidate = estimates["per_match"]
-    change = gap_errors(base, candidate, 1)
+    base = estimates[baseline]
+    candidate_estimate = estimates[candidate]
+    change = gap_errors(base, candidate_estimate, 1)
     ranked = np.argsort(-change, kind="stable")
-    window = max(tail_result["windows"], key=lambda row: row["per_match_minus_original_rpe_n_deg"])
+    excess_key = f"{candidate}_minus_{baseline}_rpe_n_deg"
+    window = max(tail_result["windows"], key=lambda row: row[excess_key])
     lo, hi = window["frames"]
     inside = (targets > lo) & (targets <= hi)
     top20 = np.zeros(len(targets), dtype=bool)
@@ -188,22 +191,22 @@ def tail_replacements(reference, estimates, tail_result):
     top5 = np.zeros(len(targets), dtype=bool)
     top5[ranked[inside[ranked]][:LARGEST_STEPS]] = True
     masks = {"largest_20_in_tail": top20}
-    if window["per_match_minus_original_rpe_n_deg"] > 0:
+    if window[excess_key] > 0:
         masks.update(largest_5_in_window=top5, remaining_in_window=inside & ~top5, entire_window=inside)
-    initial_error = tail_result["recomputed_metrics"]["per_match"]["rpe_n_deg"]
+    initial_error = tail_result["recomputed_metrics"][candidate]["rpe_n_deg"]
     substitutions = {}
     for name, mask in masks.items():
-        replacement = replace_steps(candidate, base, mask)
+        replacement = replace_steps(candidate_estimate, base, mask)
         metrics = rotation_metrics(reference, replacement)
         substitutions[name] = {
             "steps_replaced": int(mask.sum()), **metrics,
             "change_in_tail_rpe_n_deg": metrics["rpe_n_deg"] - initial_error,
             "target_frames": targets[mask].tolist(),
         }
-    return {"window_frames": [lo, hi], "window_local_rpe_n_excess_deg": window["per_match_minus_original_rpe_n_deg"],
+    return {"window_frames": [lo, hi], "window_local_rpe_n_excess_deg": window[excess_key],
             "policy": "Rank individual steps by rotation disagreement between the saved methods. "
                       "Select the window by largest local RPE_n excess. Substitutions only recompose saved rotations.",
-            "replace_per_match_steps_with_original": substitutions}
+            f"replace_{candidate}_steps_with_{baseline}": substitutions}
 
 
 def analyze(run, ground_truth, sequence, signed_windows=False):
