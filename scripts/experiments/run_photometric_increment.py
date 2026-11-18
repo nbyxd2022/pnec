@@ -15,6 +15,7 @@ import numpy as np
 
 MODES = ("original", "uniform", "per_match")
 ANALYTIC_COMPARISON_MODES = ("original", "per_match", "symmetric_analytic")
+SYMMETRIC_MODES = ("symmetric_analytic", "symmetric_uniform", "symmetric_per_match")
 CAMERA = {
     "01": "config_kitti00-02.yaml",
     "08": "config_kitti04-10.yaml",
@@ -75,7 +76,7 @@ def timing_summary(path, frames, warmup, mode):
             raise ValueError(f"{path}: {mode} applied a photometric increment")
     elif (not np.any(nonzero > 0) or np.any(nonzero > inliers)
           or not np.array_equal(trace > 0, nonzero > 0)
-          or (mode == "uniform" and np.any(nonzero[trace > 0] != inliers[trace > 0]))):
+          or (mode in ("uniform", "symmetric_uniform") and np.any(nonzero[trace > 0] != inliers[trace > 0]))):
         raise ValueError(f"{path}: invalid activity in {mode} mode")
     return {"median_total_ms": float(np.median(total)), "p95_total_ms": float(np.percentile(total, 95)),
             "median_increment_ms": float(np.median(added)), "p95_increment_ms": float(np.percentile(added, 95)),
@@ -95,7 +96,7 @@ def rotation_metrics(reference, estimate):
 
 
 def validate_symmetric_activity(target, mode):
-    if mode == "symmetric_analytic":
+    if mode in SYMMETRIC_MODES:
         with (target / "run.log").open(encoding="utf-8", errors="replace") as log:
             if not any("Symmetric analytic Ceres refinement ran" in line for line in log):
                 raise ValueError(f"{target}: symmetric analytic refinement was not logged")
@@ -209,7 +210,9 @@ def run(args):
         start = first = 0
     warmup = first - start
     modes = MODES
-    if args.reference_speed_run:
+    if args.compare_symmetric_increments:
+        modes = SYMMETRIC_MODES
+    elif args.reference_speed_run:
         modes = ("per_match",)
     elif args.reference_full_run:
         modes = ("symmetric_analytic",)
@@ -235,10 +238,17 @@ def run(args):
         speed_reference = load_speed_reference(args.reference_speed_run, manifest,
                                               replay_config(repo, args.sequence))
         manifest["speed_reference_report_sha256"] = speed_reference["report_sha256"]
-    if "symmetric_analytic" in modes:
+    if any(mode in SYMMETRIC_MODES for mode in modes):
         manifest["symmetric_analytic_control"] = {
             "source": "CVPR 2023, Section 3.2, equations 2-3",
             "scope": "Host and target KLT bearing covariances in final Ceres refinement only",
+        }
+    if args.compare_symmetric_increments:
+        manifest["symmetric_increment_ablation"] = {
+            "base": "Host and target KLT covariances in final Ceres refinement",
+            "increment": "Target-side photometric trace, uniform or per-match",
+            "search": "15x15 normalized raw SSD, +/-16px, minima separation >=4px",
+            "trace": "ratio * squared tangent displacement / (4 * squared ray norm)",
         }
     if args.resume:
         out = args.resume.resolve(strict=True)
@@ -298,9 +308,10 @@ def run(args):
             config_file.write_text(json.dumps(config_hashes, indent=2) + "\n", encoding="utf-8")
         estimates = {}
         scores[sequence] = {}
-        runs = (*modes, "original_repeat") if args.action == "smoke" else modes
+        repeat = modes[0] + "_repeat"
+        runs = (*modes, repeat) if args.action == "smoke" else modes
         for label in runs:
-            mode = "original" if label == "original_repeat" else label
+            mode = modes[0] if label == repeat else label
             target = slot / label
             if args.resume and target.exists():
                 try:
@@ -331,10 +342,10 @@ def run(args):
             checkpoint.write_text(f"{elapsed}\n", encoding="utf-8")
             checkpoint.replace(target / "wall_seconds.txt")
         if args.action == "smoke":
-            original = slot / "original/ablation/PNEC.txt"
-            repeat = slot / "original_repeat/ablation/PNEC.txt"
-            if original.read_bytes() != repeat.read_bytes():
-                raise ValueError(f"KITTI {sequence}: repeated original poses differ")
+            original = slot / modes[0] / "ablation/PNEC.txt"
+            repeated = slot / repeat / "ablation/PNEC.txt"
+            if original.read_bytes() != repeated.read_bytes():
+                raise ValueError(f"KITTI {sequence}: repeated baseline poses differ")
         else:
             gt_path = args.dataset / "poses" / f"{sequence}.txt"
             gt_rows = full_gt if full_gt is not None else np.loadtxt(gt_path, ndmin=2)[first:end]
@@ -399,6 +410,8 @@ def main():
                           help="Replay only double-sided analytic PNEC and report the archived full runs for the selected KITTI sequence alongside it")
     analytic.add_argument("--reference-speed-run", type=Path,
                           help="Check optimized per-match computation against a recorded KITTI 08 holdout")
+    analytic.add_argument("--compare-symmetric-increments", action="store_true",
+                          help="Compare double-sided PNEC with uniform and per-match photometric increments")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
@@ -415,6 +428,9 @@ def main():
         parser.error("--reference-full-run requires full --sequence")
     if args.reference_speed_run and (args.action != "holdout" or args.sequence != "08"):
         parser.error("--reference-speed-run requires holdout --sequence 08")
+    if args.compare_symmetric_increments and (
+            args.action == "full" or (args.action == "holdout" and args.sequence != "08")):
+        parser.error("--compare-symmetric-increments supports smoke or holdout --sequence 08")
     run(args)
 
 

@@ -12,7 +12,10 @@
 
 namespace pnec::rel_pose_estimation::photometric {
 
-enum class Mode { Disabled, Original, Uniform, PerMatch, SymmetricAnalytic };
+enum class Mode {
+  Disabled, Original, Uniform, PerMatch, SymmetricAnalytic,
+  SymmetricUniform, SymmetricPerMatch
+};
 
 inline Mode ExperimentMode() {
   static const Mode mode = [] {
@@ -33,8 +36,15 @@ inline Mode ExperimentMode() {
     if (value == "symmetric_analytic") {
       return Mode::SymmetricAnalytic;
     }
+    if (value == "symmetric_uniform") {
+      return Mode::SymmetricUniform;
+    }
+    if (value == "symmetric_per_match") {
+      return Mode::SymmetricPerMatch;
+    }
     throw std::invalid_argument(
-        "PNEC_PHOTOMETRIC_INCREMENT expects original, uniform, per_match or symmetric_analytic");
+        "PNEC_PHOTOMETRIC_INCREMENT expects original, uniform, per_match, "
+        "symmetric_analytic, symmetric_uniform or symmetric_per_match");
   }();
   return mode;
 }

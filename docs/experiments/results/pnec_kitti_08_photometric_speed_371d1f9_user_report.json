@@ -1,0 +1,72 @@
+{
+  "manifest": {
+    "git_commit": "371d1f9aba47ab2d152abab65b5ca0cfc1502aa5",
+    "binary_sha256": "94601bdd223fa6e8356a1dade1ce37c51478bf27730f456b72f7f20b3d236f9d",
+    "sequences": [
+      "08"
+    ],
+    "action": "holdout",
+    "replay_start": 450,
+    "evaluation_start": 500,
+    "end_exclusive": 800,
+    "modes": [
+      "per_match"
+    ],
+    "regularizer_and_init": "Nominal PNEC through weighted eigensolver",
+    "ransac_sampling": "Fixed OpenGV seed and srand(1) before each RANSAC",
+    "speed_reference_report_sha256": "0eb5cf5a1ef5aec21432c2bf3c86972961103b9c06b7bcd5cc1b5dee6366b9bb"
+  },
+  "runner_git_commit": "371d1f9aba47ab2d152abab65b5ca0cfc1502aa5",
+  "results": {
+    "08": {
+      "per_match": {
+        "wall_seconds_including_baseline_ablation_methods": 62.9494148301892,
+        "median_total_ms": 102.0,
+        "p95_total_ms": 147.19999999999993,
+        "median_increment_ms": 38.918987,
+        "p95_increment_ms": 52.22433159999999,
+        "pairs_with_nonzero_increment": 299,
+        "inliers_logged": 56238,
+        "inliers_with_increment": 56213,
+        "rpe_1_deg": 0.14729424701203495,
+        "rpe_n_deg": 1.9583673521656157
+      }
+    }
+  },
+  "photometric_speed_check": {
+    "reference": {
+      "run": "/home/yangxd/pnec_research/pnec_increment_holdout_br_8mznx",
+      "report_sha256": "0eb5cf5a1ef5aec21432c2bf3c86972961103b9c06b7bcd5cc1b5dee6366b9bb",
+      "git_commit": "c1eed89498ccfbf2883c7971d509225694095ad4",
+      "binary_sha256": "2fa36c4914f7473d27cb8d61a6e58bef1416b813e4adb69a33041771c42fd7a6",
+      "pose_sha256": {
+        "ablation/PNEC.txt": "edd336775399135c3a6ea1a30614b513f47861873450b4ad22a177509b8731a3",
+        "rot_avg/poses.txt": "72a0b2e51952d3246a128a62ce4b1eed0f8ac09bf145d9d159b76e93f1ac41f1"
+      },
+      "scores": {
+        "wall_seconds_including_baseline_ablation_methods": 76.53770370106213,
+        "median_total_ms": 144.0,
+        "p95_total_ms": 177.09999999999997,
+        "median_increment_ms": 76.490729,
+        "p95_increment_ms": 107.04281549999999,
+        "pairs_with_nonzero_increment": 299,
+        "inliers_logged": 56238,
+        "inliers_with_increment": 56213,
+        "rpe_1_deg": 0.14729424701203495,
+        "rpe_n_deg": 1.9583673521656157
+      }
+    },
+    "exact_pose_match": true,
+    "current_pose_sha256": {
+      "ablation/PNEC.txt": "edd336775399135c3a6ea1a30614b513f47861873450b4ad22a177509b8731a3",
+      "rot_avg/poses.txt": "72a0b2e51952d3246a128a62ce4b1eed0f8ac09bf145d9d159b76e93f1ac41f1"
+    },
+    "accuracy_equal": true,
+    "increment_ms": {
+      "reference_median": 76.490729,
+      "current_median": 38.918987,
+      "reference_p95": 107.04281549999999,
+      "current_p95": 52.22433159999999
+    }
+  }
+}

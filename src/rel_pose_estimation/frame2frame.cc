@@ -154,7 +154,9 @@ void AddPhotometricIncrements(
   const double mean_trace = traces.empty() ? 0 : total_trace / traces.size();
   for (size_t i = 0; i < covariances.size(); ++i) {
     const auto &bearing = target_bvs.at(inliers[i]);
-    const double trace = mode == photometric::Mode::Uniform ? mean_trace : traces[i];
+    const bool uniform = mode == photometric::Mode::Uniform ||
+                         mode == photometric::Mode::SymmetricUniform;
+    const double trace = uniform ? mean_trace : traces[i];
     covariances[i] += (trace / 2) *
         (Eigen::Matrix3d::Identity() - bearing * bearing.transpose());
     timing.increment_nonzero_ += trace > 0;
@@ -240,7 +242,9 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
   opengv::bearingVectors_t bvs2;
   std::vector<Eigen::Matrix3d> proj_covs;
   const auto mode = photometric::ExperimentMode();
-  const bool symmetric = mode == photometric::Mode::SymmetricAnalytic;
+  const bool symmetric = mode == photometric::Mode::SymmetricAnalytic ||
+                         mode == photometric::Mode::SymmetricUniform ||
+                         mode == photometric::Mode::SymmetricPerMatch;
   if (symmetric &&
       (options_.use_nec_ || !options_.use_ransac_ || !options_.use_ceres_ ||
        options_.noise_frame_ != common::Target)) {
@@ -256,7 +260,9 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
   }
 
   RefinementCovarianceUpdate update;
-  if (mode == photometric::Mode::Uniform || mode == photometric::Mode::PerMatch) {
+  if (mode == photometric::Mode::Uniform || mode == photometric::Mode::PerMatch ||
+      mode == photometric::Mode::SymmetricUniform ||
+      mode == photometric::Mode::SymmetricPerMatch) {
     if (options_.use_nec_ || !options_.use_ransac_ || !options_.use_ceres_ ||
         options_.noise_frame_ != common::Target) {
       throw std::invalid_argument(
