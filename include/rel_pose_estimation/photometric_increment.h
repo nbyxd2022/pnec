@@ -111,24 +111,28 @@ inline Ambiguity Measure(const GrayImage &host, const GrayImage &target,
   int best_x = 0, best_y = 0;
   double best = invalid;
   for (int y = 0; y < search_side; ++y) {
+    double *row_costs = costs.data() + y * search_side;
     for (int x = 0; x < search_side; ++x) {
-      if (!target.Supports(target_x + (x - search_radius),
-                           target_y + (y - search_radius), patch_radius)) {
-        continue;
-      }
-      double cost = 0;
-      for (int row = 0; row < patch_side; ++row) {
-        for (int col = 0; col < patch_side; ++col) {
-          const double difference =
-              raster[(y + row) * raster_side + x + col] -
-              source[row * patch_side + col];
-          cost += difference * difference;
+      row_costs[x] = target.Supports(target_x + (x - search_radius),
+                                     target_y + (y - search_radius), patch_radius)
+                         ? 0.0 : invalid;
+    }
+    // Independent candidate accumulators let the compiler vectorize columns.
+    // Each candidate keeps the original patch-pixel summation order.
+    for (int row = 0; row < patch_side; ++row) {
+      const double *pixels = raster.data() + (y + row) * raster_side;
+      for (int col = 0; col < patch_side; ++col) {
+        const double value = source[row * patch_side + col];
+        for (int x = 0; x < search_side; ++x) {
+          const double difference = pixels[x + col] - value;
+          row_costs[x] += difference * difference;
         }
       }
-      // Visit equal-cost candidates in (dy, dx) order.
-      costs[y * search_side + x] = cost;
-      if (cost < best) {
-        best = cost;
+    }
+    // Visit equal-cost candidates in (dy, dx) order.
+    for (int x = 0; x < search_side; ++x) {
+      if (row_costs[x] < best) {
+        best = row_costs[x];
         best_x = x;
         best_y = y;
       }

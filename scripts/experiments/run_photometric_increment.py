@@ -165,6 +165,31 @@ def load_full_reference(path, manifest, config):
             "runner_git_commit": report["runner_git_commit"], "scores": scores}
 
 
+def load_speed_reference(path, manifest, config):
+    run = path.resolve(strict=True)
+    raw = (run / "report.json").read_bytes()
+    report = json.loads(raw)
+    recorded = report["manifest"]
+    fields = ("sequences", "action", "replay_start", "evaluation_start",
+              "end_exclusive", "regularizer_and_init", "ransac_sampling")
+    if (recorded != json.loads((run / "manifest.json").read_bytes())
+            or any(recorded[key] != manifest[key] for key in fields)
+            or "per_match" not in recorded["modes"]):
+        raise ValueError("Speed reference does not match the replay protocol")
+    sequence, = manifest["sequences"]
+    if ({file.name: digest(file) for file in config}
+            != json.loads((run / sequence / "config_sha256.json").read_bytes())):
+        raise ValueError("Speed reference used different PNEC configuration files")
+    times = np.loadtxt(run / sequence / "times.txt", ndmin=1)
+    reuse_slot(run / sequence / "per_match", times,
+               manifest["evaluation_start"] - manifest["replay_start"], "per_match")
+    files = ("ablation/PNEC.txt", "rot_avg/poses.txt")
+    return {"run": str(run), "report_sha256": sha256(raw).hexdigest(),
+            "git_commit": recorded["git_commit"], "binary_sha256": recorded["binary_sha256"],
+            "pose_sha256": {file: digest(run / sequence / "per_match" / file) for file in files},
+            "scores": report["results"][sequence]["per_match"]}
+
+
 def run(args):
     repo = Path(__file__).resolve().parents[2]
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
@@ -184,7 +209,9 @@ def run(args):
         start = first = 0
     warmup = first - start
     modes = MODES
-    if args.reference_full_run:
+    if args.reference_speed_run:
+        modes = ("per_match",)
+    elif args.reference_full_run:
         modes = ("symmetric_analytic",)
     elif args.compare_symmetric_analytic:
         modes = ANALYTIC_COMPARISON_MODES
@@ -203,6 +230,11 @@ def run(args):
         full_reference = load_full_reference(args.reference_full_run, manifest,
                                              replay_config(repo, args.sequence))
         manifest["reference_full_report_sha256"] = full_reference["report_sha256"]
+    speed_reference = None
+    if args.reference_speed_run:
+        speed_reference = load_speed_reference(args.reference_speed_run, manifest,
+                                              replay_config(repo, args.sequence))
+        manifest["speed_reference_report_sha256"] = speed_reference["report_sha256"]
     if "symmetric_analytic" in modes:
         manifest["symmetric_analytic_control"] = {
             "source": "CVPR 2023, Section 3.2, equations 2-3",
@@ -232,6 +264,10 @@ def run(args):
         if len(times) != end - start or not np.isfinite(times).all() or not np.all(np.diff(times) > 0):
             raise ValueError(f"KITTI {sequence}: clip times missing or invalid")
         times -= times[0]
+        if speed_reference is not None:
+            saved_times = np.loadtxt(Path(speed_reference["run"]) / sequence / "times.txt", ndmin=1)
+            if saved_times.shape != times.shape or not np.allclose(saved_times, times, rtol=0, atol=6e-13):
+                raise ValueError("Speed reference timestamps differ from the dataset")
         time_file = slot / "times.txt"
         if time_file.exists():
             saved_times = np.loadtxt(time_file, ndmin=1)
@@ -321,11 +357,34 @@ def run(args):
     report = {"manifest": manifest, "runner_git_commit": revision, "results": scores}
     if full_reference is not None:
         report["reference_full_run"] = full_reference
+    if speed_reference is not None:
+        sequence = args.sequence
+        current = scores[sequence]["per_match"]
+        poses = {file: digest(out / sequence / "per_match" / file)
+                 for file in speed_reference["pose_sha256"]}
+        check = {
+            "reference": speed_reference,
+            "exact_pose_match": poses == speed_reference["pose_sha256"],
+            "current_pose_sha256": poses,
+            "accuracy_equal": all(current[key] == speed_reference["scores"][key]
+                                  for key in ("rpe_1_deg", "rpe_n_deg")),
+            "increment_ms": {
+                "reference_median": speed_reference["scores"]["median_increment_ms"],
+                "current_median": current["median_increment_ms"],
+                "reference_p95": speed_reference["scores"]["p95_increment_ms"],
+                "current_p95": current["p95_increment_ms"],
+            },
+        }
+        report["photometric_speed_check"] = check
     report_tmp = out / "report.json.tmp"
     report_tmp.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     report_tmp.replace(out / "report.json")
     print(json.dumps(scores, indent=2))
     print(f"Report: {out / 'report.json'}")
+    if speed_reference is not None:
+        print(json.dumps(check, indent=2))
+        if not check["exact_pose_match"] or not check["accuracy_equal"]:
+            raise ValueError("Photometric implementation changed the saved poses; inspect the speed report")
 
 
 def main():
@@ -338,6 +397,8 @@ def main():
                           help="Compare original, per-match, and double-sided analytic PNEC on the KITTI 08 holdout")
     analytic.add_argument("--reference-full-run", type=Path,
                           help="Replay only double-sided analytic PNEC and report the archived full runs for the selected KITTI sequence alongside it")
+    analytic.add_argument("--reference-speed-run", type=Path,
+                          help="Check optimized per-match computation against a recorded KITTI 08 holdout")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
@@ -352,6 +413,8 @@ def main():
         parser.error("--compare-symmetric-analytic requires holdout --sequence 08")
     if args.reference_full_run and args.action != "full":
         parser.error("--reference-full-run requires full --sequence")
+    if args.reference_speed_run and (args.action != "holdout" or args.sequence != "08"):
+        parser.error("--reference-speed-run requires holdout --sequence 08")
     run(args)
 
 
