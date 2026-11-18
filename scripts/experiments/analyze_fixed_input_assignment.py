@@ -119,19 +119,36 @@ def measure(run, report):
     return windows
 
 
+def select_capture(results_root, expected):
+    failures = []
+    for source in sorted(results_root.glob("pnec_fixed_input_windows_*/report.json")):
+        try:
+            candidate = json.loads(source.read_bytes())
+        except (OSError, ValueError):
+            continue
+        if candidate != expected:
+            continue
+        try:
+            windows = measure(source.parent, expected)
+        except (OSError, ValueError) as exc:
+            failures.append(f"{source.parent}: {exc}")
+            continue
+        return source, windows
+
+    if failures:
+        details = "\n".join(failures)
+        raise ValueError(f"Matching captures failed validation:\n{details}")
+    raise ValueError(f"No report matches the archived window capture under {results_root}")
+
+
 def main(results_root):
     repo = Path(__file__).resolve().parents[2]
     archive = repo / "docs/experiments/results" / ARCHIVE
     expected = json.loads(archive.read_bytes())
-    candidates = []
-    for path in sorted(results_root.glob("pnec_fixed_input_windows_*/report.json")):
-        if json.loads(path.read_bytes()) == expected:
-            candidates.append(path)
-    if len(candidates) != 1:
-        raise ValueError(f"Expected one archived window report under {results_root}; found {len(candidates)}")
-    source, = candidates
-    windows = measure(source.parent, expected)
+    source, windows = select_capture(results_root, expected)
+    print(f"Using capture: {source.parent}")
     result = {
+        "source_capture": source.parent.name,
         "source_report_sha256": digest(source),
         "source_manifest_sha256": expected["input_sha256"]["manifest.json"],
         "script_sha256": digest(Path(__file__).resolve()),
