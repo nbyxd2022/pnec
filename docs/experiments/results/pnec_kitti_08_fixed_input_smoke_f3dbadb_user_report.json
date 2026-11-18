@@ -1,0 +1,649 @@
+{
+  "schema": 1,
+  "manifest": {
+    "git_commit": "f3dbadb84d706f1ce49b4d1dd4bfdbedeaf42f40",
+    "binary_sha256": "f2b7c166cbf0ff0086dc49aefee6d8fd1f592975370826f638ed2170a3f2cc2e",
+    "action": "smoke",
+    "inputs": {
+      "baseline_run": "/home/yangxd/pnec_research/pnec_increment_full_9rwclo6b",
+      "baseline_report_sha256": "369d06033d80993801b9001df29ef1d9237771e0f9f74a119f100bede4188849",
+      "baseline_relative_pose_sha256": "69a914f6ff47d2616c60492c7b9083ecb073ea51eb07ac4cebc53c42a14d4dee",
+      "dataset": "/home/yangxd/ov_ws/datasets/kitti/dataset",
+      "timestamps_sha256": "65359db9033c8716d2150c90c6fabc6f93db640531d3370e3eb7056d82590e9f",
+      "ground_truth_sha256": "cd7177170c7d7ba98cdbfe9417f97bd9586da5c70cbd5ccefa5db6bf88a5fe88",
+      "config_sha256": {
+        "config_kitti04-10.yaml": "06134e8e8388dfa7983a53839d2d007d29e3cf006dfcbe57a69fca577a00faad",
+        "test_config.yaml": "2dbef196bcafd02d95e43d9af4277a5b96692557b5f56f8b4568b9c9ec194836",
+        "08.json": "8892e7ae518ee96e84245861486010f7b74903dd33c55d78e052ee31a906cac0",
+        "kitti_calib.json": "ad8c5a18c48c55dacf61d18ebbc18cd7d4f3acccd5840bd5a5cd8646adb6271c"
+      },
+      "windows": [
+        [
+          0,
+          7
+        ]
+      ],
+      "selected_target_frames": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "replay_start": 0,
+      "end_exclusive": 8
+    },
+    "online_mode": "symmetric_analytic",
+    "diagnostic_modes": [
+      "symmetric_analytic",
+      "symmetric_uniform",
+      "symmetric_per_match"
+    ],
+    "source_sha256": {
+      "scripts/experiments/run_fixed_input_audit.py": "eaf9ac46df313149af66e62b8824b5eddacaeaf8daa97a2debf5f99119ad0c9f",
+      "src/rel_pose_estimation/frame2frame.cc": "f474e830ef45bb6b9073d10bdea67c2c7d125d684b353357d9237123e05e9e70",
+      "src/rel_pose_estimation/pnec.cc": "aa4c07cbda2605c65664bbedc7813bc8b9f618c808deec04a90e9520df4e74a4",
+      "include/rel_pose_estimation/photometric_increment.h": "28cf1117d589b3ef890dfe2cae96d71b785ea27589ef916aab815a44f9df6697"
+    }
+  },
+  "baseline_prefix_exact_match": true,
+  "analysis_source_sha256": {
+    "run_fixed_input_audit.py": "eaf9ac46df313149af66e62b8824b5eddacaeaf8daa97a2debf5f99119ad0c9f",
+    "run_photometric_increment.py": "ca9cc30a9fd2a1edf635c790d20069d33eca7ef97e3884345f5e6a7b5559ecba",
+    "analyze_photometric_drift.py": "ceeaae7ef178db6ad1932bdf67880d72a1fa8e04b446602dc55ff925b74e15b2",
+    "analyze_symmetric_photometric_drift.py": "31385f2fed7bf6cad020d65f581b29692ec87fdaa2f1fbb73314c59292b7adff"
+  },
+  "interpretation": {
+    "inputs": "Each pair shares matches, RANSAC inliers, source/target KLT covariances and one Ceres initial pose",
+    "feedback": "Only the symmetric analytic baseline is fed back; other refinements are recorded only",
+    "scope": "Development windows selected from previous trajectory analysis; not held-out validation",
+    "gt_scores": "Epipolar geometry diagnostics assume static correct correspondences. They are not pixel endpoint truth or proof of covariance calibration",
+    "nll": "Gaussian residual-score change relative to nominal variance at the same specified pose; negative is better under that diagnostic model",
+    "inverse_variance": "Ratio evaluates the residual denominator at a common pose; it is not the full nonlinear optimizer influence or an information-gain measure",
+    "timing": "Diagnostic solves add overhead; capture timing is not a method speed benchmark"
+  },
+  "input_sha256": {
+    "capture/ablation/fixed_0_1_points.csv": "18d11a2d66a508c8937fcc31b9a0d56163c9e57c579e9bc197b3d25abf9d8643",
+    "capture/ablation/fixed_0_1_poses.csv": "64d67a23436a199bd79f40ecabb9892e7ad0357d5a8a11c7587f967a025dd1c4",
+    "capture/ablation/matches_0_1.csv": "c2346036270d243dd36c22b3813856cab4c3df87d6fa7a341270c44f1a020f7c",
+    "capture/ablation/fixed_1_2_points.csv": "074626edc03032e0ac5819ebb65d685d5e4c482e67f7e00369b3f46c14f17581",
+    "capture/ablation/fixed_1_2_poses.csv": "d704b6c658f791d34899c42ff20602fb39068c35675ca55a2d97475e3f5da072",
+    "capture/ablation/matches_1_2.csv": "45fb6e88fe9f926d4a492a773c9c825312ae7651a5f061e529ce85d07abab1a8",
+    "capture/ablation/fixed_2_3_points.csv": "efc4f4150558eaf056f160ec6a961060b42f3ff38bde26cf5a08b7ee52df3f63",
+    "capture/ablation/fixed_2_3_poses.csv": "db15f264b563656ee1702714b40811c51a2c25cff4a4ec7a1571ac9533b0ea95",
+    "capture/ablation/matches_2_3.csv": "3763cfb07522412eeb351cb8ac31cfe4ff0727863adea7f7b0bea079f852d3f0",
+    "capture/ablation/fixed_3_4_points.csv": "d96b5f9f0dfa69e34060c0d5453b68c3048a6c22fea23a1660f8547097e58def",
+    "capture/ablation/fixed_3_4_poses.csv": "c5218d68bc0ac2f49d06ac48f712a6e815e201ad1eb9a64e80fc151de1f772fa",
+    "capture/ablation/matches_3_4.csv": "7741f05ba0033995023a5c7e03bfa6086a3d3622f95c77e6348e26da35277c62",
+    "capture/ablation/fixed_4_5_points.csv": "8982a55474fa23e43de3e671dd3f6c311738cd0640dc799b66c0eb6fff67cfcd",
+    "capture/ablation/fixed_4_5_poses.csv": "37a7f21ae8ae9f2a1169cafc619c639ef738cb009940dc4e4fbf2fb6f50ffbd0",
+    "capture/ablation/matches_4_5.csv": "dc3a05bd46d10b40d170e909e2a4a631be921d1f18e96c8cf525dae007163801",
+    "capture/ablation/fixed_5_6_points.csv": "e518ada83c7b8908a1f43ec5c046af36384334d76b30a1af94e8c2811942164b",
+    "capture/ablation/fixed_5_6_poses.csv": "78e1e916e3a0c39e0e054d379483c41e579b077c503fe2ebff7bc28ee6a2afff",
+    "capture/ablation/matches_5_6.csv": "159f8a0ea4282850abad5a136e8c9a5365412cec64be2b9665d5dee2c3b46bc6",
+    "capture/ablation/fixed_6_7_points.csv": "ae4059ee37c6f626ccaa2100431a9715a0c2efdd0d807e70c04a1743d451697d",
+    "capture/ablation/fixed_6_7_poses.csv": "314c68aee679895aa27bf2bf0fc445900cae22df04a70bc5c9bea3c587ed9383",
+    "capture/ablation/matches_6_7.csv": "595fc1c6c624fbcc49d1718bca9bfcc626826a99f04e895c2a34a15e54168bd9",
+    "capture/ablation/PNEC.txt": "221c5300b7fe64c7f50e39cc746d5f6f58a9cbc401da5d3c741969ad0e01e306",
+    "manifest.json": "fdfaa89ab5593b01ef1f572043a2d15b2df74219422e20734229f4d50c30e40c"
+  },
+  "windows": [
+    {
+      "frames": [
+        0,
+        7
+      ],
+      "pairs": 7,
+      "fixed_input_rotation_metrics": {
+        "symmetric_analytic": {
+          "rpe_1_deg": 0.046790827272555076,
+          "rpe_n_deg": 0.1408712051428285
+        },
+        "symmetric_uniform": {
+          "rpe_1_deg": 0.04292499282070626,
+          "rpe_n_deg": 0.13480803292940072
+        },
+        "symmetric_per_match": {
+          "rpe_1_deg": 0.040092613986763795,
+          "rpe_n_deg": 0.13210926769995385
+        }
+      },
+      "signed_error_summary": {
+        "symmetric_analytic": {
+          "steps": 7,
+          "mean_signed_error_xyz_deg": [
+            0.029693389798678176,
+            -0.027698572023401317,
+            0.010119923210847964
+          ],
+          "signed_error_sum_xyz_deg": [
+            0.20785372859074724,
+            -0.19389000416380922,
+            0.07083946247593574
+          ],
+          "step_rmse_deg": 0.04679082728981043,
+          "directional_coherence": 0.9602461191685852,
+          "centered_lag_one_correlation_xyz": [
+            -0.16676845910052362,
+            0.1409525688456547,
+            -0.2792806986157811
+          ],
+          "net_window_error_xyz_deg": [
+            0.20788542523510375,
+            -0.19385670257588444,
+            0.07084259926565097
+          ]
+        },
+        "symmetric_uniform": {
+          "steps": 7,
+          "mean_signed_error_xyz_deg": [
+            0.024884463432119263,
+            -0.027056987269389883,
+            0.008550972265151294
+          ],
+          "signed_error_sum_xyz_deg": [
+            0.17419124402483485,
+            -0.1893989108857292,
+            0.059856805856059056
+          ],
+          "step_rmse_deg": 0.04292499285772328,
+          "directional_coherence": 0.9179140101137725,
+          "centered_lag_one_correlation_xyz": [
+            -0.11385883486668748,
+            -0.831060603405405,
+            -0.09224586277987365
+          ],
+          "net_window_error_xyz_deg": [
+            0.1742519898526304,
+            -0.18935222719656825,
+            0.05984478081318528
+          ]
+        },
+        "symmetric_per_match": {
+          "steps": 7,
+          "mean_signed_error_xyz_deg": [
+            0.019323124659152948,
+            -0.02918994120718727,
+            0.011957650977029038
+          ],
+          "signed_error_sum_xyz_deg": [
+            0.13526187261407063,
+            -0.2043295884503109,
+            0.08370355683920326
+          ],
+          "step_rmse_deg": 0.04009261398832847,
+          "directional_coherence": 0.968941309794189,
+          "centered_lag_one_correlation_xyz": [
+            0.2819843629540151,
+            -0.548636690470636,
+            -0.29930945197806424
+          ],
+          "net_window_error_xyz_deg": [
+            0.1352907778255352,
+            -0.20432388474590565,
+            0.08367417784621077
+          ]
+        }
+      },
+      "point_effect_at_common_initial_pose": {
+        "points": 1573,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.4294892919617032,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 394,
+            "nominal_standardized_residual2_median": 0.10739674900077889
+          },
+          "high": {
+            "points": 394,
+            "nominal_standardized_residual2_median": 2.3509627962727184
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.009827804762358444,
+          "fraction_inverse_variance_ratio_below_half": 0.9898283534647171,
+          "mean_gaussian_nll_delta": 0.1322464882325456
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.023058597682558146,
+          "fraction_inverse_variance_ratio_below_half": 0.9669421487603306,
+          "mean_gaussian_nll_delta": -0.17950203478366056
+        }
+      },
+      "point_effect_at_gt_motion": {
+        "points": 1573,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.5696101680108798,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 394,
+            "nominal_standardized_residual2_median": 26.30928000791895
+          },
+          "high": {
+            "points": 394,
+            "nominal_standardized_residual2_median": 412.6678753361507
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.013805295475526967,
+          "fraction_inverse_variance_ratio_below_half": 0.9847425301970757,
+          "mean_gaussian_nll_delta": -258.31923534057364
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.03517755537135709,
+          "fraction_inverse_variance_ratio_below_half": 0.9574062301335029,
+          "mean_gaussian_nll_delta": -254.50841144927645
+        }
+      },
+      "gt_motion_unavailable_pairs": 0
+    }
+  ],
+  "pairs": [
+    {
+      "target_frame": 1,
+      "inliers": 202,
+      "rotation_error_deg": {
+        "initial": 0.06535801396139783,
+        "symmetric_analytic": 0.07699008981214356,
+        "symmetric_uniform": 0.049904148068754824,
+        "symmetric_per_match": 0.042678472533291614
+      },
+      "at_common_initial_pose": {
+        "points": 202,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.39214719942694953,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 51,
+            "nominal_standardized_residual2_median": 0.11110838691326148
+          },
+          "high": {
+            "points": 51,
+            "nominal_standardized_residual2_median": 2.211205984480075
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.010015988052736721,
+          "fraction_inverse_variance_ratio_below_half": 0.9851485148514851,
+          "mean_gaussian_nll_delta": 0.4176086748105735
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.024589583004648134,
+          "fraction_inverse_variance_ratio_below_half": 0.9801980198019802,
+          "mean_gaussian_nll_delta": 0.09582900138667783
+        }
+      },
+      "at_gt_motion": {
+        "points": 202,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.4881433441483991,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 51,
+            "nominal_standardized_residual2_median": 23.61122006079074
+          },
+          "high": {
+            "points": 51,
+            "nominal_standardized_residual2_median": 224.46809985502333
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.015138627301400937,
+          "fraction_inverse_variance_ratio_below_half": 0.9851485148514851,
+          "mean_gaussian_nll_delta": -256.0358726598945
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.03721584669040957,
+          "fraction_inverse_variance_ratio_below_half": 0.9554455445544554,
+          "mean_gaussian_nll_delta": -251.67800769746432
+        }
+      }
+    },
+    {
+      "target_frame": 2,
+      "inliers": 211,
+      "rotation_error_deg": {
+        "initial": 0.055042552676608396,
+        "symmetric_analytic": 0.044789178877624784,
+        "symmetric_uniform": 0.05720093927749196,
+        "symmetric_per_match": 0.05817409537529444
+      },
+      "at_common_initial_pose": {
+        "points": 211,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.420049565028551,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 53,
+            "nominal_standardized_residual2_median": 0.1111818265306292
+          },
+          "high": {
+            "points": 53,
+            "nominal_standardized_residual2_median": 3.4591526370359387
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.008428287633030966,
+          "fraction_inverse_variance_ratio_below_half": 0.985781990521327,
+          "mean_gaussian_nll_delta": 0.19249724609201702
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.02011865471857289,
+          "fraction_inverse_variance_ratio_below_half": 0.966824644549763,
+          "mean_gaussian_nll_delta": -0.09971221024045082
+        }
+      },
+      "at_gt_motion": {
+        "points": 211,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.5705701255732554,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 53,
+            "nominal_standardized_residual2_median": 19.38831010165451
+          },
+          "high": {
+            "points": 53,
+            "nominal_standardized_residual2_median": 294.03880376057265
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.011227317164628079,
+          "fraction_inverse_variance_ratio_below_half": 0.985781990521327,
+          "mean_gaussian_nll_delta": -202.97138832839383
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.025612208109985136,
+          "fraction_inverse_variance_ratio_below_half": 0.9715639810426541,
+          "mean_gaussian_nll_delta": -200.61815179841682
+        }
+      }
+    },
+    {
+      "target_frame": 3,
+      "inliers": 209,
+      "rotation_error_deg": {
+        "initial": 0.016805570429508254,
+        "symmetric_analytic": 0.013614522918627824,
+        "symmetric_uniform": 0.020384208284047498,
+        "symmetric_per_match": 0.03128960418601875
+      },
+      "at_common_initial_pose": {
+        "points": 209,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.3737078710762921,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 53,
+            "nominal_standardized_residual2_median": 0.142240194277938
+          },
+          "high": {
+            "points": 53,
+            "nominal_standardized_residual2_median": 1.1570756452470332
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.007946270587865428,
+          "fraction_inverse_variance_ratio_below_half": 0.9904306220095693,
+          "mean_gaussian_nll_delta": 0.9301397009045217
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.017596355585583725,
+          "fraction_inverse_variance_ratio_below_half": 0.9808612440191388,
+          "mean_gaussian_nll_delta": 0.6204286357618002
+        }
+      },
+      "at_gt_motion": {
+        "points": 209,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.5875795257374204,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 53,
+            "nominal_standardized_residual2_median": 40.31629258190436
+          },
+          "high": {
+            "points": 53,
+            "nominal_standardized_residual2_median": 579.7820265238248
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.011522063285941186,
+          "fraction_inverse_variance_ratio_below_half": 0.9856459330143541,
+          "mean_gaussian_nll_delta": -224.8292954340085
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.02815041372795756,
+          "fraction_inverse_variance_ratio_below_half": 0.9760765550239234,
+          "mean_gaussian_nll_delta": -221.89229784977033
+        }
+      }
+    },
+    {
+      "target_frame": 4,
+      "inliers": 228,
+      "rotation_error_deg": {
+        "initial": 0.043901730307597094,
+        "symmetric_analytic": 0.0419250154231878,
+        "symmetric_uniform": 0.04261158979162818,
+        "symmetric_per_match": 0.03070164880951176
+      },
+      "at_common_initial_pose": {
+        "points": 228,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.44403382887320453,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 57,
+            "nominal_standardized_residual2_median": 0.10339398672602933
+          },
+          "high": {
+            "points": 57,
+            "nominal_standardized_residual2_median": 2.55479578724853
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.008596912553256054,
+          "fraction_inverse_variance_ratio_below_half": 0.9912280701754386,
+          "mean_gaussian_nll_delta": 0.5992673806464613
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.022857445134851634,
+          "fraction_inverse_variance_ratio_below_half": 0.9649122807017544,
+          "mean_gaussian_nll_delta": 0.2576312225318163
+        }
+      },
+      "at_gt_motion": {
+        "points": 228,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.5364840934840034,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 57,
+            "nominal_standardized_residual2_median": 33.53661978939838
+          },
+          "high": {
+            "points": 57,
+            "nominal_standardized_residual2_median": 460.1544993888785
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.012860145475179274,
+          "fraction_inverse_variance_ratio_below_half": 0.9824561403508771,
+          "mean_gaussian_nll_delta": -200.55476429584726
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.03497776007401289,
+          "fraction_inverse_variance_ratio_below_half": 0.9649122807017544,
+          "mean_gaussian_nll_delta": -197.53342773320944
+        }
+      }
+    },
+    {
+      "target_frame": 5,
+      "inliers": 247,
+      "rotation_error_deg": {
+        "initial": 0.04785166042514932,
+        "symmetric_analytic": 0.044917194070197175,
+        "symmetric_uniform": 0.03505457511566684,
+        "symmetric_per_match": 0.03445370325076225
+      },
+      "at_common_initial_pose": {
+        "points": 247,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.539498370692209,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 62,
+            "nominal_standardized_residual2_median": 0.1304795889523838
+          },
+          "high": {
+            "points": 62,
+            "nominal_standardized_residual2_median": 2.912078105284784
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.014365089646804588,
+          "fraction_inverse_variance_ratio_below_half": 0.9878542510121457,
+          "mean_gaussian_nll_delta": -0.4156426477357375
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.03026848336187489,
+          "fraction_inverse_variance_ratio_below_half": 0.9473684210526315,
+          "mean_gaussian_nll_delta": -0.7127664637528348
+        }
+      },
+      "at_gt_motion": {
+        "points": 247,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.6590295186613875,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 62,
+            "nominal_standardized_residual2_median": 19.503891307279726
+          },
+          "high": {
+            "points": 62,
+            "nominal_standardized_residual2_median": 516.8631963526902
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.019062554440179146,
+          "fraction_inverse_variance_ratio_below_half": 0.979757085020243,
+          "mean_gaussian_nll_delta": -238.66000370371995
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.0493539321344571,
+          "fraction_inverse_variance_ratio_below_half": 0.9271255060728745,
+          "mean_gaussian_nll_delta": -233.8499107533147
+        }
+      }
+    },
+    {
+      "target_frame": 6,
+      "inliers": 241,
+      "rotation_error_deg": {
+        "initial": 0.04925983470484105,
+        "symmetric_analytic": 0.04206453658977891,
+        "symmetric_uniform": 0.05270877646940663,
+        "symmetric_per_match": 0.050645569613299114
+      },
+      "at_common_initial_pose": {
+        "points": 241,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.5040910805527932,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 61,
+            "nominal_standardized_residual2_median": 0.055702398814624556
+          },
+          "high": {
+            "points": 61,
+            "nominal_standardized_residual2_median": 1.6663837208172179
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.008046526094972984,
+          "fraction_inverse_variance_ratio_below_half": 0.995850622406639,
+          "mean_gaussian_nll_delta": 0.32753762175101425
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.024246608255209124,
+          "fraction_inverse_variance_ratio_below_half": 0.966804979253112,
+          "mean_gaussian_nll_delta": -0.03135141569663989
+        }
+      },
+      "at_gt_motion": {
+        "points": 241,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.5967465107506601,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 61,
+            "nominal_standardized_residual2_median": 25.13085480168354
+          },
+          "high": {
+            "points": 61,
+            "nominal_standardized_residual2_median": 454.87313656893286
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.012590770411864958,
+          "fraction_inverse_variance_ratio_below_half": 0.995850622406639,
+          "mean_gaussian_nll_delta": -230.913553014697
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.03545033547846946,
+          "fraction_inverse_variance_ratio_below_half": 0.966804979253112,
+          "mean_gaussian_nll_delta": -226.8386396987575
+        }
+      }
+    },
+    {
+      "target_frame": 7,
+      "inliers": 235,
+      "rotation_error_deg": {
+        "initial": 0.09228455781087012,
+        "symmetric_analytic": 0.040768669656664376,
+        "symmetric_uniform": 0.02995349284838633,
+        "symmetric_per_match": 0.019302448329799937
+      },
+      "at_common_initial_pose": {
+        "points": 235,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.37631557047352215,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 59,
+            "nominal_standardized_residual2_median": 0.27412935381625975
+          },
+          "high": {
+            "points": 59,
+            "nominal_standardized_residual2_median": 2.773654990361257
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.011883097787979805,
+          "fraction_inverse_variance_ratio_below_half": 0.9914893617021276,
+          "mean_gaussian_nll_delta": -0.9542771845747351
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.022156923908377604,
+          "fraction_inverse_variance_ratio_below_half": 0.9659574468085106,
+          "mean_gaussian_nll_delta": -1.2147888447476674
+        }
+      },
+      "at_gt_motion": {
+        "points": 235,
+        "rank_correlation_increment_vs_nominal_standardized_residual2": 0.6254607155075962,
+        "increment_rank_quartiles": {
+          "low": {
+            "points": 59,
+            "nominal_standardized_residual2_median": 28.44512398744034
+          },
+          "high": {
+            "points": 59,
+            "nominal_standardized_residual2_median": 665.8276355367477
+          }
+        },
+        "symmetric_uniform": {
+          "median_inverse_variance_ratio_to_baseline": 0.018352169396412123,
+          "fraction_inverse_variance_ratio_below_half": 0.9787234042553191,
+          "mean_gaussian_nll_delta": -444.57426289196076
+        },
+        "symmetric_per_match": {
+          "median_inverse_variance_ratio_to_baseline": 0.04140493085543242,
+          "fraction_inverse_variance_ratio_below_half": 0.9446808510638298,
+          "mean_gaussian_nll_delta": -439.70294352389413
+        }
+      }
+    }
+  ]
+}
