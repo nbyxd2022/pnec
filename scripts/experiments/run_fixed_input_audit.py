@@ -283,7 +283,7 @@ def analyze(out, dataset):
     return report
 
 
-def record_pairs(repo, executable, config, source, start_frame, times, targets, out):
+def record_pairs(repo, executable, config, source, start_frame, times, targets, out, *, rotation_feedback=False):
     """Run with local frame IDs starting at zero and only analytic feedback."""
     images = out / "images"
     images.mkdir()
@@ -296,6 +296,9 @@ def record_pairs(repo, executable, config, source, start_frame, times, targets, 
     environment = dict(os.environ, PNEC_PHOTOMETRIC_INCREMENT=MODES[0], PNEC_FIXED_INPUT_AUDIT="1",
                        PNEC_MATCH_DIAGNOSTICS_FRAMES=",".join(map(str, targets)),
                        OPENBLAS_NUM_THREADS="1")
+    environment.pop("PNEC_PREVIOUS_ROTATION_BY_VIEW", None)
+    if rotation_feedback:
+        environment["PNEC_PREVIOUS_ROTATION_BY_VIEW"] = "1"
     command = [str(executable), *map(str, config), str(images), str(out / "times.txt"),
                str(target) + "/", "", "true"]
     print("Run directory:", out, flush=True)
