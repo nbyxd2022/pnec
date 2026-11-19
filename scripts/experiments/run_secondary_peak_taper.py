@@ -37,14 +37,19 @@ def arm_traces(rows):
     return tapered, matched
 
 
-def evaluate(capture, hashes, prior_window, reference, executable):
-    lo, hi = prior_window["frames"]
+def evaluate_pairs(capture, hashes, frames, reference, executable, online_steps=None):
+    lo, hi = frames
     rotations = {name: [] for name in TAPER_MODES}
     totals = np.zeros(3)  # weak, targeted, matched target-side traces
     changed_points = changed_pairs = observations = 0
-    largest_gap = largest_control_error = 0.0
+    largest_gap = largest_control_error = largest_online_error = 0.0
     for target in range(lo + 1, hi + 1):
         inputs, poses = pair_inputs(capture, hashes, target)
+        if online_steps is not None:
+            online_error = control_difference_deg(poses["symmetric_analytic"][0], online_steps[target - 1])
+            if online_error > CONTROL_TOLERANCE_DEG:
+                raise ValueError(f"Frame {target}: captured analytic rotation differs from online baseline")
+            largest_online_error = max(largest_online_error, online_error)
         rows = inputs[0]
         tapered, matched = arm_traces(rows)
         try:
@@ -68,25 +73,37 @@ def evaluate(capture, hashes, prior_window, reference, executable):
         if (target - lo) % 50 == 0:
             print(f"Window {lo}-{hi}: {target - lo}/{hi - lo} pairs", flush=True)
 
-    if observations != prior_window["observations"] or hi - lo != prior_window["pairs"]:
-        raise ValueError(f"Window {lo}-{hi}: coverage differs from weak-scale capture")
     scores = {name: rotation_metrics(reference[lo:hi + 1], compose_steps(steps))
               for name, steps in rotations.items()}
-    for name in ("symmetric_analytic", "weak_per_match"):
-        for metric, value in scores[name].items():
-            archived = prior_window["fixed_input_rotation_metrics"][name][metric]
-            if not np.isclose(archived, value, rtol=0, atol=CONTROL_TOLERANCE_DEG):
-                raise ValueError(f"Window {lo}-{hi}: archived {name} {metric} differs")
     deltas = {name: {metric: value - scores[name][metric]
                      for metric, value in scores["far_peak_taper"].items()}
               for name in TAPER_MODES if name != "far_peak_taper"}
-    return {"frames": [lo, hi], "pairs": hi - lo, "observations": observations,
+    summary = {"frames": [lo, hi], "pairs": hi - lo, "observations": observations,
             "observations_attenuated": changed_points, "pairs_with_attenuation": changed_pairs,
             "sum_added_target_trace_rad2": dict(zip(("weak_per_match", "far_peak_taper", "matched_budget"),
                                                     totals.tolist())),
             "max_per_pair_budget_difference_rad2": float(largest_gap),
             "max_replayed_analytic_rotation_difference_deg": largest_control_error,
             "fixed_input_rotation_metrics": scores, "far_peak_taper_minus_control_deg": deltas}
+
+    if online_steps is not None:
+        summary["max_capture_vs_online_rotation_difference_deg"] = largest_online_error
+    return summary
+
+
+def evaluate(capture, hashes, prior_window, reference, executable):
+    lo, hi = prior_window["frames"]
+    summary = evaluate_pairs(capture, hashes, (lo, hi), reference, executable)
+    observations = summary["observations"]
+    if observations != prior_window["observations"] or hi - lo != prior_window["pairs"]:
+        raise ValueError(f"Window {lo}-{hi}: coverage differs from weak-scale capture")
+    scores = summary["fixed_input_rotation_metrics"]
+    for name in ("symmetric_analytic", "weak_per_match"):
+        for metric, value in scores[name].items():
+            archived = prior_window["fixed_input_rotation_metrics"][name][metric]
+            if not np.isclose(archived, value, rtol=0, atol=CONTROL_TOLERANCE_DEG):
+                raise ValueError(f"Window {lo}-{hi}: archived {name} {metric} differs")
+    return summary
 
 
 def run(capture, executable):

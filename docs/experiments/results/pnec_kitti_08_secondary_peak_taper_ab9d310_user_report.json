@@ -1,0 +1,118 @@
+{
+  "sequence": "08",
+  "scope": "Fixed-input development windows with baseline feedback",
+  "git_commit": "ab9d3100097ae4694f2df983afc2f0369ea4e509",
+  "source_capture": "/home/yangxd/pnec_research/pnec_fixed_input_windows_e3q_g3cw",
+  "source_report_sha256": "0e4c6e9d77bb4757a397d539092a69250a42a81050eb4c777dd587333c5e928d",
+  "source_manifest_sha256": "7163bd559a9ebc28117b121411282b75b7e2123046a609df2d2f65ce4907c733",
+  "ground_truth_sha256": "cd7177170c7d7ba98cdbfe9417f97bd9586da5c70cbd5ccefa5db6bf88a5fe88",
+  "weak_control_report_sha256": "6da27634d2c39c1cf04292887a7949c909a6fb7f111f62699bc1efd0bfbbb5d8",
+  "runner_sha256": "06976be5d4e5fbadf2e59e5114535b478d9249e823789c902f3ae4e5e3475ce8",
+  "executable_sha256": "5d072576895c7a7df9e373a935f46ca8657c6d828d0c17c8f0475be7c563b95c",
+  "control_tolerance_deg": 0.0001,
+  "target_increment_scale": 0.03125,
+  "best_within_px": 2,
+  "second_beyond_px": 12,
+  "taper": "(second_beyond_px / second_to_endpoint_px)^2 for eligible points",
+  "matched_budget": "one factor per frame pair times every original per-match increment",
+  "windows": [
+    {
+      "frames": [
+        2600,
+        2800
+      ],
+      "pairs": 200,
+      "observations": 30665,
+      "observations_attenuated": 15292,
+      "pairs_with_attenuation": 200,
+      "sum_added_target_trace_rad2": {
+        "weak_per_match": 0.02227726061732367,
+        "far_peak_taper": 0.01717148559244624,
+        "matched_budget": 0.01717148559244624
+      },
+      "max_per_pair_budget_difference_rad2": 8.131516293641283e-20,
+      "max_replayed_analytic_rotation_difference_deg": 0,
+      "fixed_input_rotation_metrics": {
+        "symmetric_analytic": {
+          "rpe_1_deg": 0.2103287147036826,
+          "rpe_n_deg": 3.1581824685621775
+        },
+        "weak_per_match": {
+          "rpe_1_deg": 0.20864293286131336,
+          "rpe_n_deg": 3.5419178333311776
+        },
+        "matched_budget": {
+          "rpe_1_deg": 0.2086667721387542,
+          "rpe_n_deg": 3.5249200369619427
+        },
+        "far_peak_taper": {
+          "rpe_1_deg": 0.2074331659145925,
+          "rpe_n_deg": 3.480650578467379
+        }
+      },
+      "far_peak_taper_minus_control_deg": {
+        "symmetric_analytic": {
+          "rpe_1_deg": -0.0028955487890901244,
+          "rpe_n_deg": 0.3224681099052016
+        },
+        "weak_per_match": {
+          "rpe_1_deg": -0.0012097669467208694,
+          "rpe_n_deg": -0.06126725486379847
+        },
+        "matched_budget": {
+          "rpe_1_deg": -0.0012336062241617152,
+          "rpe_n_deg": -0.04426945849456354
+        }
+      }
+    },
+    {
+      "frames": [
+        3400,
+        3600
+      ],
+      "pairs": 200,
+      "observations": 32416,
+      "observations_attenuated": 17130,
+      "pairs_with_attenuation": 200,
+      "sum_added_target_trace_rad2": {
+        "weak_per_match": 0.01983867720163214,
+        "far_peak_taper": 0.014777643181531281,
+        "matched_budget": 0.014777643181531281
+      },
+      "max_per_pair_budget_difference_rad2": 5.421010862427522e-20,
+      "max_replayed_analytic_rotation_difference_deg": 0,
+      "fixed_input_rotation_metrics": {
+        "symmetric_analytic": {
+          "rpe_1_deg": 0.09323231084361316,
+          "rpe_n_deg": 0.7921833542104325
+        },
+        "weak_per_match": {
+          "rpe_1_deg": 0.0900052362164323,
+          "rpe_n_deg": 0.5534376465620952
+        },
+        "matched_budget": {
+          "rpe_1_deg": 0.09008609557784807,
+          "rpe_n_deg": 0.563150131227497
+        },
+        "far_peak_taper": {
+          "rpe_1_deg": 0.08948950419650153,
+          "rpe_n_deg": 0.5416501638882438
+        }
+      },
+      "far_peak_taper_minus_control_deg": {
+        "symmetric_analytic": {
+          "rpe_1_deg": -0.0037428066471116295,
+          "rpe_n_deg": -0.2505331903221887
+        },
+        "weak_per_match": {
+          "rpe_1_deg": -0.0005157320199307702,
+          "rpe_n_deg": -0.011787482673851324
+        },
+        "matched_budget": {
+          "rpe_1_deg": -0.0005965913813465312,
+          "rpe_n_deg": -0.02149996733925319
+        }
+      }
+    }
+  ]
+}

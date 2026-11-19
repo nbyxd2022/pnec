@@ -283,6 +283,28 @@ def analyze(out, dataset):
     return report
 
 
+def record_pairs(repo, executable, config, source, start_frame, times, targets, out):
+    """Run with local frame IDs starting at zero and only analytic feedback."""
+    images = out / "images"
+    images.mkdir()
+    for frame in range(start_frame, start_frame + len(times)):
+        name = f"{frame:06d}.png"
+        (images / name).symlink_to((source / name).resolve(strict=True))
+    np.savetxt(out / "times.txt", times, fmt="%.12f")
+    target = out / "capture"
+    target.mkdir()
+    environment = dict(os.environ, PNEC_PHOTOMETRIC_INCREMENT=MODES[0], PNEC_FIXED_INPUT_AUDIT="1",
+                       PNEC_MATCH_DIAGNOSTICS_FRAMES=",".join(map(str, targets)),
+                       OPENBLAS_NUM_THREADS="1")
+    command = [str(executable), *map(str, config), str(images), str(out / "times.txt"),
+               str(target) + "/", "", "true"]
+    print("Run directory:", out, flush=True)
+    print("Baseline frames:", len(times), "; fixed-input diagnostic pairs:",
+          len(targets), "; native log:", target / "run.log", flush=True)
+    with (target / "run.log").open("w", encoding="utf-8") as log:
+        subprocess.run(command, cwd=repo, env=environment, stdout=log, stderr=subprocess.STDOUT, check=True)
+
+
 def run(args):
     repo = Path(__file__).resolve().parents[2]
     dataset = args.dataset.resolve(strict=True)
@@ -315,24 +337,7 @@ def run(args):
                     repo / "src/rel_pose_estimation/pnec.cc",
                     repo / "include/rel_pose_estimation/photometric_increment.h")}}
     atomic_json(out / "manifest.json", manifest)
-    images = out / "images"
-    images.mkdir()
-    for frame in range(len(times)):
-        name = f"{frame:06d}.png"
-        (images / name).symlink_to((source / name).resolve(strict=True))
-    np.savetxt(out / "times.txt", times, fmt="%.12f")
-    target = out / "capture"
-    target.mkdir()
-    environment = dict(os.environ, PNEC_PHOTOMETRIC_INCREMENT=MODES[0], PNEC_FIXED_INPUT_AUDIT="1",
-                       PNEC_MATCH_DIAGNOSTICS_FRAMES=",".join(map(str, inputs["selected_target_frames"])),
-                       OPENBLAS_NUM_THREADS="1")
-    command = [str(executable), *map(str, config), str(images), str(out / "times.txt"),
-               str(target) + "/", "", "true"]
-    print("Run directory:", out, flush=True)
-    print("Baseline frames:", len(times), "; fixed-input diagnostic pairs:",
-          len(inputs["selected_target_frames"]), "; native log:", target / "run.log", flush=True)
-    with (target / "run.log").open("w", encoding="utf-8") as log:
-        subprocess.run(command, cwd=repo, env=environment, stdout=log, stderr=subprocess.STDOUT, check=True)
+    record_pairs(repo, executable, config, source, 0, times, inputs["selected_target_frames"], out)
     return analyze(out, dataset)
 
 
