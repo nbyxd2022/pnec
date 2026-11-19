@@ -400,10 +400,13 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
   const bool shared_weak = shared_setting && *shared_setting;
   const char *audit_setting = std::getenv("PNEC_FIXED_INPUT_AUDIT");
   if (shared_weak) {
-    if (std::string_view(shared_setting) != "1" || !ablation ||
-        mode != photometric::Mode::SymmetricAnalytic || (audit_setting && *audit_setting)) {
+    const bool supported = mode == photometric::Mode::SymmetricAnalytic ||
+                           mode == photometric::Mode::Original;
+    if (std::string_view(shared_setting) != "1" || !ablation || !supported ||
+        (audit_setting && *audit_setting) || options_.use_nec_ ||
+        !options_.use_ransac_ || !options_.use_ceres_ || options_.noise_frame_ != common::Target) {
       throw std::invalid_argument(
-          "Shared weak outputs require PNEC_SHARED_WEAK_OUTPUTS=1, analytic mode and a single observer");
+          "Shared weak outputs require original or analytic target-side PNEC with RANSAC and Ceres");
     }
     observer = [&](const auto &left, const auto &right, const auto &nominal,
                    const auto *source_covs, const auto &indices,
