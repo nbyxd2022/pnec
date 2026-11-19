@@ -520,9 +520,11 @@ def main():
     if args.compare_symmetric_increments and (
             args.action == "full" or (args.action == "holdout" and args.sequence != "08")):
         parser.error("--compare-symmetric-increments supports smoke or holdout --sequence 08")
-    if (args.compare_taper_feedback or args.compare_weak_allocation) and (
-            args.action != "holdout" or args.sequence not in ("09", "10")):
-        parser.error("Feedback comparisons require holdout --sequence 09 or 10")
+    if args.compare_taper_feedback and (args.action != "holdout" or args.sequence not in ("09", "10")):
+        parser.error("--compare-taper-feedback requires holdout --sequence 09 or 10")
+    if args.compare_weak_allocation and (
+            args.action not in ("holdout", "full") or args.sequence not in ("09", "10")):
+        parser.error("--compare-weak-allocation requires holdout or full with --sequence 09 or 10")
     if args.reference_symmetric_full_run and (args.action != "full" or args.sequence != "08"):
         parser.error("--reference-symmetric-full-run requires full --sequence 08")
     run(args)
