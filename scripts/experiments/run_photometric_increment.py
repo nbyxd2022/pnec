@@ -104,9 +104,11 @@ def rotation_metrics(reference, estimate):
 
 
 def validate_symmetric_activity(target, mode, *, feedback=False):
-    if mode not in (*SYMMETRIC_MODES, *TAPER_FEEDBACK_MODES, *WEAK_ALLOCATION_MODES):
+    symmetric = mode in (*SYMMETRIC_MODES, *TAPER_FEEDBACK_MODES, *WEAK_ALLOCATION_MODES)
+    if not symmetric and not feedback:
         return
-    symmetric_logged = feedback_logged = False
+    symmetric_logged = not symmetric
+    feedback_logged = False
     with (target / "run.log").open(encoding="utf-8", errors="replace") as log:
         for line in log:
             symmetric_logged |= "Symmetric analytic Ceres refinement ran" in line
@@ -240,9 +242,12 @@ def run(args):
         end, full_gt, input_hashes = full_sequence_inputs(args.dataset.resolve(strict=True), args.sequence)
         start = first = 0
     warmup = first - start
-    feedback = args.compare_taper_feedback or args.compare_weak_allocation
+    original_feedback = args.original_with_feedback
+    feedback = args.compare_taper_feedback or args.compare_weak_allocation or original_feedback
     modes = MODES
-    if args.compare_taper_feedback:
+    if original_feedback:
+        modes = ("original",)
+    elif args.compare_taper_feedback:
         modes = TAPER_FEEDBACK_MODES
     elif args.compare_weak_allocation:
         modes = WEAK_ALLOCATION_MODES
@@ -296,17 +301,19 @@ def run(args):
         feedback_protocol = {
             "previous_rotation": "predecessor edge in the currently retained view graph",
             "feedback": "each mode feeds its own previous relative rotation into the next solve",
-            "target_increment_scale": 1 / 32,
         }
-        if args.compare_taper_feedback:
+        if original_feedback:
+            manifest["original_feedback"] = feedback_protocol
+        elif args.compare_taper_feedback:
             manifest["taper_feedback"] = {
-                **feedback_protocol, "best_within_px": 2, "second_beyond_px": 12,
+                **feedback_protocol, "target_increment_scale": 1 / 32,
+                "best_within_px": 2, "second_beyond_px": 12,
                 "taper": "(12 / second_to_endpoint_px)^2 for eligible matches",
                 "matched_budget": "same-pair taper total computed on this mode's own inliers",
             }
         else:
             manifest["weak_allocation_feedback"] = {
-                **feedback_protocol,
+                **feedback_protocol, "target_increment_scale": 1 / 32,
                 "weak_per_match": "scaled photometric trace for each inlier",
                 "weak_uniform": "sum of scaled traces divided by this mode's inlier count",
             }
@@ -440,7 +447,7 @@ def run(args):
                     }
 
     report = {"manifest": manifest, "runner_git_commit": revision, "results": scores}
-    if feedback:
+    if feedback and not original_feedback:
         sequence_scores = scores[args.sequence]
         candidate = "far_peak_taper" if args.compare_taper_feedback else "weak_per_match"
         report[f"{candidate}_minus_control_deg"] = {
@@ -502,6 +509,8 @@ def main():
                           help="Run the four taper comparison modes with previous rotation feedback on KITTI 09 or 10")
     analytic.add_argument("--compare-weak-allocation", action="store_true",
                           help="Compare weak uniform and per-match increments with analytic PNEC on KITTI 09 or 10")
+    analytic.add_argument("--original-with-feedback", action="store_true",
+                          help="Replay original PNEC weighting with previous-rotation feedback on full KITTI 09 or 10")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
@@ -521,6 +530,8 @@ def main():
     if args.compare_symmetric_increments and (
             args.action == "full" or (args.action == "holdout" and args.sequence != "08")):
         parser.error("--compare-symmetric-increments supports smoke or holdout --sequence 08")
+    if args.original_with_feedback and (args.action != "full" or args.sequence not in ("09", "10")):
+        parser.error("--original-with-feedback requires full --sequence 09 or 10")
     if args.compare_taper_feedback and (args.action != "holdout" or args.sequence not in ("09", "10")):
         parser.error("--compare-taper-feedback requires holdout --sequence 09 or 10")
     if args.compare_weak_allocation and (

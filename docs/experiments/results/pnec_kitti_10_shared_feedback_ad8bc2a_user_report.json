@@ -1,0 +1,70 @@
+{
+  "sequence": "10",
+  "source_run": "/home/yangxd/pnec_research/pnec_weak_allocation_full_09_10.p8Fgov/10/pnec_increment_full_h19gks2e",
+  "source_report_sha256": "5b45dab4666e2370cf78150a3eb3f40c376c28a90ff28d82b88748571d68bb29",
+  "tool_git_commit": "ad8bc2a25083b44d1cd1e80e982b669085841211",
+  "binary_sha256": "ffd1b8d4b91f4d3e8ec5092cb62973a7b5a60c3b114743f9e70f493622ebe72c",
+  "target_increment_scale": 0.03125,
+  "feedback": "Analytic solution drives the next frame; weak estimates share inliers and Ceres initialization",
+  "baseline_exact_pose_rows_match": true,
+  "frames": 1201,
+  "tail_evaluation_start": 800,
+  "shared_feedback_metrics": {
+    "symmetric_analytic": {
+      "rpe_1_deg": 0.15300459768093166,
+      "rpe_n_deg": 10.136613350951663,
+      "tail": {
+        "rpe_1_deg": 0.19441317518207807,
+        "rpe_n_deg": 10.039805814460975
+      }
+    },
+    "weak_uniform": {
+      "rpe_1_deg": 0.1492938595062047,
+      "rpe_n_deg": 10.06658875285195,
+      "tail": {
+        "rpe_1_deg": 0.18304150657038193,
+        "rpe_n_deg": 9.341628525336567
+      }
+    },
+    "weak_per_match": {
+      "rpe_1_deg": 0.14491616803012733,
+      "rpe_n_deg": 9.740592696378396,
+      "tail": {
+        "rpe_1_deg": 0.18233627947851944,
+        "rpe_n_deg": 9.197507251801646
+      }
+    }
+  },
+  "independent_feedback_metrics": {
+    "symmetric_analytic": {
+      "rpe_1_deg": 0.15300459768093166,
+      "rpe_n_deg": 10.136613350951663,
+      "tail": {
+        "rpe_1_deg": 0.19441317518207807,
+        "rpe_n_deg": 10.039805814460975
+      }
+    },
+    "weak_uniform": {
+      "rpe_1_deg": 0.14938093672308572,
+      "rpe_n_deg": 8.250885650678818,
+      "tail": {
+        "rpe_1_deg": 0.20242007123850025,
+        "rpe_n_deg": 8.864053203384662
+      }
+    },
+    "weak_per_match": {
+      "rpe_1_deg": 0.13611741596127155,
+      "rpe_n_deg": 8.407840051063706,
+      "tail": {
+        "rpe_1_deg": 0.18045542366576944,
+        "rpe_n_deg": 8.879283685520873
+      }
+    }
+  },
+  "target_frame_errors_deg": [],
+  "relative_poses_sha256": {
+    "symmetric_analytic": "f7d6cfdda40950e11505dffe4476d5b49fd1cc57d37f7ff09512cbe975bf6a5e",
+    "weak_uniform": "7926dde925bb3030c587e46208844958eb4f7b10adffc79856bee878249f1ecb",
+    "weak_per_match": "a8d7cf5bf82f7673e7ea23ac573677d10cd6a4e4108f4be3bda8511af352bc7a"
+  }
+}
