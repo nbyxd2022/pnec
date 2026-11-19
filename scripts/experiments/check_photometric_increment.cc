@@ -53,5 +53,34 @@ int main() {
     std::cerr << "Photometric search tie order differs from the Python reference\n";
     return 1;
   }
-  std::cout << "Photometric search reference cases passed\n";
+  using namespace pnec::rel_pose_estimation::photometric;
+  detail.best_cost = 1;
+  detail.second_cost = 2;
+  detail.best_dx = 2;
+  const double far = FarPeakRetention(detail, {0.5, 14, 0});
+  const double boundary = FarPeakRetention(detail, {0.5, 10, 0});
+  detail.best_dx = 3;
+  const double off_endpoint = FarPeakRetention(detail, {0.5, 14, 0});
+  detail.best_dx = 0;
+  detail.second_cost = std::numeric_limits<double>::infinity();
+  if (far != 0.5625 || boundary != 1 || off_endpoint != 1 ||
+      FarPeakRetention(detail, {0.5, 16, 0}) != 1) {
+    std::cerr << "Far-peak retention differs from the fixed-input rule\n";
+    return 1;
+  }
+  std::vector<double> weak{4, 2, 0}, tapered = weak, matched = weak;
+  const std::vector<double> retention{far, 1, 1};
+  const double weak_total = ApplyWeakIncrement(Mode::WeakPerMatch, {}, 6, weak);
+  const double tapered_total = ApplyWeakIncrement(Mode::FarPeakTaper, retention, 6, tapered);
+  const double matched_total = ApplyWeakIncrement(Mode::MatchedBudget, retention, 6, matched);
+  std::vector<double> zero(3, 0);
+  if (weak_total != 6.0 / 32 || tapered_total != 4.25 / 32 ||
+      std::abs(tapered_total - matched_total) > 1e-15 ||
+      tapered[0] != 2.25 / 32 || tapered[1] != 2.0 / 32 ||
+      matched[0] != 2 * matched[1] || matched[2] != 0 ||
+      ApplyWeakIncrement(Mode::MatchedBudget, retention, 0, zero) != 0) {
+    std::cerr << "Target traces differ from the weak or equal-total control\n";
+    return 1;
+  }
+  std::cout << "Photometric search and weak increment reference cases passed\n";
 }

@@ -36,7 +36,10 @@
 #include "frame_processing.h"
 
 #include <cmath>
+#include <cstdlib>
 #include <ctime>
+#include <stdexcept>
+#include <string_view>
 #include <opencv2/core/eigen.hpp>
 #include <opengv/relative_pose/CentralRelativeAdapter.hpp>
 #include <opengv/relative_pose/methods.hpp>
@@ -127,6 +130,32 @@ bool FrameProcessing::ProcessFrame(pnec::frames::BaseFrame::Ptr frame,
 Sophus::SO3d
 FrameProcessing::PrevRelRotation(pnec::odometry::View::Ptr prev_view,
                                  int prev_view_idx) {
+  static const bool use_view_position = [] {
+    const char *setting = std::getenv("PNEC_PREVIOUS_ROTATION_BY_VIEW");
+    if (!setting || !*setting) {
+      return false;
+    }
+    if (std::string_view(setting) != "1") {
+      throw std::invalid_argument("PNEC_PREVIOUS_ROTATION_BY_VIEW expects 1 or unset");
+    }
+    return true;
+  }();
+  if (use_view_position && prev_view_idx > 0) {
+    View::Ptr predecessor;
+    if (!view_graph_->GetViewByPos(prev_view_idx - 1, predecessor) ||
+        !view_graph_->AreConnected(predecessor, prev_view)) {
+      throw std::runtime_error("Previous PNEC view connection is missing");
+    }
+    // After pruning, the predecessor's frame ID is larger than its position.
+    if (predecessor->Frame()->id() != prev_view_idx - 1) {
+      static const bool logged = [] {
+        BOOST_LOG_TRIVIAL(info) << "Previous-view PNEC rotation feedback active after graph pruning";
+        return true;
+      }();
+      (void)logged;
+    }
+    return view_graph_->RelPose(predecessor, prev_view).so3();
+  }
   for (const auto &connection : prev_view->connections()) {
     pnec::odometry::View::Ptr view = connection.first;
     pnec::odometry::View::Connection *view_connection = connection.second;

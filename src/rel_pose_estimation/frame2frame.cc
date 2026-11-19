@@ -137,6 +137,11 @@ void AddPhotometricIncrements(
   const Eigen::Matrix3d inverse_intrinsic = intrinsic.inverse();
   std::vector<double> traces;
   traces.reserve(inliers.size());
+  const bool use_retention = photometric::UsesFarPeakRetention(mode);
+  std::vector<double> retention;
+  if (use_retention) {
+    retention.reserve(inliers.size());
+  }
   double total_trace = 0;
   for (int index : inliers) {
     const auto &host_point = host.keypoints().at(ids.at(index)).point_;
@@ -145,7 +150,7 @@ void AddPhotometricIncrements(
     const auto ambiguity =
         photometric::Measure(gray1, gray2, host_point.x(), host_point.y(),
                              target_point.x(), target_point.y(),
-                             audit ? &measurement : nullptr);
+                             (audit || use_retention) ? &measurement : nullptr);
     const auto &bearing = target_bvs.at(index);
     const Eigen::Vector3d ray =
         inverse_intrinsic * Eigen::Vector3d(target_point.x(), target_point.y(), 1.0);
@@ -156,12 +161,18 @@ void AddPhotometricIncrements(
                          (4 * ray.squaredNorm());
     traces.push_back(trace);
     total_trace += trace;
+    if (use_retention) {
+      retention.push_back(photometric::FarPeakRetention(measurement, ambiguity));
+    }
     if (audit) {
       audit->push_back({ambiguity, measurement, trace});
     }
   }
   if (!std::isfinite(total_trace) || covariances.size() != inliers.size()) {
     throw std::runtime_error("Invalid photometric refinement covariance input");
+  }
+  if (photometric::IsWeakIncrement(mode)) {
+    total_trace = photometric::ApplyWeakIncrement(mode, retention, total_trace, traces);
   }
   const double mean_trace = traces.empty() ? 0 : total_trace / traces.size();
   for (size_t i = 0; i < covariances.size(); ++i) {
@@ -351,7 +362,8 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
   const auto mode = photometric::ExperimentMode();
   const bool symmetric = mode == photometric::Mode::SymmetricAnalytic ||
                          mode == photometric::Mode::SymmetricUniform ||
-                         mode == photometric::Mode::SymmetricPerMatch;
+                         mode == photometric::Mode::SymmetricPerMatch ||
+                         photometric::IsWeakIncrement(mode);
   if (symmetric &&
       (options_.use_nec_ || !options_.use_ransac_ || !options_.use_ceres_ ||
        options_.noise_frame_ != common::Target)) {
@@ -369,7 +381,8 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
   RefinementCovarianceUpdate update;
   if (mode == photometric::Mode::Uniform || mode == photometric::Mode::PerMatch ||
       mode == photometric::Mode::SymmetricUniform ||
-      mode == photometric::Mode::SymmetricPerMatch) {
+      mode == photometric::Mode::SymmetricPerMatch ||
+      photometric::IsWeakIncrement(mode)) {
     if (options_.use_nec_ || !options_.use_ransac_ || !options_.use_ceres_ ||
         options_.noise_frame_ != common::Target) {
       throw std::invalid_argument(

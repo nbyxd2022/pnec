@@ -1,0 +1,68 @@
+{
+  "sequence": "10",
+  "scope": "Cross-sequence fixed-input rotation with analytic baseline feedback",
+  "git_commit": "439867e6e324350ad1fdbbc56cb41e87ebfc46c0",
+  "manifest_sha256": "9f1117fa337d371f6f819fe7c191f9d2b32aff3249351e3feb6890cb18ada2d8",
+  "capture_index_sha256": "ea42cd4cb26bc474065483a405284633c802d6fafe65b6317c2df5a2c60ea4b2",
+  "binary_sha256": {
+    "pnec_vo": "736571b926dacf928858241dff0c51a88aa05c1d225bc9a9d56a53ed9e9f2569",
+    "pnec_fixed_refine": "5d072576895c7a7df9e373a935f46ca8657c6d828d0c17c8f0475be7c563b95c"
+  },
+  "target_increment_scale": 0.03125,
+  "best_within_px": 2,
+  "second_beyond_px": 12,
+  "window": {
+    "pairs": 299,
+    "observations": 54533,
+    "observations_attenuated": 27103,
+    "pairs_with_attenuation": 299,
+    "sum_added_target_trace_rad2": {
+      "weak_per_match": 0.031349024766696224,
+      "far_peak_taper": 0.023753443993454037,
+      "matched_budget": 0.023753443993454037
+    },
+    "max_per_pair_budget_difference_rad2": 2.710505431213761e-20,
+    "max_replayed_analytic_rotation_difference_deg": 0,
+    "fixed_input_rotation_metrics": {
+      "symmetric_analytic": {
+        "rpe_1_deg": 0.1356655838788545,
+        "rpe_n_deg": 3.102623737793371
+      },
+      "weak_per_match": {
+        "rpe_1_deg": 0.13290239428987413,
+        "rpe_n_deg": 3.0347763925355498
+      },
+      "matched_budget": {
+        "rpe_1_deg": 0.13292670705176876,
+        "rpe_n_deg": 2.975404864755911
+      },
+      "far_peak_taper": {
+        "rpe_1_deg": 0.13264674056038073,
+        "rpe_n_deg": 3.0707111841917594
+      }
+    },
+    "far_peak_taper_minus_control_deg": {
+      "symmetric_analytic": {
+        "rpe_1_deg": -0.0030188433184737684,
+        "rpe_n_deg": -0.031912553601611826
+      },
+      "weak_per_match": {
+        "rpe_1_deg": -0.0002556537294934047,
+        "rpe_n_deg": 0.03593479165620961
+      },
+      "matched_budget": {
+        "rpe_1_deg": -0.000279966491388034,
+        "rpe_n_deg": 0.09530631943584833
+      }
+    },
+    "max_capture_vs_online_rotation_difference_deg": 6.180847714617654e-09,
+    "local_frames": [
+      50,
+      349
+    ],
+    "dataset_frames": [
+      500,
+      799
+    ]
+  }
+}

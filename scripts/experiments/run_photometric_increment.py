@@ -16,6 +16,8 @@ import numpy as np
 MODES = ("original", "uniform", "per_match")
 ANALYTIC_COMPARISON_MODES = ("original", "per_match", "symmetric_analytic")
 SYMMETRIC_MODES = ("symmetric_analytic", "symmetric_uniform", "symmetric_per_match")
+TAPER_FEEDBACK_MODES = (SYMMETRIC_MODES[0], "weak_per_match", "matched_budget", "far_peak_taper")
+ROTATION_FEEDBACK_LOG = "Previous-view PNEC rotation feedback active after graph pruning"
 SYMMETRIC_CONTROL = {
     "source": "CVPR 2023, Section 3.2, equations 2-3",
     "scope": "Host and target KLT bearing covariances in final Ceres refinement only",
@@ -99,15 +101,23 @@ def rotation_metrics(reference, estimate):
     return {"rpe_1_deg": errors[0], "rpe_n_deg": sum(errors) / len(reference)}
 
 
-def validate_symmetric_activity(target, mode):
-    if mode in SYMMETRIC_MODES:
-        with (target / "run.log").open(encoding="utf-8", errors="replace") as log:
-            if not any("Symmetric analytic Ceres refinement ran" in line for line in log):
-                raise ValueError(f"{target}: symmetric analytic refinement was not logged")
+def validate_symmetric_activity(target, mode, *, feedback=False):
+    if mode not in (*SYMMETRIC_MODES, *TAPER_FEEDBACK_MODES):
+        return
+    symmetric_logged = feedback_logged = False
+    with (target / "run.log").open(encoding="utf-8", errors="replace") as log:
+        for line in log:
+            symmetric_logged |= "Symmetric analytic Ceres refinement ran" in line
+            feedback_logged |= ROTATION_FEEDBACK_LOG in line
+            if symmetric_logged and (not feedback or feedback_logged):
+                return
+    if not symmetric_logged:
+        raise ValueError(f"{target}: symmetric analytic refinement was not logged")
+    raise ValueError(f"{target}: no previous rotation feedback logged after pruning")
 
 
-def reuse_slot(target, times, warmup, mode):
-    validate_symmetric_activity(target, mode)
+def reuse_slot(target, times, warmup, mode, *, feedback=False):
+    validate_symmetric_activity(target, mode, feedback=feedback)
     pose_rows(target / "rot_avg/poses.txt", times)
     estimate = restore_rotations(target / "ablation/PNEC.txt", times, warmup)
     summary = timing_summary(target / "timing.txt", len(times), warmup, mode)
@@ -228,8 +238,11 @@ def run(args):
         end, full_gt, input_hashes = full_sequence_inputs(args.dataset.resolve(strict=True), args.sequence)
         start = first = 0
     warmup = first - start
+    feedback = args.compare_taper_feedback
     modes = MODES
-    if args.reference_symmetric_full_run:
+    if feedback:
+        modes = TAPER_FEEDBACK_MODES
+    elif args.reference_symmetric_full_run:
         modes = SYMMETRIC_MODES[1:]
     elif args.compare_symmetric_increments:
         modes = SYMMETRIC_MODES
@@ -267,6 +280,24 @@ def run(args):
         manifest["speed_reference_report_sha256"] = speed_reference["report_sha256"]
     if any(mode in SYMMETRIC_MODES for mode in modes):
         manifest["symmetric_analytic_control"] = SYMMETRIC_CONTROL
+    if feedback:
+        dataset = args.dataset.resolve(strict=True)
+        sequence_dir = dataset / "sequences" / args.sequence
+        manifest["times_sha256"] = digest(sequence_dir / "times.txt")
+        manifest["ground_truth_sha256"] = digest(dataset / "poses" / f"{args.sequence}.txt")
+        manifest["image_sha256"] = {
+            path.name: digest(path) for path in
+            (sequence_dir / "image_0" / f"{frame:06d}.png" for frame in range(start, end))
+        }
+        manifest["taper_feedback"] = {
+            "previous_rotation": "predecessor edge in the currently retained view graph",
+            "feedback": "each mode feeds its own previous relative rotation into the next solve",
+            "target_increment_scale": 1 / 32,
+            "best_within_px": 2,
+            "second_beyond_px": 12,
+            "taper": "(12 / second_to_endpoint_px)^2 for eligible matches",
+            "matched_budget": "same-pair taper total computed on this mode's own inliers",
+        }
     if args.compare_symmetric_increments or args.reference_symmetric_full_run:
         manifest["symmetric_increment_ablation"] = {
             "base": "Host and target KLT covariances in final Ceres refinement",
@@ -340,7 +371,8 @@ def run(args):
             target = slot / label
             if args.resume and target.exists():
                 try:
-                    estimates[label], scores[sequence][label] = reuse_slot(target, times, warmup, mode)
+                    estimates[label], scores[sequence][label] = reuse_slot(
+                        target, times, warmup, mode, feedback=feedback)
                 except (FileNotFoundError, ValueError) as error:
                     preserved = slot / f"{label}.interrupted-{uuid4().hex[:8]}"
                     target.rename(preserved)
@@ -351,13 +383,17 @@ def run(args):
             target.mkdir()
             env = dict(os.environ, PNEC_PHOTOMETRIC_INCREMENT=mode, OPENBLAS_NUM_THREADS="1")
             env.pop("PNEC_MATCH_DIAGNOSTICS_FRAMES", None)
+            env.pop("PNEC_FIXED_INPUT_AUDIT", None)
+            env.pop("PNEC_PREVIOUS_ROTATION_BY_VIEW", None)
+            if feedback:
+                env["PNEC_PREVIOUS_ROTATION_BY_VIEW"] = "1"
             command = [executable, *config, images, time_file, str(target) + "/", "", "true"]
             print(f"KITTI {sequence} {label} running", flush=True)
             tic = perf_counter()
             with (target / "run.log").open("w", encoding="utf-8") as log:
                 subprocess.run(command, cwd=repo, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
             elapsed = perf_counter() - tic
-            validate_symmetric_activity(target, mode)
+            validate_symmetric_activity(target, mode, feedback=feedback)
             estimates[label] = restore_rotations(target / "ablation/PNEC.txt", times, warmup)
             pose_rows(target / "rot_avg/poses.txt", times)
             scores[sequence][label] = {
@@ -391,6 +427,13 @@ def run(args):
                     }
 
     report = {"manifest": manifest, "runner_git_commit": revision, "results": scores}
+    if feedback:
+        sequence_scores = scores[args.sequence]
+        report["far_peak_taper_minus_control_deg"] = {
+            mode: {metric: sequence_scores["far_peak_taper"][metric] - sequence_scores[mode][metric]
+                   for metric in ("rpe_1_deg", "rpe_n_deg")}
+            for mode in TAPER_FEEDBACK_MODES[:-1]
+        }
     if full_reference is not None:
         report["reference_full_run"] = full_reference
     if symmetric_full_reference is not None:
@@ -441,6 +484,8 @@ def main():
                           help="Compare double-sided PNEC with uniform and per-match photometric increments")
     analytic.add_argument("--reference-symmetric-full-run", type=Path,
                           help="Replay only symmetric uniform/per-match increments and reuse a recorded KITTI 08 full symmetric baseline")
+    analytic.add_argument("--compare-taper-feedback", action="store_true",
+                          help="Run the four taper comparison modes with previous rotation feedback on KITTI 09 or 10")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
@@ -460,6 +505,8 @@ def main():
     if args.compare_symmetric_increments and (
             args.action == "full" or (args.action == "holdout" and args.sequence != "08")):
         parser.error("--compare-symmetric-increments supports smoke or holdout --sequence 08")
+    if args.compare_taper_feedback and (args.action != "holdout" or args.sequence not in ("09", "10")):
+        parser.error("--compare-taper-feedback requires holdout --sequence 09 or 10")
     if args.reference_symmetric_full_run and (args.action != "full" or args.sequence != "08"):
         parser.error("--reference-symmetric-full-run requires full --sequence 08")
     run(args)

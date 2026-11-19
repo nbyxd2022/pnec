@@ -9,12 +9,13 @@
 #include <limits>
 #include <stdexcept>
 #include <string_view>
+#include <vector>
 
 namespace pnec::rel_pose_estimation::photometric {
 
 enum class Mode {
   Disabled, Original, Uniform, PerMatch, SymmetricAnalytic,
-  SymmetricUniform, SymmetricPerMatch
+  SymmetricUniform, SymmetricPerMatch, WeakPerMatch, MatchedBudget, FarPeakTaper
 };
 
 inline Mode ExperimentMode() {
@@ -42,9 +43,19 @@ inline Mode ExperimentMode() {
     if (value == "symmetric_per_match") {
       return Mode::SymmetricPerMatch;
     }
+    if (value == "weak_per_match") {
+      return Mode::WeakPerMatch;
+    }
+    if (value == "matched_budget") {
+      return Mode::MatchedBudget;
+    }
+    if (value == "far_peak_taper") {
+      return Mode::FarPeakTaper;
+    }
     throw std::invalid_argument(
         "PNEC_PHOTOMETRIC_INCREMENT expects original, uniform, per_match, "
-        "symmetric_analytic, symmetric_uniform or symmetric_per_match");
+        "symmetric_analytic, symmetric_uniform, symmetric_per_match, "
+        "weak_per_match, matched_budget or far_peak_taper");
   }();
   return mode;
 }
@@ -87,6 +98,56 @@ struct Measurement {
   int best_dx = 0;
   int best_dy = 0;
 };
+
+inline bool IsWeakIncrement(Mode mode) {
+  return mode == Mode::WeakPerMatch || mode == Mode::MatchedBudget ||
+         mode == Mode::FarPeakTaper;
+}
+
+inline bool UsesFarPeakRetention(Mode mode) {
+  return mode == Mode::MatchedBudget || mode == Mode::FarPeakTaper;
+}
+
+inline double FarPeakRetention(const Measurement &measurement,
+                               const Ambiguity &ambiguity) {
+  constexpr double best_limit = 2;
+  constexpr double far_limit = 12;
+  if (!std::isfinite(measurement.best_cost) ||
+      !std::isfinite(measurement.second_cost) ||
+      std::hypot(measurement.best_dx, measurement.best_dy) > best_limit) {
+    return 1;
+  }
+  const double distance = std::hypot(measurement.best_dx + ambiguity.dx,
+                                     measurement.best_dy + ambiguity.dy);
+  if (distance <= far_limit) {
+    return 1;
+  }
+  const double ratio = far_limit / distance;
+  return ratio * ratio;
+}
+
+// In each run the same frame's original traces define its matched total.
+inline double ApplyWeakIncrement(Mode mode, const std::vector<double> &retention,
+                                 double original_total, std::vector<double> &traces) {
+  constexpr double scale = 1.0 / 32;
+  const bool matched = mode == Mode::MatchedBudget;
+  const bool tapered = mode == Mode::FarPeakTaper;
+  double factor = 1;
+  if (matched && original_total > 0) {
+    double tapered_total = 0;
+    for (size_t i = 0; i < traces.size(); ++i) {
+      tapered_total += traces[i] * retention[i];
+    }
+    factor = tapered_total / original_total;
+  }
+  double total = 0;
+  for (size_t i = 0; i < traces.size(); ++i) {
+    traces[i] *= tapered ? retention[i] : factor;
+    traces[i] *= scale;
+    total += traces[i];
+  }
+  return total;
+}
 
 // Keep the offline 15x15 raw SSD, +/-16 px grid and 4 px mode separation.
 inline Ambiguity Measure(const GrayImage &host, const GrayImage &target,
