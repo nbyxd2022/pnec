@@ -284,7 +284,7 @@ def analyze(out, dataset):
 
 
 def record_pairs(repo, executable, config, source, start_frame, times, targets, out, *,
-                 rotation_feedback=False, mode=MODES[0], shared_weak=False):
+                 rotation_feedback=False, mode=MODES[0], shared_weak=False, forward_backward=False):
     """Record selected frame pairs from the requested continuous replay."""
     images = out / "images"
     images.mkdir()
@@ -295,12 +295,16 @@ def record_pairs(repo, executable, config, source, start_frame, times, targets, 
     target = out / "capture"
     target.mkdir()
     environment = dict(os.environ, PNEC_PHOTOMETRIC_INCREMENT=mode, OPENBLAS_NUM_THREADS="1")
-    for flag in ("PNEC_FIXED_INPUT_AUDIT", "PNEC_MATCH_DIAGNOSTICS_FRAMES", "PNEC_SHARED_WEAK_OUTPUTS"):
+    for flag in ("PNEC_FIXED_INPUT_AUDIT", "PNEC_MATCH_DIAGNOSTICS_FRAMES", "PNEC_SHARED_WEAK_OUTPUTS",
+                 "PNEC_MATCH_DIAGNOSTICS_FB"):
         environment.pop(flag, None)
     if shared_weak:
         environment["PNEC_SHARED_WEAK_OUTPUTS"] = "1"
     else:
-        environment["PNEC_FIXED_INPUT_AUDIT"] = "1"
+        if forward_backward:
+            environment["PNEC_MATCH_DIAGNOSTICS_FB"] = "1"
+        else:
+            environment["PNEC_FIXED_INPUT_AUDIT"] = "1"
         environment["PNEC_MATCH_DIAGNOSTICS_FRAMES"] = ",".join(map(str, targets))
     environment.pop("PNEC_PREVIOUS_ROTATION_BY_VIEW", None)
     if rotation_feedback:

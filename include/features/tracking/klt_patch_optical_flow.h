@@ -62,11 +62,12 @@ struct PNECObservation {
       : transform(Eigen::AffineCompact2f()), covariance(Eigen::Matrix2d()),
         hessian(Eigen::Matrix3d()) {}
   PNECObservation(const Eigen::AffineCompact2f &t, const Eigen::Matrix2d &cov,
-                  const Eigen::Matrix3d &h)
-      : transform(t), covariance(cov), hessian(h) {}
+                  const Eigen::Matrix3d &h, double fb_error_sq_px2 = -1.0)
+      : transform(t), covariance(cov), hessian(h), fb_error_sq_px2(fb_error_sq_px2) {}
   Eigen::AffineCompact2f transform;
   Eigen::Matrix2d covariance;
   Eigen::Matrix3d hessian;
+  double fb_error_sq_px2 = -1.0;
 };
 
 struct PNECOpticalFlowResult : OpticalFlowResult {
@@ -244,7 +245,7 @@ public:
               Eigen::Matrix3d hessian =
                   patch_vec[min_level].H_se2.template cast<double>() *
                   uncertainty_scaling;
-              result[id] = PNECObservation(transform_2, covariance, hessian);
+              result[id] = PNECObservation(transform_2, covariance, hessian, dist2);
             }
           }
         }

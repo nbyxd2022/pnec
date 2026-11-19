@@ -53,6 +53,8 @@ struct KeyPoint {
   Eigen::Matrix2d img_covariance_;
   Eigen::Matrix3d bv_covariance_;
   Eigen::Matrix3d hessian_;
+  // Squared round-trip displacement for KLT observations, negative if unavailable.
+  double fb_error_sq_px2_ = -1.0;
 
   KeyPoint()
       : point_(Eigen::Vector2d::Zero()),

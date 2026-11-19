@@ -203,6 +203,8 @@ void WriteMatchDiagnostics(frames::BaseFrame &host, frames::BaseFrame &target,
   const auto path = folder + "matches_" + std::to_string(host.id()) + "_" +
                     std::to_string(target.id()) + ".csv";
   std::ofstream out(path);
+  const char *fb_setting = std::getenv("PNEC_MATCH_DIAGNOSTICS_FB");
+  const bool include_fb = fb_setting && std::string_view(fb_setting) == "1";
   out << "host_frame,target_frame,host_time_s,target_time_s,solver_index,"
          "feature_id,host_x_px,host_y_px,target_x_px,target_y_px,"
          "ransac_enabled,ransac_inlier,noise_frame,"
@@ -210,8 +212,11 @@ void WriteMatchDiagnostics(frames::BaseFrame &host, frames::BaseFrame &target,
          "target_cov00,target_cov01,target_cov10,target_cov11,"
          "projected_cov00,projected_cov01,projected_cov02,"
          "projected_cov10,projected_cov11,projected_cov12,"
-         "projected_cov20,projected_cov21,projected_cov22\n";
-  out << std::setprecision(17);
+         "projected_cov20,projected_cov21,projected_cov22";
+  if (include_fb) {
+    out << ",target_fb_error_sq_px2";
+  }
+  out << '\n' << std::setprecision(17);
   size_t index = 0;
   for (const auto id : feature_ids) {
     const auto &h = host.keypoints().at(id);
@@ -230,6 +235,9 @@ void WriteMatchDiagnostics(frames::BaseFrame &host, frames::BaseFrame &target,
       for (int col = 0; col < 3; ++col) {
         out << ',' << cov(row, col);
       }
+    }
+    if (include_fb) {
+      out << ',' << t.fb_error_sq_px2_;
     }
     out << '\n';
     ++index;

@@ -1,0 +1,2962 @@
+{
+  "scope": "Descriptive target covariance shape diagnostic at fixed KITTI reference motion",
+  "feature": "Target pixel covariance lambda_max/lambda_min",
+  "quartiles_within_frame": [
+    0.25,
+    0.75
+  ],
+  "max_predicted_angular_variance_ratio_for_pairing": 1.1,
+  "matching": "Sort both groups by predicted dual angular variance and pair within each frame",
+  "frame_weight": "Equal among comparable frames",
+  "q_threshold": 9.0,
+  "regularizer": 1e-13,
+  "config_sha256_lf": "06134e8e8388dfa7983a53839d2d007d29e3cf006dfcbe57a69fca577a00faad",
+  "kitti10_capture_bundle_sha256": "63160a0722350f394ebe33c494f590d9fab3dfe1a7ede032ae58f6abef94a17f",
+  "runner_sha256": "22e55e2289797ce44cb6b84f24b4beb8b207d64a795a2979b5958c5ce7c798b8",
+  "sequences": [
+    {
+      "sequence": "09",
+      "ground_truth_sha256_lf": "e29c10964d558536e225e052f386723a515ad574b6ce14b91a86c94e5ad94014",
+      "frame_pairs": 11,
+      "comparable_frame_pairs": 11,
+      "matched_points_per_group": 353,
+      "relative_change_target_vs_host_condition_number": {
+        "points": 2369,
+        "p99": 3.262791710900739e-07
+      },
+      "frames_with_higher_q_tail_in_high_group": 5,
+      "frames_with_higher_squared_error_in_high_group": 8,
+      "low": {
+        "condition_number": 1.4533856257069484,
+        "predicted_angular_variance_mrad2": 0.5685960346322946,
+        "epipolar_angle_mrad2": 0.896737417238889,
+        "q_above_9": 0.08250324517618979,
+        "epipolar_rms_mrad": 0.9469622047573435
+      },
+      "high": {
+        "condition_number": 18.065719141879544,
+        "predicted_angular_variance_mrad2": 0.567982874004804,
+        "epipolar_angle_mrad2": 1.096600979262792,
+        "q_above_9": 0.12275571663629993,
+        "epipolar_rms_mrad": 1.0471871748941504
+      },
+      "frames": [
+        {
+          "target_frame": 1057,
+          "matches_sha256": "ee17839e18ba7ea44d74dab33c2fd248b0370802b858a81d771b3ad0ed15967c",
+          "eligible": 144,
+          "low_available": 36,
+          "high_available": 36,
+          "matched_points_per_group": 24,
+          "low": {
+            "condition_number": 1.3165148196771286,
+            "predicted_angular_variance_mrad2": 0.27980183663290853,
+            "epipolar_angle_mrad2": 0.33765127231630115,
+            "q_above_9": 0.041666666666666664,
+            "epipolar_rms_mrad": 0.5810776818260198
+          },
+          "high": {
+            "condition_number": 16.132068851940023,
+            "predicted_angular_variance_mrad2": 0.2771189404479509,
+            "epipolar_angle_mrad2": 1.2668995617640617,
+            "q_above_9": 0.20833333333333334,
+            "epipolar_rms_mrad": 1.1255663293489468
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9132060889525538,
+            1.0986687052050066
+          ]
+        },
+        {
+          "target_frame": 1058,
+          "matches_sha256": "fe0ae75f9d774c1a1f9deaad7810227eebf679e69f992e2440f571cad46b3a7d",
+          "eligible": 145,
+          "low_available": 37,
+          "high_available": 37,
+          "matched_points_per_group": 21,
+          "low": {
+            "condition_number": 1.4198139267132002,
+            "predicted_angular_variance_mrad2": 0.26894647551903245,
+            "epipolar_angle_mrad2": 0.6578931590144012,
+            "q_above_9": 0.047619047619047616,
+            "epipolar_rms_mrad": 0.8111061330149102
+          },
+          "high": {
+            "condition_number": 19.932798283362317,
+            "predicted_angular_variance_mrad2": 0.2661807667744999,
+            "epipolar_angle_mrad2": 0.1445048786608001,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.3801379731897356
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9154199871861068,
+            1.0892253298169028
+          ]
+        },
+        {
+          "target_frame": 1059,
+          "matches_sha256": "b853126772c4437b61c143f1ccb9e25a572500c177616195e837b378f4f2c472",
+          "eligible": 154,
+          "low_available": 39,
+          "high_available": 39,
+          "matched_points_per_group": 25,
+          "low": {
+            "condition_number": 1.3854124300760504,
+            "predicted_angular_variance_mrad2": 0.32067613642393594,
+            "epipolar_angle_mrad2": 0.23629542982190913,
+            "q_above_9": 0.04,
+            "epipolar_rms_mrad": 0.4861022832922194
+          },
+          "high": {
+            "condition_number": 14.207534091566258,
+            "predicted_angular_variance_mrad2": 0.3113286318426179,
+            "epipolar_angle_mrad2": 0.33839768110889523,
+            "q_above_9": 0.04,
+            "epipolar_rms_mrad": 0.581719589758584
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9100913602997781,
+            1.077892748724996
+          ]
+        },
+        {
+          "target_frame": 1103,
+          "matches_sha256": "938bacacc194688b6001072686ce7d00d4c53c43de39dfe88a15062de38969da",
+          "eligible": 255,
+          "low_available": 64,
+          "high_available": 64,
+          "matched_points_per_group": 34,
+          "low": {
+            "condition_number": 1.54139210936515,
+            "predicted_angular_variance_mrad2": 0.9184039280226186,
+            "epipolar_angle_mrad2": 0.783741096032639,
+            "q_above_9": 0.029411764705882353,
+            "epipolar_rms_mrad": 0.8852915316621067
+          },
+          "high": {
+            "condition_number": 21.588490482386675,
+            "predicted_angular_variance_mrad2": 0.8983924118205214,
+            "epipolar_angle_mrad2": 0.7755047896064621,
+            "q_above_9": 0.058823529411764705,
+            "epipolar_rms_mrad": 0.8806274976438461
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9091827028279641,
+            1.098180192715186
+          ]
+        },
+        {
+          "target_frame": 1104,
+          "matches_sha256": "3a9485d5f3fb3675bb1c905e8746aa7232665c0b00458cfac121b45961ada7f8",
+          "eligible": 240,
+          "low_available": 60,
+          "high_available": 60,
+          "matched_points_per_group": 29,
+          "low": {
+            "condition_number": 1.610974435643684,
+            "predicted_angular_variance_mrad2": 0.44596899446690985,
+            "epipolar_angle_mrad2": 0.4934973411968813,
+            "q_above_9": 0.10344827586206896,
+            "epipolar_rms_mrad": 0.7024936591862458
+          },
+          "high": {
+            "condition_number": 22.04537218576899,
+            "predicted_angular_variance_mrad2": 0.4373810131439165,
+            "epipolar_angle_mrad2": 2.780777013179015,
+            "q_above_9": 0.3448275862068966,
+            "epipolar_rms_mrad": 1.6675661945419182
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9091631593669739,
+            1.0983283405536974
+          ]
+        },
+        {
+          "target_frame": 1105,
+          "matches_sha256": "23d65cb0fda131095338b0c4f36b09d59d58013bbbf5eaba662f6748701e6af6",
+          "eligible": 239,
+          "low_available": 60,
+          "high_available": 60,
+          "matched_points_per_group": 32,
+          "low": {
+            "condition_number": 1.4767458572178689,
+            "predicted_angular_variance_mrad2": 0.4434436353235452,
+            "epipolar_angle_mrad2": 3.2431561984797366,
+            "q_above_9": 0.125,
+            "epipolar_rms_mrad": 1.8008765083924374
+          },
+          "high": {
+            "condition_number": 25.15652648082198,
+            "predicted_angular_variance_mrad2": 0.44511529573933584,
+            "epipolar_angle_mrad2": 1.1775724401891812,
+            "q_above_9": 0.125,
+            "epipolar_rms_mrad": 1.0851600988744385
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9175651144175768,
+            1.098330663897371
+          ]
+        },
+        {
+          "target_frame": 1106,
+          "matches_sha256": "83f5d3b1b0a8ab892c6d40e552bfd09c7ba1a4c1e504ab82cd377c3a5539c1c4",
+          "eligible": 260,
+          "low_available": 65,
+          "high_available": 65,
+          "matched_points_per_group": 39,
+          "low": {
+            "condition_number": 1.4896715263075748,
+            "predicted_angular_variance_mrad2": 1.0108822964380437,
+            "epipolar_angle_mrad2": 0.45479163621776353,
+            "q_above_9": 0.07692307692307693,
+            "epipolar_rms_mrad": 0.6743824109641083
+          },
+          "high": {
+            "condition_number": 19.102172178379636,
+            "predicted_angular_variance_mrad2": 0.9995896100932601,
+            "epipolar_angle_mrad2": 0.6508689582547544,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.8067644998726422
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9094527504660518,
+            1.099211700796868
+          ]
+        },
+        {
+          "target_frame": 1107,
+          "matches_sha256": "f449bbb1f1e1be5b7fdf6e99fe29a3f0229d8442824771d0e73b01c70aaf73c7",
+          "eligible": 269,
+          "low_available": 68,
+          "high_available": 68,
+          "matched_points_per_group": 41,
+          "low": {
+            "condition_number": 1.5055348534140964,
+            "predicted_angular_variance_mrad2": 0.6076970702633749,
+            "epipolar_angle_mrad2": 0.9009904899432051,
+            "q_above_9": 0.07317073170731707,
+            "epipolar_rms_mrad": 0.9492051885357586
+          },
+          "high": {
+            "condition_number": 18.276653696913,
+            "predicted_angular_variance_mrad2": 0.6002146564202336,
+            "epipolar_angle_mrad2": 0.9162924920505326,
+            "q_above_9": 0.12195121951219512,
+            "epipolar_rms_mrad": 0.9572316814912326
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9109912207689664,
+            1.0901717461058866
+          ]
+        },
+        {
+          "target_frame": 1118,
+          "matches_sha256": "689d967c3b74116de1f06dd5f602b31e9d6b29eec97f97d16766e67addaff75e",
+          "eligible": 223,
+          "low_available": 56,
+          "high_available": 56,
+          "matched_points_per_group": 37,
+          "low": {
+            "condition_number": 1.386385769637435,
+            "predicted_angular_variance_mrad2": 0.49388769826922113,
+            "epipolar_angle_mrad2": 1.2425445610008221,
+            "q_above_9": 0.16216216216216217,
+            "epipolar_rms_mrad": 1.1146948286418226
+          },
+          "high": {
+            "condition_number": 17.093565084343854,
+            "predicted_angular_variance_mrad2": 0.51059051808225,
+            "epipolar_angle_mrad2": 1.6210631400546085,
+            "q_above_9": 0.24324324324324326,
+            "epipolar_rms_mrad": 1.2732097784947336
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9325068173829338,
+            1.0974192419466222
+          ]
+        },
+        {
+          "target_frame": 1119,
+          "matches_sha256": "3dfa57928dc2aae5555f4a087ceb71065ed5d37679e38df1b40bbdf580d92ca9",
+          "eligible": 219,
+          "low_available": 55,
+          "high_available": 55,
+          "matched_points_per_group": 38,
+          "low": {
+            "condition_number": 1.43300640761914,
+            "predicted_angular_variance_mrad2": 0.936975632230524,
+            "epipolar_angle_mrad2": 0.37452727612443387,
+            "q_above_9": 0.02631578947368421,
+            "epipolar_rms_mrad": 0.6119863365504444
+          },
+          "high": {
+            "condition_number": 14.08176265166922,
+            "predicted_angular_variance_mrad2": 0.9742185905116225,
+            "epipolar_angle_mrad2": 0.5104738705293085,
+            "q_above_9": 0.02631578947368421,
+            "epipolar_rms_mrad": 0.7144745415543569
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.920851036793222,
+            1.0996150945622551
+          ]
+        },
+        {
+          "target_frame": 1120,
+          "matches_sha256": "383e118152fc3005d020085435223912ea2e735414b24b46546e60abebad0859",
+          "eligible": 221,
+          "low_available": 56,
+          "high_available": 56,
+          "matched_points_per_group": 33,
+          "low": {
+            "condition_number": 1.421789747105103,
+            "predicted_angular_variance_mrad2": 0.5278726773651263,
+            "epipolar_angle_mrad2": 1.1390231294796858,
+            "q_above_9": 0.18181818181818182,
+            "epipolar_rms_mrad": 1.0672502656264302
+          },
+          "high": {
+            "condition_number": 11.105966573523022,
+            "predicted_angular_variance_mrad2": 0.5276811791766357,
+            "epipolar_angle_mrad2": 1.8802559464930932,
+            "q_above_9": 0.18181818181818182,
+            "epipolar_rms_mrad": 1.3712242509863561
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9139798338829472,
+            1.0941625217211286
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": "10",
+      "ground_truth_sha256_lf": "b29cfbc423220a7bc163ef53d0e0a362f8206f006eb2db690d8b48795327380e",
+      "frame_pairs": 100,
+      "comparable_frame_pairs": 100,
+      "matched_points_per_group": 2328,
+      "relative_change_target_vs_host_condition_number": {
+        "points": 16094,
+        "p99": 6.780685361351678e-07
+      },
+      "frames_with_higher_q_tail_in_high_group": 47,
+      "frames_with_higher_squared_error_in_high_group": 61,
+      "low": {
+        "condition_number": 1.5074645413574859,
+        "predicted_angular_variance_mrad2": 0.6381951375832872,
+        "epipolar_angle_mrad2": 0.9766898217696626,
+        "q_above_9": 0.10373599717061457,
+        "epipolar_rms_mrad": 0.9882761869890737
+      },
+      "high": {
+        "condition_number": 12.872926686385153,
+        "predicted_angular_variance_mrad2": 0.6407536120821894,
+        "epipolar_angle_mrad2": 1.0642136419976755,
+        "q_above_9": 0.12888377795434575,
+        "epipolar_rms_mrad": 1.0316073099768515
+      },
+      "frames": [
+        {
+          "target_frame": 300,
+          "matches_sha256": "c6b5925f3ce9525a39ffafef19d59e0a170e49d8a9f1376fea460f28abd71433",
+          "eligible": 131,
+          "low_available": 33,
+          "high_available": 33,
+          "matched_points_per_group": 17,
+          "low": {
+            "condition_number": 1.563615038385216,
+            "predicted_angular_variance_mrad2": 0.5412057843213157,
+            "epipolar_angle_mrad2": 0.5876225639518526,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.7665654335748858
+          },
+          "high": {
+            "condition_number": 10.011893015432078,
+            "predicted_angular_variance_mrad2": 0.560083821871747,
+            "epipolar_angle_mrad2": 1.6489903323505641,
+            "q_above_9": 0.29411764705882354,
+            "epipolar_rms_mrad": 1.284130185125544
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.914767136942461,
+            1.08671770185506
+          ]
+        },
+        {
+          "target_frame": 301,
+          "matches_sha256": "d914cd57e6c3face6fdc91e63051fd9919fc82012c800113a88a373db459084b",
+          "eligible": 124,
+          "low_available": 31,
+          "high_available": 31,
+          "matched_points_per_group": 14,
+          "low": {
+            "condition_number": 1.5401580137947206,
+            "predicted_angular_variance_mrad2": 0.5827334875814342,
+            "epipolar_angle_mrad2": 2.556231107768553,
+            "q_above_9": 0.14285714285714285,
+            "epipolar_rms_mrad": 1.5988217873698598
+          },
+          "high": {
+            "condition_number": 9.97129999558186,
+            "predicted_angular_variance_mrad2": 0.5574849899282145,
+            "epipolar_angle_mrad2": 2.956524054425433,
+            "q_above_9": 0.2857142857142857,
+            "epipolar_rms_mrad": 1.7194545805066888
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9113824213560392,
+            1.078321663272837
+          ]
+        },
+        {
+          "target_frame": 302,
+          "matches_sha256": "2b9b0f0a78fd3e35915f703e22fcd09b1d7f78a83b9bfcb03052b721126827f1",
+          "eligible": 121,
+          "low_available": 31,
+          "high_available": 31,
+          "matched_points_per_group": 16,
+          "low": {
+            "condition_number": 1.8060648143843485,
+            "predicted_angular_variance_mrad2": 0.5936887139940618,
+            "epipolar_angle_mrad2": 2.269606394620992,
+            "q_above_9": 0.125,
+            "epipolar_rms_mrad": 1.5065212891363307
+          },
+          "high": {
+            "condition_number": 10.601208149307277,
+            "predicted_angular_variance_mrad2": 0.5800655218114247,
+            "epipolar_angle_mrad2": 0.7930560480528629,
+            "q_above_9": 0.125,
+            "epipolar_rms_mrad": 0.8905369436766017
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9102969749144437,
+            1.0866402153980674
+          ]
+        },
+        {
+          "target_frame": 303,
+          "matches_sha256": "371ba263ae4c2fcc6d1be1e1ed68cc5ec87b1d3b3fc3a152c662ebd4d8f65695",
+          "eligible": 125,
+          "low_available": 32,
+          "high_available": 32,
+          "matched_points_per_group": 14,
+          "low": {
+            "condition_number": 1.7023545350281453,
+            "predicted_angular_variance_mrad2": 0.4881564310520648,
+            "epipolar_angle_mrad2": 1.0366861691148797,
+            "q_above_9": 0.14285714285714285,
+            "epipolar_rms_mrad": 1.0181778671307287
+          },
+          "high": {
+            "condition_number": 10.100601899502575,
+            "predicted_angular_variance_mrad2": 0.47392260701722566,
+            "epipolar_angle_mrad2": 1.206964391744386,
+            "q_above_9": 0.21428571428571427,
+            "epipolar_rms_mrad": 1.0986193115653784
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9172633045260207,
+            1.077256768109882
+          ]
+        },
+        {
+          "target_frame": 304,
+          "matches_sha256": "f37bc70076d87997dab334dcf42cbb01a9632f0e16e33fbe3030fb48b122628b",
+          "eligible": 152,
+          "low_available": 38,
+          "high_available": 38,
+          "matched_points_per_group": 21,
+          "low": {
+            "condition_number": 1.6968830216836266,
+            "predicted_angular_variance_mrad2": 0.7201688225108599,
+            "epipolar_angle_mrad2": 0.2581673798816889,
+            "q_above_9": 0.047619047619047616,
+            "epipolar_rms_mrad": 0.5081017416637035
+          },
+          "high": {
+            "condition_number": 10.351267659450244,
+            "predicted_angular_variance_mrad2": 0.7132482774180638,
+            "epipolar_angle_mrad2": 0.5428221760006904,
+            "q_above_9": 0.09523809523809523,
+            "epipolar_rms_mrad": 0.7367646679915442
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9154275824924291,
+            1.0980379681402834
+          ]
+        },
+        {
+          "target_frame": 305,
+          "matches_sha256": "6079a0e67687541d522af404b6d06658a96a93c42f71a87ebe3e36d4bfb820c8",
+          "eligible": 135,
+          "low_available": 34,
+          "high_available": 34,
+          "matched_points_per_group": 18,
+          "low": {
+            "condition_number": 1.6381862692974605,
+            "predicted_angular_variance_mrad2": 0.6996795343447905,
+            "epipolar_angle_mrad2": 0.5591406782751234,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.7477570984451591
+          },
+          "high": {
+            "condition_number": 10.311331761261188,
+            "predicted_angular_variance_mrad2": 0.7291935560330226,
+            "epipolar_angle_mrad2": 0.3393951693028812,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.5825763205820171
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9353275765654416,
+            1.092398329825578
+          ]
+        },
+        {
+          "target_frame": 306,
+          "matches_sha256": "937689469a9a40639a66095276f30d01cbc5b58c47c47bfddd30b1ea33cb48e3",
+          "eligible": 140,
+          "low_available": 35,
+          "high_available": 35,
+          "matched_points_per_group": 19,
+          "low": {
+            "condition_number": 1.6923455257158526,
+            "predicted_angular_variance_mrad2": 0.5965432539559152,
+            "epipolar_angle_mrad2": 0.316254102283576,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.562364741323259
+          },
+          "high": {
+            "condition_number": 10.182101359683163,
+            "predicted_angular_variance_mrad2": 0.5798370316370929,
+            "epipolar_angle_mrad2": 0.22060945339404794,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.4696908061629991
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9112085126655305,
+            1.0748512649127098
+          ]
+        },
+        {
+          "target_frame": 307,
+          "matches_sha256": "5b92db5495e71c58113d40c3c55a12c0ad5e916ef96df30be5c11f641b730e24",
+          "eligible": 136,
+          "low_available": 34,
+          "high_available": 34,
+          "matched_points_per_group": 21,
+          "low": {
+            "condition_number": 1.67369729300439,
+            "predicted_angular_variance_mrad2": 0.3329840098002198,
+            "epipolar_angle_mrad2": 1.6970945215222675,
+            "q_above_9": 0.42857142857142855,
+            "epipolar_rms_mrad": 1.3027258044278802
+          },
+          "high": {
+            "condition_number": 10.197460459310586,
+            "predicted_angular_variance_mrad2": 0.3304853417204281,
+            "epipolar_angle_mrad2": 1.8601264876554642,
+            "q_above_9": 0.23809523809523808,
+            "epipolar_rms_mrad": 1.363864541534629
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.923293995697638,
+            1.0770431632665363
+          ]
+        },
+        {
+          "target_frame": 308,
+          "matches_sha256": "8177a762c09fa1e4a29a2564f9a32b20f141ab063eb27c19fb5f287e3904311d",
+          "eligible": 127,
+          "low_available": 32,
+          "high_available": 32,
+          "matched_points_per_group": 15,
+          "low": {
+            "condition_number": 1.5647182997983036,
+            "predicted_angular_variance_mrad2": 0.9430947701396858,
+            "epipolar_angle_mrad2": 2.395800771186566,
+            "q_above_9": 0.2,
+            "epipolar_rms_mrad": 1.547837449859179
+          },
+          "high": {
+            "condition_number": 11.72781510186597,
+            "predicted_angular_variance_mrad2": 0.9306335043195383,
+            "epipolar_angle_mrad2": 1.4700057775389859,
+            "q_above_9": 0.2,
+            "epipolar_rms_mrad": 1.2124379479127936
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9183921312421135,
+            1.083698046400423
+          ]
+        },
+        {
+          "target_frame": 309,
+          "matches_sha256": "d523549ccef3a6fcf7e892777b5ed82d0d90ede26fe54b540af5f619b3d9ae6c",
+          "eligible": 134,
+          "low_available": 34,
+          "high_available": 34,
+          "matched_points_per_group": 20,
+          "low": {
+            "condition_number": 1.6766075131263551,
+            "predicted_angular_variance_mrad2": 0.6507149159658127,
+            "epipolar_angle_mrad2": 0.7960974475152673,
+            "q_above_9": 0.05,
+            "epipolar_rms_mrad": 0.8922429307734903
+          },
+          "high": {
+            "condition_number": 10.832317540876828,
+            "predicted_angular_variance_mrad2": 0.6692793366090958,
+            "epipolar_angle_mrad2": 0.6902543679007452,
+            "q_above_9": 0.05,
+            "epipolar_rms_mrad": 0.8308154836669484
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.933046591536718,
+            1.0939582807735038
+          ]
+        },
+        {
+          "target_frame": 310,
+          "matches_sha256": "c296e84ab0f8a79fd53a5f7b21310e7f4318b2c932b3afc7af732e87e0aa1494",
+          "eligible": 140,
+          "low_available": 35,
+          "high_available": 35,
+          "matched_points_per_group": 18,
+          "low": {
+            "condition_number": 1.621961744143789,
+            "predicted_angular_variance_mrad2": 0.6086353254503113,
+            "epipolar_angle_mrad2": 0.07731127768090634,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.2780490562489043
+          },
+          "high": {
+            "condition_number": 11.225033807304335,
+            "predicted_angular_variance_mrad2": 0.6130594781223192,
+            "epipolar_angle_mrad2": 0.41791228819794124,
+            "q_above_9": 0.05555555555555555,
+            "epipolar_rms_mrad": 0.6464613586270577
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9114896331631127,
+            1.0958053762246978
+          ]
+        },
+        {
+          "target_frame": 311,
+          "matches_sha256": "60549a593554b474b9c3c398aaeb33ef73ec748baeb437d1e65b25ee87147875",
+          "eligible": 140,
+          "low_available": 35,
+          "high_available": 35,
+          "matched_points_per_group": 21,
+          "low": {
+            "condition_number": 1.6998815776150036,
+            "predicted_angular_variance_mrad2": 0.742151996349405,
+            "epipolar_angle_mrad2": 0.9807146023020966,
+            "q_above_9": 0.09523809523809523,
+            "epipolar_rms_mrad": 0.9903103565560125
+          },
+          "high": {
+            "condition_number": 12.436623311513616,
+            "predicted_angular_variance_mrad2": 0.726544317428599,
+            "epipolar_angle_mrad2": 0.6072394077400348,
+            "q_above_9": 0.09523809523809523,
+            "epipolar_rms_mrad": 0.7792556754621905
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.916653209835822,
+            1.074300673369002
+          ]
+        },
+        {
+          "target_frame": 312,
+          "matches_sha256": "c72f021f7d886fc7e3532ab61f5375db84416b2f109ef04c02ed3d47890974af",
+          "eligible": 162,
+          "low_available": 41,
+          "high_available": 41,
+          "matched_points_per_group": 27,
+          "low": {
+            "condition_number": 1.5983869605770016,
+            "predicted_angular_variance_mrad2": 0.9390587858696283,
+            "epipolar_angle_mrad2": 1.5504767577519487,
+            "q_above_9": 0.037037037037037035,
+            "epipolar_rms_mrad": 1.245181415598526
+          },
+          "high": {
+            "condition_number": 14.382778870672107,
+            "predicted_angular_variance_mrad2": 0.9474290111717684,
+            "epipolar_angle_mrad2": 0.5975671550678564,
+            "q_above_9": 0.07407407407407407,
+            "epipolar_rms_mrad": 0.7730246794688099
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.912795081973628,
+            1.094610796587836
+          ]
+        },
+        {
+          "target_frame": 313,
+          "matches_sha256": "7bfc6789e0d2bb75a511398f97a1ee2ee36dadedbaa786577450cc0a23e8da04",
+          "eligible": 163,
+          "low_available": 41,
+          "high_available": 41,
+          "matched_points_per_group": 25,
+          "low": {
+            "condition_number": 1.4310423002598283,
+            "predicted_angular_variance_mrad2": 0.8135237213439557,
+            "epipolar_angle_mrad2": 0.9570180751291625,
+            "q_above_9": 0.12,
+            "epipolar_rms_mrad": 0.9782730064400031
+          },
+          "high": {
+            "condition_number": 17.320313200221516,
+            "predicted_angular_variance_mrad2": 0.7988965397458145,
+            "epipolar_angle_mrad2": 0.9040298180497885,
+            "q_above_9": 0.04,
+            "epipolar_rms_mrad": 0.9508048264758591
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9282488421406391,
+            1.0834152055697164
+          ]
+        },
+        {
+          "target_frame": 314,
+          "matches_sha256": "d8e0b402ac10960eb3eab24b8ff92e971e332e19cc1a36b1a291bff2bc31cd74",
+          "eligible": 154,
+          "low_available": 39,
+          "high_available": 39,
+          "matched_points_per_group": 20,
+          "low": {
+            "condition_number": 1.5590925508054005,
+            "predicted_angular_variance_mrad2": 0.6026852413722498,
+            "epipolar_angle_mrad2": 0.5445102999991626,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.7379094117838331
+          },
+          "high": {
+            "condition_number": 14.189370037676033,
+            "predicted_angular_variance_mrad2": 0.6071782071643648,
+            "epipolar_angle_mrad2": 0.36617610901097886,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.6051248705936477
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9243111119374549,
+            1.0954151770277916
+          ]
+        },
+        {
+          "target_frame": 315,
+          "matches_sha256": "7c05ab793c3dda50362549cb13f61dd7f889b2de1b51a8d2cd1fd95a167f1a81",
+          "eligible": 152,
+          "low_available": 38,
+          "high_available": 38,
+          "matched_points_per_group": 20,
+          "low": {
+            "condition_number": 1.4852196647897538,
+            "predicted_angular_variance_mrad2": 0.5076914205946292,
+            "epipolar_angle_mrad2": 3.3535645608740374,
+            "q_above_9": 0.1,
+            "epipolar_rms_mrad": 1.8312740267021856
+          },
+          "high": {
+            "condition_number": 9.538037535775493,
+            "predicted_angular_variance_mrad2": 0.4980724381760875,
+            "epipolar_angle_mrad2": 0.49473512812891085,
+            "q_above_9": 0.05,
+            "epipolar_rms_mrad": 0.7033741025435262
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9252757310101167,
+            1.0778158362146981
+          ]
+        },
+        {
+          "target_frame": 316,
+          "matches_sha256": "1a334bfd0a2c4ab74b7797627fe20df2ffe07d8bdceaf1d2b83e2e4184e88be8",
+          "eligible": 149,
+          "low_available": 38,
+          "high_available": 38,
+          "matched_points_per_group": 22,
+          "low": {
+            "condition_number": 1.5307618568755608,
+            "predicted_angular_variance_mrad2": 0.958260057682878,
+            "epipolar_angle_mrad2": 0.3193982824235137,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.5651533264730145
+          },
+          "high": {
+            "condition_number": 13.003662467750296,
+            "predicted_angular_variance_mrad2": 1.0012436885856024,
+            "epipolar_angle_mrad2": 0.4115732244891689,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.6415397294705675
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.944584221372075,
+            1.0955269199691529
+          ]
+        },
+        {
+          "target_frame": 317,
+          "matches_sha256": "e6d777d74993b31259e217b7ce53b8ee3b7918beb9a688520a010863e9dc63c9",
+          "eligible": 162,
+          "low_available": 41,
+          "high_available": 41,
+          "matched_points_per_group": 17,
+          "low": {
+            "condition_number": 1.595615261838746,
+            "predicted_angular_variance_mrad2": 0.5942832237543757,
+            "epipolar_angle_mrad2": 0.4774533619623611,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.69098000113054
+          },
+          "high": {
+            "condition_number": 11.633465344438873,
+            "predicted_angular_variance_mrad2": 0.6148845587945951,
+            "epipolar_angle_mrad2": 0.4274890008438426,
+            "q_above_9": 0.058823529411764705,
+            "epipolar_rms_mrad": 0.6538264302120576
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9223601250173867,
+            1.0979763819794097
+          ]
+        },
+        {
+          "target_frame": 318,
+          "matches_sha256": "38530084a1706e4b676b98e0616054507877233ecec0bf1407f0221e022518d5",
+          "eligible": 170,
+          "low_available": 43,
+          "high_available": 43,
+          "matched_points_per_group": 23,
+          "low": {
+            "condition_number": 1.5302596165349598,
+            "predicted_angular_variance_mrad2": 0.43259960545209614,
+            "epipolar_angle_mrad2": 0.5280853000680905,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.7266947777905731
+          },
+          "high": {
+            "condition_number": 12.503206602079931,
+            "predicted_angular_variance_mrad2": 0.4393836048325524,
+            "epipolar_angle_mrad2": 1.081770426737434,
+            "q_above_9": 0.2608695652173913,
+            "epipolar_rms_mrad": 1.0400819327040702
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9158126134066947,
+            1.0956316059258269
+          ]
+        },
+        {
+          "target_frame": 319,
+          "matches_sha256": "44181c8d5aa804f9e13b82adc8a7811db607967a0ff0e46cb00ef4424de3ef28",
+          "eligible": 150,
+          "low_available": 38,
+          "high_available": 38,
+          "matched_points_per_group": 23,
+          "low": {
+            "condition_number": 1.4426392935442127,
+            "predicted_angular_variance_mrad2": 0.4519717886087721,
+            "epipolar_angle_mrad2": 2.453250113169289,
+            "q_above_9": 0.2608695652173913,
+            "epipolar_rms_mrad": 1.5662854507302586
+          },
+          "high": {
+            "condition_number": 10.888687009686526,
+            "predicted_angular_variance_mrad2": 0.47592237720683384,
+            "epipolar_angle_mrad2": 1.6944102649430355,
+            "q_above_9": 0.30434782608695654,
+            "epipolar_rms_mrad": 1.3016951505414145
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9681870664992225,
+            1.0983985528539535
+          ]
+        },
+        {
+          "target_frame": 320,
+          "matches_sha256": "996fc2b92548839a09dbfea55125c6eece9fc1f8333ce338e47fe66f32d01f7a",
+          "eligible": 167,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 22,
+          "low": {
+            "condition_number": 1.7574840926115236,
+            "predicted_angular_variance_mrad2": 0.6103440179503554,
+            "epipolar_angle_mrad2": 2.6479443305297576,
+            "q_above_9": 0.22727272727272727,
+            "epipolar_rms_mrad": 1.6272505432568636
+          },
+          "high": {
+            "condition_number": 19.443788750895973,
+            "predicted_angular_variance_mrad2": 0.6121299374665243,
+            "epipolar_angle_mrad2": 3.322536124295304,
+            "q_above_9": 0.5,
+            "epipolar_rms_mrad": 1.8227825224900813
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9139122033690095,
+            1.0814252822136066
+          ]
+        },
+        {
+          "target_frame": 321,
+          "matches_sha256": "e7511923446dd84ca81c6047975ced657c3e1286c26e1691cc22acd5c5f2f083",
+          "eligible": 176,
+          "low_available": 44,
+          "high_available": 44,
+          "matched_points_per_group": 24,
+          "low": {
+            "condition_number": 1.527301571788934,
+            "predicted_angular_variance_mrad2": 0.6735321275994824,
+            "epipolar_angle_mrad2": 1.3920130916694047,
+            "q_above_9": 0.08333333333333333,
+            "epipolar_rms_mrad": 1.1798360444016807
+          },
+          "high": {
+            "condition_number": 20.769342943499723,
+            "predicted_angular_variance_mrad2": 0.6911374265509854,
+            "epipolar_angle_mrad2": 1.7331494553624474,
+            "q_above_9": 0.16666666666666666,
+            "epipolar_rms_mrad": 1.3164913426841998
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9120117837691138,
+            1.0961578148876236
+          ]
+        },
+        {
+          "target_frame": 322,
+          "matches_sha256": "35c5e0d02739571dfa5fb2583e8900813e9e63c6ba7f859f9a845fb1fe539966",
+          "eligible": 154,
+          "low_available": 39,
+          "high_available": 39,
+          "matched_points_per_group": 18,
+          "low": {
+            "condition_number": 1.5299424657290097,
+            "predicted_angular_variance_mrad2": 0.5772095283212123,
+            "epipolar_angle_mrad2": 0.335832528536002,
+            "q_above_9": 0.1111111111111111,
+            "epipolar_rms_mrad": 0.5795105939808193
+          },
+          "high": {
+            "condition_number": 24.810699116440603,
+            "predicted_angular_variance_mrad2": 0.5802425177366537,
+            "epipolar_angle_mrad2": 0.8551654736422621,
+            "q_above_9": 0.05555555555555555,
+            "epipolar_rms_mrad": 0.924751574014482
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9138791690433063,
+            1.0924472415475024
+          ]
+        },
+        {
+          "target_frame": 323,
+          "matches_sha256": "748355373b696910f6386c241362b3209f582ae11809117d9975da4d7a2e1a5e",
+          "eligible": 164,
+          "low_available": 41,
+          "high_available": 41,
+          "matched_points_per_group": 24,
+          "low": {
+            "condition_number": 1.6178669523376674,
+            "predicted_angular_variance_mrad2": 0.5330761383848313,
+            "epipolar_angle_mrad2": 0.44396866662208545,
+            "q_above_9": 0.08333333333333333,
+            "epipolar_rms_mrad": 0.6663097377512094
+          },
+          "high": {
+            "condition_number": 23.559880962729306,
+            "predicted_angular_variance_mrad2": 0.5395176611748399,
+            "epipolar_angle_mrad2": 0.5264206488314952,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.7255485158357745
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.915211355269587,
+            1.084357031149319
+          ]
+        },
+        {
+          "target_frame": 324,
+          "matches_sha256": "99a40ec749cc7074029c577749ec4b3e173ccbf9d59c46de55d046af8092bd32",
+          "eligible": 157,
+          "low_available": 40,
+          "high_available": 40,
+          "matched_points_per_group": 23,
+          "low": {
+            "condition_number": 1.6379420101698348,
+            "predicted_angular_variance_mrad2": 0.6721181463431585,
+            "epipolar_angle_mrad2": 0.7105260477264842,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.8429270714163143
+          },
+          "high": {
+            "condition_number": 17.091208266934807,
+            "predicted_angular_variance_mrad2": 0.6696992314752233,
+            "epipolar_angle_mrad2": 1.0505575462468022,
+            "q_above_9": 0.13043478260869565,
+            "epipolar_rms_mrad": 1.0249670952019885
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9119786025172085,
+            1.0852198318487343
+          ]
+        },
+        {
+          "target_frame": 325,
+          "matches_sha256": "f8a335697be65186db90661c8cd1ea2c291f2463792527220d4d0b6a4faf2b9e",
+          "eligible": 147,
+          "low_available": 37,
+          "high_available": 37,
+          "matched_points_per_group": 19,
+          "low": {
+            "condition_number": 1.580102524625967,
+            "predicted_angular_variance_mrad2": 0.6082097246819768,
+            "epipolar_angle_mrad2": 0.19446633076651706,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.4409833679023701
+          },
+          "high": {
+            "condition_number": 14.746630640144168,
+            "predicted_angular_variance_mrad2": 0.6075136370714244,
+            "epipolar_angle_mrad2": 0.8310011711746043,
+            "q_above_9": 0.15789473684210525,
+            "epipolar_rms_mrad": 0.9115926563847496
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9186238032045813,
+            1.0867754667906806
+          ]
+        },
+        {
+          "target_frame": 326,
+          "matches_sha256": "40510899dd627406e01d56009cecca5905f48efc4909b0ea6ad79f2df09ba019",
+          "eligible": 142,
+          "low_available": 36,
+          "high_available": 36,
+          "matched_points_per_group": 20,
+          "low": {
+            "condition_number": 1.5805148494982044,
+            "predicted_angular_variance_mrad2": 0.8314834610289534,
+            "epipolar_angle_mrad2": 0.3782636011829395,
+            "q_above_9": 0.05,
+            "epipolar_rms_mrad": 0.6150313822748719
+          },
+          "high": {
+            "condition_number": 14.30892652702463,
+            "predicted_angular_variance_mrad2": 0.8359076736079887,
+            "epipolar_angle_mrad2": 0.30714919038473354,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.5542104206749757
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9129551286739069,
+            1.0963966743730487
+          ]
+        },
+        {
+          "target_frame": 327,
+          "matches_sha256": "760fa89337fe4dc6a859adbdfa912b9b55f5d26d15db9149db010fefce9a2927",
+          "eligible": 134,
+          "low_available": 34,
+          "high_available": 34,
+          "matched_points_per_group": 15,
+          "low": {
+            "condition_number": 1.5210882444148566,
+            "predicted_angular_variance_mrad2": 0.7045613866049979,
+            "epipolar_angle_mrad2": 1.42391301456759,
+            "q_above_9": 0.2,
+            "epipolar_rms_mrad": 1.193278263678506
+          },
+          "high": {
+            "condition_number": 12.592262071557967,
+            "predicted_angular_variance_mrad2": 0.7023150951111493,
+            "epipolar_angle_mrad2": 1.3361728451462058,
+            "q_above_9": 0.13333333333333333,
+            "epipolar_rms_mrad": 1.1559294291375255
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9168473127237661,
+            1.0791104188853418
+          ]
+        },
+        {
+          "target_frame": 328,
+          "matches_sha256": "e8b913db65cc23b6e84d5ad91ac30e891842e694e08daf1d95dc1f89548efe5c",
+          "eligible": 133,
+          "low_available": 34,
+          "high_available": 34,
+          "matched_points_per_group": 20,
+          "low": {
+            "condition_number": 1.565445833541046,
+            "predicted_angular_variance_mrad2": 0.6743951854991214,
+            "epipolar_angle_mrad2": 0.20902785716706296,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.45719564430018683
+          },
+          "high": {
+            "condition_number": 10.218419586111853,
+            "predicted_angular_variance_mrad2": 0.6682732510756633,
+            "epipolar_angle_mrad2": 0.10681851415165211,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.32683101773187334
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9255655740064147,
+            1.0851352902047073
+          ]
+        },
+        {
+          "target_frame": 329,
+          "matches_sha256": "5128b184b2c0fed65bd02e07cc9882ca231301ce13c0aca7d7f8ada4c3130184",
+          "eligible": 145,
+          "low_available": 37,
+          "high_available": 37,
+          "matched_points_per_group": 20,
+          "low": {
+            "condition_number": 1.5208202894167162,
+            "predicted_angular_variance_mrad2": 0.9281931179679137,
+            "epipolar_angle_mrad2": 1.0174626640040452,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 1.0086935431557225
+          },
+          "high": {
+            "condition_number": 13.95480922337769,
+            "predicted_angular_variance_mrad2": 0.9038567863421333,
+            "epipolar_angle_mrad2": 0.5054685027831674,
+            "q_above_9": 0.05,
+            "epipolar_rms_mrad": 0.7109630811674874
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9110398156486178,
+            1.075295825167505
+          ]
+        },
+        {
+          "target_frame": 330,
+          "matches_sha256": "dfef04db70ba3f2269fc3b0aab3b8f1051a0df3918cb9a117bb95e12b10b8aae",
+          "eligible": 146,
+          "low_available": 37,
+          "high_available": 37,
+          "matched_points_per_group": 22,
+          "low": {
+            "condition_number": 1.4844217842442584,
+            "predicted_angular_variance_mrad2": 0.4084377541509889,
+            "epipolar_angle_mrad2": 0.3041898290188461,
+            "q_above_9": 0.045454545454545456,
+            "epipolar_rms_mrad": 0.5515340687744014
+          },
+          "high": {
+            "condition_number": 14.719470322287618,
+            "predicted_angular_variance_mrad2": 0.4010840183967843,
+            "epipolar_angle_mrad2": 0.58205308709574,
+            "q_above_9": 0.09090909090909091,
+            "epipolar_rms_mrad": 0.7629240375658247
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9150787585504656,
+            1.0871668960365803
+          ]
+        },
+        {
+          "target_frame": 331,
+          "matches_sha256": "dedbd37370d56197dad10f977b7350a88576c941303beb269c6a6635313d768f",
+          "eligible": 148,
+          "low_available": 37,
+          "high_available": 37,
+          "matched_points_per_group": 17,
+          "low": {
+            "condition_number": 1.5061816490802877,
+            "predicted_angular_variance_mrad2": 0.49981912289339503,
+            "epipolar_angle_mrad2": 0.11087258287569747,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.33297534875077084
+          },
+          "high": {
+            "condition_number": 15.492889632341035,
+            "predicted_angular_variance_mrad2": 0.49412778091242693,
+            "epipolar_angle_mrad2": 0.2813957541673899,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.5304674864375666
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.913269575450561,
+            1.0837872629624432
+          ]
+        },
+        {
+          "target_frame": 332,
+          "matches_sha256": "a169a944c9230298cab234b3dba15124f6e8aa95db8f05fe7b3cefc73a83e5f5",
+          "eligible": 162,
+          "low_available": 41,
+          "high_available": 41,
+          "matched_points_per_group": 26,
+          "low": {
+            "condition_number": 1.4723750260010926,
+            "predicted_angular_variance_mrad2": 0.5642636956273878,
+            "epipolar_angle_mrad2": 0.12279886506252066,
+            "q_above_9": 0.038461538461538464,
+            "epipolar_rms_mrad": 0.35042668999738114
+          },
+          "high": {
+            "condition_number": 12.001071803822423,
+            "predicted_angular_variance_mrad2": 0.58847968894966,
+            "epipolar_angle_mrad2": 0.173895117706928,
+            "q_above_9": 0.038461538461538464,
+            "epipolar_rms_mrad": 0.417007335315493
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9095557393725747,
+            1.094138475879724
+          ]
+        },
+        {
+          "target_frame": 333,
+          "matches_sha256": "32457c3373b83c4c4fa57e440119f10f4ac514a23903ac762606069745a99a71",
+          "eligible": 165,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 30,
+          "low": {
+            "condition_number": 1.4793492875007315,
+            "predicted_angular_variance_mrad2": 0.5853682549016322,
+            "epipolar_angle_mrad2": 0.28533223312704215,
+            "q_above_9": 0.1,
+            "epipolar_rms_mrad": 0.5341649868037422
+          },
+          "high": {
+            "condition_number": 12.800240939666342,
+            "predicted_angular_variance_mrad2": 0.5720208830481408,
+            "epipolar_angle_mrad2": 0.17615732393429787,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.41971100049236004
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9162153846017568,
+            1.0958349615898768
+          ]
+        },
+        {
+          "target_frame": 334,
+          "matches_sha256": "51791a4e7e3c37431355e4d9f39eed5d4ef2d889032d69277810709ea68d52a5",
+          "eligible": 163,
+          "low_available": 41,
+          "high_available": 41,
+          "matched_points_per_group": 29,
+          "low": {
+            "condition_number": 1.5067668856382477,
+            "predicted_angular_variance_mrad2": 0.6230517178649871,
+            "epipolar_angle_mrad2": 0.43437860234163045,
+            "q_above_9": 0.06896551724137931,
+            "epipolar_rms_mrad": 0.6590740492096699
+          },
+          "high": {
+            "condition_number": 10.92610560111808,
+            "predicted_angular_variance_mrad2": 0.6264915889096999,
+            "epipolar_angle_mrad2": 0.37721603344851706,
+            "q_above_9": 0.034482758620689655,
+            "epipolar_rms_mrad": 0.6141791541956769
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.911671620545081,
+            1.0926949147539595
+          ]
+        },
+        {
+          "target_frame": 335,
+          "matches_sha256": "d5d8c6e0aaaff6c8a462f67a6134bfb91ccf7288ea41397a651827c444fda233",
+          "eligible": 149,
+          "low_available": 38,
+          "high_available": 38,
+          "matched_points_per_group": 25,
+          "low": {
+            "condition_number": 1.51090010003057,
+            "predicted_angular_variance_mrad2": 0.6941576692984469,
+            "epipolar_angle_mrad2": 0.6567048852423146,
+            "q_above_9": 0.04,
+            "epipolar_rms_mrad": 0.8103732999317751
+          },
+          "high": {
+            "condition_number": 15.683452062345008,
+            "predicted_angular_variance_mrad2": 0.6879341441859979,
+            "epipolar_angle_mrad2": 0.3997667734003007,
+            "q_above_9": 0.04,
+            "epipolar_rms_mrad": 0.6322711233326259
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9194255049541551,
+            1.0976489272632373
+          ]
+        },
+        {
+          "target_frame": 336,
+          "matches_sha256": "7f67952794fa446ec77801d4492d19171060b23679a5df9629ed0fcf1780e074",
+          "eligible": 168,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 24,
+          "low": {
+            "condition_number": 1.4650577184635363,
+            "predicted_angular_variance_mrad2": 0.5785104673144845,
+            "epipolar_angle_mrad2": 0.6147577688232472,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.7840649008999492
+          },
+          "high": {
+            "condition_number": 12.800958049305153,
+            "predicted_angular_variance_mrad2": 0.5773059894197811,
+            "epipolar_angle_mrad2": 0.24376508701157873,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.4937257204274239
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9111956815240404,
+            1.0800364089516696
+          ]
+        },
+        {
+          "target_frame": 337,
+          "matches_sha256": "1a56812cdda93f867c4d1deadcb5880faee9841f36223c31e2d551b36e9ab848",
+          "eligible": 172,
+          "low_available": 43,
+          "high_available": 43,
+          "matched_points_per_group": 23,
+          "low": {
+            "condition_number": 1.5014450199470708,
+            "predicted_angular_variance_mrad2": 0.45272869119751613,
+            "epipolar_angle_mrad2": 0.19768500882942455,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.4446178233375542
+          },
+          "high": {
+            "condition_number": 8.116275783191892,
+            "predicted_angular_variance_mrad2": 0.45420718608906735,
+            "epipolar_angle_mrad2": 0.15664630622240525,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.39578568218469606
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9334214727825281,
+            1.0938940393244108
+          ]
+        },
+        {
+          "target_frame": 338,
+          "matches_sha256": "a923bf1ba7ede9b626809879062c6f9c3e9c34163cef41ad6645eb75600a2ce2",
+          "eligible": 167,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 29,
+          "low": {
+            "condition_number": 1.4399252993345868,
+            "predicted_angular_variance_mrad2": 0.5239152840076382,
+            "epipolar_angle_mrad2": 0.36938685373617086,
+            "q_above_9": 0.034482758620689655,
+            "epipolar_rms_mrad": 0.6077720409299615
+          },
+          "high": {
+            "condition_number": 10.455301330103685,
+            "predicted_angular_variance_mrad2": 0.5305050239640525,
+            "epipolar_angle_mrad2": 1.3560883122399732,
+            "q_above_9": 0.034482758620689655,
+            "epipolar_rms_mrad": 1.1645120489887484
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9237405871085841,
+            1.0938193320317418
+          ]
+        },
+        {
+          "target_frame": 339,
+          "matches_sha256": "d5737ab53d771b19e9f03eed096ac6ef19156106312f14603ee5915636150691",
+          "eligible": 159,
+          "low_available": 40,
+          "high_available": 40,
+          "matched_points_per_group": 26,
+          "low": {
+            "condition_number": 1.4829643865389492,
+            "predicted_angular_variance_mrad2": 0.40699612850216343,
+            "epipolar_angle_mrad2": 1.1708986642339925,
+            "q_above_9": 0.19230769230769232,
+            "epipolar_rms_mrad": 1.0820807105914014
+          },
+          "high": {
+            "condition_number": 10.09936271517814,
+            "predicted_angular_variance_mrad2": 0.39815197769851135,
+            "epipolar_angle_mrad2": 1.0732313783335552,
+            "q_above_9": 0.19230769230769232,
+            "epipolar_rms_mrad": 1.0359688114675825
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9146256195122808,
+            1.0754287953048083
+          ]
+        },
+        {
+          "target_frame": 340,
+          "matches_sha256": "1e8d327e2ab221c3438fe5976a742b001e1e8c582f302bd6780bb08ad087ba65",
+          "eligible": 156,
+          "low_available": 39,
+          "high_available": 39,
+          "matched_points_per_group": 23,
+          "low": {
+            "condition_number": 1.3981783530514222,
+            "predicted_angular_variance_mrad2": 0.5447877411903125,
+            "epipolar_angle_mrad2": 0.28818670998214296,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.5368302431701691
+          },
+          "high": {
+            "condition_number": 12.116705656166085,
+            "predicted_angular_variance_mrad2": 0.5360058074961485,
+            "epipolar_angle_mrad2": 0.4282433445879007,
+            "q_above_9": 0.043478260869565216,
+            "epipolar_rms_mrad": 0.6544030444518888
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9186290915131736,
+            1.0898806480197298
+          ]
+        },
+        {
+          "target_frame": 341,
+          "matches_sha256": "48de5b80a8f3b4d82bbccee83abf4fd4089e0f20f5173b18c18edad52575b0d7",
+          "eligible": 160,
+          "low_available": 40,
+          "high_available": 40,
+          "matched_points_per_group": 26,
+          "low": {
+            "condition_number": 1.5161553707741364,
+            "predicted_angular_variance_mrad2": 0.4488956015313913,
+            "epipolar_angle_mrad2": 1.0827443375402195,
+            "q_above_9": 0.19230769230769232,
+            "epipolar_rms_mrad": 1.040550016837355
+          },
+          "high": {
+            "condition_number": 13.392666762889066,
+            "predicted_angular_variance_mrad2": 0.45875264193071147,
+            "epipolar_angle_mrad2": 0.7361103001148006,
+            "q_above_9": 0.11538461538461539,
+            "epipolar_rms_mrad": 0.8579687057899027
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9102375754230918,
+            1.0901310290456898
+          ]
+        },
+        {
+          "target_frame": 342,
+          "matches_sha256": "36aba5697fc32371b81573637d09eae7870cc6afd832f55549979e4d0332d683",
+          "eligible": 156,
+          "low_available": 39,
+          "high_available": 39,
+          "matched_points_per_group": 28,
+          "low": {
+            "condition_number": 1.508314035298485,
+            "predicted_angular_variance_mrad2": 0.4502241000993465,
+            "epipolar_angle_mrad2": 2.986474103524159,
+            "q_above_9": 0.42857142857142855,
+            "epipolar_rms_mrad": 1.7281418065437104
+          },
+          "high": {
+            "condition_number": 12.358362692057282,
+            "predicted_angular_variance_mrad2": 0.4499925058160773,
+            "epipolar_angle_mrad2": 3.649982118735083,
+            "q_above_9": 0.5357142857142857,
+            "epipolar_rms_mrad": 1.9104926377076368
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9138288936664682,
+            1.0957028519471785
+          ]
+        },
+        {
+          "target_frame": 343,
+          "matches_sha256": "2f570cc503acb0d113124535444c9e4873cc6306d917d848f54f35fc0c7439b1",
+          "eligible": 165,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 28,
+          "low": {
+            "condition_number": 1.5240606341911729,
+            "predicted_angular_variance_mrad2": 0.39578785600391975,
+            "epipolar_angle_mrad2": 0.8040883711930954,
+            "q_above_9": 0.10714285714285714,
+            "epipolar_rms_mrad": 0.8967097474618503
+          },
+          "high": {
+            "condition_number": 13.462290948129413,
+            "predicted_angular_variance_mrad2": 0.39129063509251055,
+            "epipolar_angle_mrad2": 0.8184255481876539,
+            "q_above_9": 0.10714285714285714,
+            "epipolar_rms_mrad": 0.9046687505311841
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9140922337543296,
+            1.0957559978583145
+          ]
+        },
+        {
+          "target_frame": 344,
+          "matches_sha256": "32f81eff534b54ccf38ba2e25b92e010bc7c80330ae7dc15bf1c05a802f8c974",
+          "eligible": 155,
+          "low_available": 39,
+          "high_available": 39,
+          "matched_points_per_group": 25,
+          "low": {
+            "condition_number": 1.486651038296448,
+            "predicted_angular_variance_mrad2": 0.46221876411577545,
+            "epipolar_angle_mrad2": 1.5036060471177704,
+            "q_above_9": 0.24,
+            "epipolar_rms_mrad": 1.2262161502434106
+          },
+          "high": {
+            "condition_number": 14.141001422214261,
+            "predicted_angular_variance_mrad2": 0.45799963560009216,
+            "epipolar_angle_mrad2": 2.5073386994184643,
+            "q_above_9": 0.4,
+            "epipolar_rms_mrad": 1.5834578300095221
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9202541857223804,
+            1.0723204356891056
+          ]
+        },
+        {
+          "target_frame": 345,
+          "matches_sha256": "be139d4c18fb0d6c81da71be365bbbf4c622183416387db5e6979f1f25ff8bb7",
+          "eligible": 153,
+          "low_available": 39,
+          "high_available": 39,
+          "matched_points_per_group": 25,
+          "low": {
+            "condition_number": 1.434411747627745,
+            "predicted_angular_variance_mrad2": 0.46720137492385755,
+            "epipolar_angle_mrad2": 0.4050476060051425,
+            "q_above_9": 0.04,
+            "epipolar_rms_mrad": 0.6364335047788908
+          },
+          "high": {
+            "condition_number": 10.737503543635482,
+            "predicted_angular_variance_mrad2": 0.4567366943095288,
+            "epipolar_angle_mrad2": 0.4653908593815661,
+            "q_above_9": 0.08,
+            "epipolar_rms_mrad": 0.6821956166537323
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9156501988984627,
+            1.072319095985203
+          ]
+        },
+        {
+          "target_frame": 346,
+          "matches_sha256": "92eaf4c456929f71571aeab369307bebf610d5011d9f08c110c4b0cf94c5485e",
+          "eligible": 173,
+          "low_available": 44,
+          "high_available": 44,
+          "matched_points_per_group": 29,
+          "low": {
+            "condition_number": 1.4395168198963793,
+            "predicted_angular_variance_mrad2": 0.743395075348238,
+            "epipolar_angle_mrad2": 0.4537112734615836,
+            "q_above_9": 0.06896551724137931,
+            "epipolar_rms_mrad": 0.6735809331190897
+          },
+          "high": {
+            "condition_number": 11.198588686868586,
+            "predicted_angular_variance_mrad2": 0.7599456594641875,
+            "epipolar_angle_mrad2": 0.25077733121602874,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.5007767279097829
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9109359362587028,
+            1.095804839484264
+          ]
+        },
+        {
+          "target_frame": 347,
+          "matches_sha256": "e4fb41faa48e203dc9577cb32cc2b3770c8d4371ba91846fee9f2ba272034f2d",
+          "eligible": 161,
+          "low_available": 41,
+          "high_available": 41,
+          "matched_points_per_group": 27,
+          "low": {
+            "condition_number": 1.4691238669686502,
+            "predicted_angular_variance_mrad2": 0.4417218233174936,
+            "epipolar_angle_mrad2": 1.9823949358231525,
+            "q_above_9": 0.3333333333333333,
+            "epipolar_rms_mrad": 1.4079754741554102
+          },
+          "high": {
+            "condition_number": 12.771715098101165,
+            "predicted_angular_variance_mrad2": 0.4390037558278174,
+            "epipolar_angle_mrad2": 1.788182187942618,
+            "q_above_9": 0.3333333333333333,
+            "epipolar_rms_mrad": 1.3372292952005718
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.917899644336391,
+            1.0956242676971777
+          ]
+        },
+        {
+          "target_frame": 348,
+          "matches_sha256": "733cde8df212480fa4e50513abc657d5b538c789f358d4fd7760d006b95ba769",
+          "eligible": 171,
+          "low_available": 43,
+          "high_available": 43,
+          "matched_points_per_group": 26,
+          "low": {
+            "condition_number": 1.4065795150544937,
+            "predicted_angular_variance_mrad2": 0.6940750345768166,
+            "epipolar_angle_mrad2": 0.2799683670883753,
+            "q_above_9": 0.038461538461538464,
+            "epipolar_rms_mrad": 0.5291203710767289
+          },
+          "high": {
+            "condition_number": 13.442743429581842,
+            "predicted_angular_variance_mrad2": 0.6953163821130748,
+            "epipolar_angle_mrad2": 0.44594364020995386,
+            "q_above_9": 0.038461538461538464,
+            "epipolar_rms_mrad": 0.667790116885503
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9105800605272538,
+            1.0950017424453993
+          ]
+        },
+        {
+          "target_frame": 349,
+          "matches_sha256": "ccb45c11e7bb0467a17f3515ce8aeead81e1b2f1ea0b82b24fe6aaa2f190d903",
+          "eligible": 186,
+          "low_available": 47,
+          "high_available": 47,
+          "matched_points_per_group": 25,
+          "low": {
+            "condition_number": 1.4541221741685986,
+            "predicted_angular_variance_mrad2": 0.7986437290157987,
+            "epipolar_angle_mrad2": 1.253579693583691,
+            "q_above_9": 0.16,
+            "epipolar_rms_mrad": 1.1196337318890008
+          },
+          "high": {
+            "condition_number": 11.448906580406124,
+            "predicted_angular_variance_mrad2": 0.8061534924873465,
+            "epipolar_angle_mrad2": 1.1074914842186467,
+            "q_above_9": 0.12,
+            "epipolar_rms_mrad": 1.0523742130148603
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9147457659462946,
+            1.093335024401278
+          ]
+        },
+        {
+          "target_frame": 350,
+          "matches_sha256": "6be9d31cabe3a100b0b2e2782c8d205d299fc857ff939856cc5fec7f54142da0",
+          "eligible": 181,
+          "low_available": 46,
+          "high_available": 46,
+          "matched_points_per_group": 35,
+          "low": {
+            "condition_number": 1.5596943759340136,
+            "predicted_angular_variance_mrad2": 1.0366914961927407,
+            "epipolar_angle_mrad2": 0.2302261220430804,
+            "q_above_9": 0.02857142857142857,
+            "epipolar_rms_mrad": 0.47981884294291777
+          },
+          "high": {
+            "condition_number": 11.53531288241094,
+            "predicted_angular_variance_mrad2": 1.070401855619932,
+            "epipolar_angle_mrad2": 0.2760251392983297,
+            "q_above_9": 0.02857142857142857,
+            "epipolar_rms_mrad": 0.5253809468360361
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9252458967812411,
+            1.0927802232347374
+          ]
+        },
+        {
+          "target_frame": 351,
+          "matches_sha256": "20e0f059df9b367c384210f6871b61d1c9b74b2dfedb6300921c05c4e1379d02",
+          "eligible": 169,
+          "low_available": 43,
+          "high_available": 43,
+          "matched_points_per_group": 27,
+          "low": {
+            "condition_number": 1.5013563489764712,
+            "predicted_angular_variance_mrad2": 0.5927374523953423,
+            "epipolar_angle_mrad2": 0.9195905079179161,
+            "q_above_9": 0.07407407407407407,
+            "epipolar_rms_mrad": 0.9589528184003194
+          },
+          "high": {
+            "condition_number": 13.797914356105375,
+            "predicted_angular_variance_mrad2": 0.59750669669437,
+            "epipolar_angle_mrad2": 0.6908005270860341,
+            "q_above_9": 0.037037037037037035,
+            "epipolar_rms_mrad": 0.8311441072918908
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.909410774478353,
+            1.0924556054247254
+          ]
+        },
+        {
+          "target_frame": 352,
+          "matches_sha256": "a9eefc3c85e009814800d2acd51c172121cff114300cd78f305df58d914ca534",
+          "eligible": 167,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 26,
+          "low": {
+            "condition_number": 1.4441877839728767,
+            "predicted_angular_variance_mrad2": 0.502673666916596,
+            "epipolar_angle_mrad2": 0.9058925666782358,
+            "q_above_9": 0.11538461538461539,
+            "epipolar_rms_mrad": 0.9517838865405507
+          },
+          "high": {
+            "condition_number": 12.619999693306717,
+            "predicted_angular_variance_mrad2": 0.5091094533312782,
+            "epipolar_angle_mrad2": 0.5633510821320026,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.7505671736307168
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9202487334874155,
+            1.0987223808261406
+          ]
+        },
+        {
+          "target_frame": 353,
+          "matches_sha256": "23ce31eb07daa74a8a2a14fed70419fda2249fb24cca2045fd51a1f18ea2b094",
+          "eligible": 155,
+          "low_available": 39,
+          "high_available": 39,
+          "matched_points_per_group": 24,
+          "low": {
+            "condition_number": 1.5268850716003957,
+            "predicted_angular_variance_mrad2": 0.45367462634512323,
+            "epipolar_angle_mrad2": 0.7426718724172279,
+            "q_above_9": 0.041666666666666664,
+            "epipolar_rms_mrad": 0.8617841217017334
+          },
+          "high": {
+            "condition_number": 14.42503777148304,
+            "predicted_angular_variance_mrad2": 0.4540910378853725,
+            "epipolar_angle_mrad2": 0.6069633494970165,
+            "q_above_9": 0.041666666666666664,
+            "epipolar_rms_mrad": 0.7790785258862013
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.918971053391843,
+            1.0902853173112428
+          ]
+        },
+        {
+          "target_frame": 354,
+          "matches_sha256": "71abbd38e1d4d9f5bb780ba5186925c841f56e99d6ae8ed1d130d4dda2d07237",
+          "eligible": 168,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 24,
+          "low": {
+            "condition_number": 1.6179684512075356,
+            "predicted_angular_variance_mrad2": 0.5171425834170306,
+            "epipolar_angle_mrad2": 2.6673575586101776,
+            "q_above_9": 0.375,
+            "epipolar_rms_mrad": 1.6332046897465662
+          },
+          "high": {
+            "condition_number": 23.128200642294033,
+            "predicted_angular_variance_mrad2": 0.5132897284418876,
+            "epipolar_angle_mrad2": 3.202630166282694,
+            "q_above_9": 0.4166666666666667,
+            "epipolar_rms_mrad": 1.7895893848262214
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9096869258936032,
+            1.094694697181711
+          ]
+        },
+        {
+          "target_frame": 355,
+          "matches_sha256": "917390b584a9b65d32c25ce7638186602fd35fe43284b8ae25520c32c61ae554",
+          "eligible": 182,
+          "low_available": 46,
+          "high_available": 46,
+          "matched_points_per_group": 27,
+          "low": {
+            "condition_number": 1.5521488440481046,
+            "predicted_angular_variance_mrad2": 0.5072010466900575,
+            "epipolar_angle_mrad2": 0.34054390312535693,
+            "q_above_9": 0.037037037037037035,
+            "epipolar_rms_mrad": 0.5835613961918291
+          },
+          "high": {
+            "condition_number": 19.04796882586491,
+            "predicted_angular_variance_mrad2": 0.5091757991165573,
+            "epipolar_angle_mrad2": 0.41747353060368547,
+            "q_above_9": 0.07407407407407407,
+            "epipolar_rms_mrad": 0.6461219162075261
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9120208603860642,
+            1.0800071665165407
+          ]
+        },
+        {
+          "target_frame": 356,
+          "matches_sha256": "8c7900324d7fac0bfedf5950fe9cdd030b71b546a1a105d4c9976e8fd5766de6",
+          "eligible": 186,
+          "low_available": 47,
+          "high_available": 47,
+          "matched_points_per_group": 31,
+          "low": {
+            "condition_number": 1.4993258838708465,
+            "predicted_angular_variance_mrad2": 0.5396111456304418,
+            "epipolar_angle_mrad2": 2.397985661453897,
+            "q_above_9": 0.1935483870967742,
+            "epipolar_rms_mrad": 1.5485430770417388
+          },
+          "high": {
+            "condition_number": 12.98860035616844,
+            "predicted_angular_variance_mrad2": 0.5314623162185604,
+            "epipolar_angle_mrad2": 3.7377749073231694,
+            "q_above_9": 0.3225806451612903,
+            "epipolar_rms_mrad": 1.9333325909742403
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9132793685932671,
+            1.092236871423015
+          ]
+        },
+        {
+          "target_frame": 357,
+          "matches_sha256": "fe050f0e62117c56eec6f3cccb58268085ecb5ba1448a9086ef56c5079d00578",
+          "eligible": 180,
+          "low_available": 45,
+          "high_available": 45,
+          "matched_points_per_group": 27,
+          "low": {
+            "condition_number": 1.477717692414768,
+            "predicted_angular_variance_mrad2": 0.5216573315043614,
+            "epipolar_angle_mrad2": 0.42307081018369386,
+            "q_above_9": 0.07407407407407407,
+            "epipolar_rms_mrad": 0.6504389365526128
+          },
+          "high": {
+            "condition_number": 10.8410982896726,
+            "predicted_angular_variance_mrad2": 0.5244101312338632,
+            "epipolar_angle_mrad2": 1.2373656324514526,
+            "q_above_9": 0.2222222222222222,
+            "epipolar_rms_mrad": 1.112369377703042
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9136063938477149,
+            1.092867022664376
+          ]
+        },
+        {
+          "target_frame": 358,
+          "matches_sha256": "cf4da002e6a2ed941dacb97b178d5b83d14bf04128e9b8a1160315f5b2c8fafc",
+          "eligible": 174,
+          "low_available": 44,
+          "high_available": 44,
+          "matched_points_per_group": 29,
+          "low": {
+            "condition_number": 1.4478448185262265,
+            "predicted_angular_variance_mrad2": 0.664412288858739,
+            "epipolar_angle_mrad2": 3.252285740190911,
+            "q_above_9": 0.3448275862068966,
+            "epipolar_rms_mrad": 1.8034094765723372
+          },
+          "high": {
+            "condition_number": 15.308978025175806,
+            "predicted_angular_variance_mrad2": 0.6771116473340153,
+            "epipolar_angle_mrad2": 5.234192843213574,
+            "q_above_9": 0.41379310344827586,
+            "epipolar_rms_mrad": 2.287835842715463
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9270519974783021,
+            1.0912093196639099
+          ]
+        },
+        {
+          "target_frame": 359,
+          "matches_sha256": "1995c32e4f627baa355a023cc85c2372548855de304242db0bff6d4674c1f295",
+          "eligible": 172,
+          "low_available": 43,
+          "high_available": 43,
+          "matched_points_per_group": 26,
+          "low": {
+            "condition_number": 1.4892104659814032,
+            "predicted_angular_variance_mrad2": 0.6674646749729007,
+            "epipolar_angle_mrad2": 0.6183999413332537,
+            "q_above_9": 0.038461538461538464,
+            "epipolar_rms_mrad": 0.7863840927519158
+          },
+          "high": {
+            "condition_number": 9.774328920895755,
+            "predicted_angular_variance_mrad2": 0.6460859710192595,
+            "epipolar_angle_mrad2": 0.32343179579645304,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.5687106432945079
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9110078822198879,
+            1.0899646371159704
+          ]
+        },
+        {
+          "target_frame": 360,
+          "matches_sha256": "546e7e57d3397aa53a6fcfff8c8bd48a2bc8c054fadc6de5a3d2651e1d0b0c85",
+          "eligible": 179,
+          "low_available": 45,
+          "high_available": 45,
+          "matched_points_per_group": 25,
+          "low": {
+            "condition_number": 1.4691396406681603,
+            "predicted_angular_variance_mrad2": 0.6546883023822464,
+            "epipolar_angle_mrad2": 0.46267412399257873,
+            "q_above_9": 0.04,
+            "epipolar_rms_mrad": 0.6802015318952014
+          },
+          "high": {
+            "condition_number": 10.833820915764997,
+            "predicted_angular_variance_mrad2": 0.6534393244951491,
+            "epipolar_angle_mrad2": 1.0997390745983058,
+            "q_above_9": 0.12,
+            "epipolar_rms_mrad": 1.0486844494881697
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9226066867535285,
+            1.0902994357140157
+          ]
+        },
+        {
+          "target_frame": 361,
+          "matches_sha256": "06fce2215977a41808d5bc8cbbf1eb6404c8005b7085e454500681cff346f96d",
+          "eligible": 183,
+          "low_available": 46,
+          "high_available": 46,
+          "matched_points_per_group": 19,
+          "low": {
+            "condition_number": 1.5100191074275389,
+            "predicted_angular_variance_mrad2": 0.6118373057052541,
+            "epipolar_angle_mrad2": 0.15343616619221784,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.3917092878554424
+          },
+          "high": {
+            "condition_number": 18.7454239637088,
+            "predicted_angular_variance_mrad2": 0.6293292693945821,
+            "epipolar_angle_mrad2": 0.6968329995697092,
+            "q_above_9": 0.10526315789473684,
+            "epipolar_rms_mrad": 0.8347652362009987
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9216785172875536,
+            1.09853601937087
+          ]
+        },
+        {
+          "target_frame": 362,
+          "matches_sha256": "47a0bbee6cf014bb43e75096d97b66d281b99cf06de24bfdad7a1db0d626a300",
+          "eligible": 170,
+          "low_available": 43,
+          "high_available": 43,
+          "matched_points_per_group": 23,
+          "low": {
+            "condition_number": 1.5559941206830183,
+            "predicted_angular_variance_mrad2": 0.5144113762149323,
+            "epipolar_angle_mrad2": 0.6582753196786802,
+            "q_above_9": 0.043478260869565216,
+            "epipolar_rms_mrad": 0.8113416787511167
+          },
+          "high": {
+            "condition_number": 15.188629765316195,
+            "predicted_angular_variance_mrad2": 0.5194254574431084,
+            "epipolar_angle_mrad2": 0.9407849261656579,
+            "q_above_9": 0.13043478260869565,
+            "epipolar_rms_mrad": 0.9699406817768074
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9231509877548425,
+            1.0962894575968505
+          ]
+        },
+        {
+          "target_frame": 363,
+          "matches_sha256": "1bdb491b3b6f1156800cd97b2ff6bb05aafe7a015a02b5079592fcac633537ff",
+          "eligible": 173,
+          "low_available": 44,
+          "high_available": 44,
+          "matched_points_per_group": 26,
+          "low": {
+            "condition_number": 1.4620310956714362,
+            "predicted_angular_variance_mrad2": 0.4107692135963302,
+            "epipolar_angle_mrad2": 0.4336303673991662,
+            "q_above_9": 0.038461538461538464,
+            "epipolar_rms_mrad": 0.6585061635240526
+          },
+          "high": {
+            "condition_number": 13.563793369946385,
+            "predicted_angular_variance_mrad2": 0.4174390560531108,
+            "epipolar_angle_mrad2": 0.4838374929675705,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.6955842817139922
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9210564445280013,
+            1.09590018839887
+          ]
+        },
+        {
+          "target_frame": 364,
+          "matches_sha256": "37121d29d9b48eedcc37682cc06b3427109b2f2b89592e88183bb898a309ecb3",
+          "eligible": 168,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 23,
+          "low": {
+            "condition_number": 1.4864019634301275,
+            "predicted_angular_variance_mrad2": 0.35771490285242213,
+            "epipolar_angle_mrad2": 0.34331662761082216,
+            "q_above_9": 0.043478260869565216,
+            "epipolar_rms_mrad": 0.5859322722045801
+          },
+          "high": {
+            "condition_number": 17.803726129861555,
+            "predicted_angular_variance_mrad2": 0.3642490426596717,
+            "epipolar_angle_mrad2": 1.0264323560610067,
+            "q_above_9": 0.21739130434782608,
+            "epipolar_rms_mrad": 1.0131299798451365
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.921042058405497,
+            1.0983399120033868
+          ]
+        },
+        {
+          "target_frame": 365,
+          "matches_sha256": "30e8317583f8ede63728b64e111f09900d0445c555c5fcfda8edc9570ffe8f3f",
+          "eligible": 178,
+          "low_available": 45,
+          "high_available": 45,
+          "matched_points_per_group": 24,
+          "low": {
+            "condition_number": 1.4064429675467538,
+            "predicted_angular_variance_mrad2": 0.640771068703703,
+            "epipolar_angle_mrad2": 0.6502612933554832,
+            "q_above_9": 0.08333333333333333,
+            "epipolar_rms_mrad": 0.8063878058077784
+          },
+          "high": {
+            "condition_number": 15.751309908813612,
+            "predicted_angular_variance_mrad2": 0.6578688780362941,
+            "epipolar_angle_mrad2": 1.0593278028630626,
+            "q_above_9": 0.125,
+            "epipolar_rms_mrad": 1.0292365145402989
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.911073755619824,
+            1.0958736447386714
+          ]
+        },
+        {
+          "target_frame": 366,
+          "matches_sha256": "27ccd488ae97c2698d4d9313fab2b2a3241e86d97f5c7066860b77fc61804238",
+          "eligible": 163,
+          "low_available": 41,
+          "high_available": 41,
+          "matched_points_per_group": 25,
+          "low": {
+            "condition_number": 1.4175327906793467,
+            "predicted_angular_variance_mrad2": 1.0380613576935687,
+            "epipolar_angle_mrad2": 1.6125496762619564,
+            "q_above_9": 0.08,
+            "epipolar_rms_mrad": 1.2698620697784293
+          },
+          "high": {
+            "condition_number": 11.08166404377808,
+            "predicted_angular_variance_mrad2": 1.0392746560761923,
+            "epipolar_angle_mrad2": 2.939356286564611,
+            "q_above_9": 0.16,
+            "epipolar_rms_mrad": 1.714455099022605
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.909657787658934,
+            1.0845550092304164
+          ]
+        },
+        {
+          "target_frame": 367,
+          "matches_sha256": "7542e0a8a91d0d47071681ff16f6ff4b8f94d73b47d1eb93f312b0c68b6a6aa3",
+          "eligible": 149,
+          "low_available": 38,
+          "high_available": 38,
+          "matched_points_per_group": 22,
+          "low": {
+            "condition_number": 1.3782240750678982,
+            "predicted_angular_variance_mrad2": 0.6825842988334313,
+            "epipolar_angle_mrad2": 0.321844630956818,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.5673135208655069
+          },
+          "high": {
+            "condition_number": 25.366762205640736,
+            "predicted_angular_variance_mrad2": 0.6922747498033606,
+            "epipolar_angle_mrad2": 0.7090670572195227,
+            "q_above_9": 0.09090909090909091,
+            "epipolar_rms_mrad": 0.8420611956500089
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9175852320302595,
+            1.0768914887588845
+          ]
+        },
+        {
+          "target_frame": 368,
+          "matches_sha256": "051ff85d46634b8008c5ace7cb94b74bb096e7b6e42eb260a03f658ce901a2ff",
+          "eligible": 159,
+          "low_available": 40,
+          "high_available": 40,
+          "matched_points_per_group": 24,
+          "low": {
+            "condition_number": 1.4488779256135447,
+            "predicted_angular_variance_mrad2": 1.2501396585322258,
+            "epipolar_angle_mrad2": 0.35084520660965995,
+            "q_above_9": 0.08333333333333333,
+            "epipolar_rms_mrad": 0.5923218775375936
+          },
+          "high": {
+            "condition_number": 10.003743277640394,
+            "predicted_angular_variance_mrad2": 1.274086145034023,
+            "epipolar_angle_mrad2": 0.7581759577762343,
+            "q_above_9": 0.08333333333333333,
+            "epipolar_rms_mrad": 0.870733000279784
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9268545469669974,
+            1.079131645956218
+          ]
+        },
+        {
+          "target_frame": 369,
+          "matches_sha256": "2c7903b536d548f381b1bb45d47b3bfa50784eacd395af4e14786a5016f7636f",
+          "eligible": 154,
+          "low_available": 39,
+          "high_available": 39,
+          "matched_points_per_group": 16,
+          "low": {
+            "condition_number": 1.486137437676247,
+            "predicted_angular_variance_mrad2": 0.8498296354298374,
+            "epipolar_angle_mrad2": 0.5599761373722685,
+            "q_above_9": 0.0625,
+            "epipolar_rms_mrad": 0.748315533296128
+          },
+          "high": {
+            "condition_number": 12.943896431741177,
+            "predicted_angular_variance_mrad2": 0.870630927792229,
+            "epipolar_angle_mrad2": 0.8578073891883558,
+            "q_above_9": 0.1875,
+            "epipolar_rms_mrad": 0.9261789185618272
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9095888809728908,
+            1.0685475787881382
+          ]
+        },
+        {
+          "target_frame": 370,
+          "matches_sha256": "7968a37ca6936b3d8ef4126f448eab288f2fbf490a55e12de96d6c5b88112255",
+          "eligible": 152,
+          "low_available": 38,
+          "high_available": 38,
+          "matched_points_per_group": 22,
+          "low": {
+            "condition_number": 1.4612173220981666,
+            "predicted_angular_variance_mrad2": 0.8148648154089837,
+            "epipolar_angle_mrad2": 0.9937288098452453,
+            "q_above_9": 0.09090909090909091,
+            "epipolar_rms_mrad": 0.9968594734691772
+          },
+          "high": {
+            "condition_number": 11.232001649014785,
+            "predicted_angular_variance_mrad2": 0.8347393534785524,
+            "epipolar_angle_mrad2": 1.2080316169250123,
+            "q_above_9": 0.045454545454545456,
+            "epipolar_rms_mrad": 1.0991049162500421
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9119324747182621,
+            1.0969397727288805
+          ]
+        },
+        {
+          "target_frame": 371,
+          "matches_sha256": "58988461aa3d5a7da94d2ef802d72cf26b9f898417c5119b376dfa9509b900a0",
+          "eligible": 145,
+          "low_available": 37,
+          "high_available": 37,
+          "matched_points_per_group": 16,
+          "low": {
+            "condition_number": 1.4891189355833245,
+            "predicted_angular_variance_mrad2": 0.606198980770893,
+            "epipolar_angle_mrad2": 0.35230140168083496,
+            "q_above_9": 0.125,
+            "epipolar_rms_mrad": 0.5935498308321172
+          },
+          "high": {
+            "condition_number": 9.445682399848337,
+            "predicted_angular_variance_mrad2": 0.5716156708528901,
+            "epipolar_angle_mrad2": 0.5437658954475932,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.7374048382317498
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9117068222443556,
+            1.0666829648294018
+          ]
+        },
+        {
+          "target_frame": 372,
+          "matches_sha256": "70bbf9dcf43cee6a08304329097a0a594520f27b69dcf2ef1fb1e5aecb30cec4",
+          "eligible": 138,
+          "low_available": 35,
+          "high_available": 35,
+          "matched_points_per_group": 20,
+          "low": {
+            "condition_number": 1.4990228118873492,
+            "predicted_angular_variance_mrad2": 0.5430349329476327,
+            "epipolar_angle_mrad2": 1.1295994399665215,
+            "q_above_9": 0.15,
+            "epipolar_rms_mrad": 1.062826156982656
+          },
+          "high": {
+            "condition_number": 15.545691080679484,
+            "predicted_angular_variance_mrad2": 0.5391348841783203,
+            "epipolar_angle_mrad2": 2.311136201561701,
+            "q_above_9": 0.4,
+            "epipolar_rms_mrad": 1.5202421522776235
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9188828320963995,
+            1.0715077163952653
+          ]
+        },
+        {
+          "target_frame": 373,
+          "matches_sha256": "febe3e04457301c0a363940b62855954335c5003480ebfb3688e389df3a7aa03",
+          "eligible": 141,
+          "low_available": 36,
+          "high_available": 36,
+          "matched_points_per_group": 22,
+          "low": {
+            "condition_number": 1.4821045809941114,
+            "predicted_angular_variance_mrad2": 0.44578903636013706,
+            "epipolar_angle_mrad2": 0.8554264049555826,
+            "q_above_9": 0.13636363636363635,
+            "epipolar_rms_mrad": 0.9248926450975716
+          },
+          "high": {
+            "condition_number": 13.427100149792365,
+            "predicted_angular_variance_mrad2": 0.4516178006925623,
+            "epipolar_angle_mrad2": 1.0213327741474452,
+            "q_above_9": 0.045454545454545456,
+            "epipolar_rms_mrad": 1.010610099963109
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9275249859228437,
+            1.0906332714499702
+          ]
+        },
+        {
+          "target_frame": 374,
+          "matches_sha256": "bff33c7f6f360961b19f929809c57cfd4011b772582034af2f37ceb37a5bcf0b",
+          "eligible": 139,
+          "low_available": 35,
+          "high_available": 35,
+          "matched_points_per_group": 20,
+          "low": {
+            "condition_number": 1.4805590284243155,
+            "predicted_angular_variance_mrad2": 0.511209409806962,
+            "epipolar_angle_mrad2": 0.7067253671667493,
+            "q_above_9": 0.1,
+            "epipolar_rms_mrad": 0.8406695945297114
+          },
+          "high": {
+            "condition_number": 9.832986877301725,
+            "predicted_angular_variance_mrad2": 0.4988878967409505,
+            "epipolar_angle_mrad2": 4.952032711259713,
+            "q_above_9": 0.2,
+            "epipolar_rms_mrad": 2.2253163171243124
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9117745197320782,
+            1.093639988069202
+          ]
+        },
+        {
+          "target_frame": 375,
+          "matches_sha256": "9ba3da0724d1b1dee1ef5b3c9dc39a611395d1b7201c3bb6126ab6134798c2f7",
+          "eligible": 123,
+          "low_available": 31,
+          "high_available": 31,
+          "matched_points_per_group": 15,
+          "low": {
+            "condition_number": 1.3934826000919733,
+            "predicted_angular_variance_mrad2": 0.45078267026854363,
+            "epipolar_angle_mrad2": 0.6760267432834273,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.8222084548844212
+          },
+          "high": {
+            "condition_number": 12.47839694337076,
+            "predicted_angular_variance_mrad2": 0.4543059524071714,
+            "epipolar_angle_mrad2": 0.9500377648670856,
+            "q_above_9": 0.06666666666666667,
+            "epipolar_rms_mrad": 0.9746988072564189
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9367139361252054,
+            1.0950529311362147
+          ]
+        },
+        {
+          "target_frame": 376,
+          "matches_sha256": "791bb5c20ef24f0733ac8a57af85dcb99198f6100d32e226cbc45a7b6793ba02",
+          "eligible": 131,
+          "low_available": 33,
+          "high_available": 33,
+          "matched_points_per_group": 20,
+          "low": {
+            "condition_number": 1.429258648410866,
+            "predicted_angular_variance_mrad2": 0.4300721948261986,
+            "epipolar_angle_mrad2": 1.474889845433934,
+            "q_above_9": 0.3,
+            "epipolar_rms_mrad": 1.2144504293852154
+          },
+          "high": {
+            "condition_number": 8.671349786761187,
+            "predicted_angular_variance_mrad2": 0.4250555450532133,
+            "epipolar_angle_mrad2": 0.880705349915044,
+            "q_above_9": 0.15,
+            "epipolar_rms_mrad": 0.9384590294280534
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9117788933979883,
+            1.0986639440994654
+          ]
+        },
+        {
+          "target_frame": 377,
+          "matches_sha256": "73d70ee24ad99c73e70615d08d7c8bc7c6a611744cbee23700e37a9991e5d592",
+          "eligible": 139,
+          "low_available": 35,
+          "high_available": 35,
+          "matched_points_per_group": 15,
+          "low": {
+            "condition_number": 1.4206862237790119,
+            "predicted_angular_variance_mrad2": 1.472586337785966,
+            "epipolar_angle_mrad2": 0.3448948759335941,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.5872775118575494
+          },
+          "high": {
+            "condition_number": 8.582768278062153,
+            "predicted_angular_variance_mrad2": 1.5161114915197311,
+            "epipolar_angle_mrad2": 1.3980226123949768,
+            "q_above_9": 0.2,
+            "epipolar_rms_mrad": 1.1823800625835066
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9342478363204041,
+            1.073236411765609
+          ]
+        },
+        {
+          "target_frame": 378,
+          "matches_sha256": "482787908f2cf863de89bce732b7587ac0f8df426ed8106e79d1a91799809d33",
+          "eligible": 149,
+          "low_available": 38,
+          "high_available": 38,
+          "matched_points_per_group": 15,
+          "low": {
+            "condition_number": 1.3614755199546036,
+            "predicted_angular_variance_mrad2": 0.570470035577,
+            "epipolar_angle_mrad2": 0.5674905466053431,
+            "q_above_9": 0.06666666666666667,
+            "epipolar_rms_mrad": 0.7533196842014306
+          },
+          "high": {
+            "condition_number": 8.948073463206551,
+            "predicted_angular_variance_mrad2": 0.5727374140487117,
+            "epipolar_angle_mrad2": 0.8617848509386022,
+            "q_above_9": 0.2,
+            "epipolar_rms_mrad": 0.928323677893978
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9095316258350652,
+            1.0694362493799077
+          ]
+        },
+        {
+          "target_frame": 379,
+          "matches_sha256": "22cc9f9d799be9861c8e8b5aa75c1d631e2d3d1bfd7fb844897c8905249c60bb",
+          "eligible": 152,
+          "low_available": 38,
+          "high_available": 38,
+          "matched_points_per_group": 17,
+          "low": {
+            "condition_number": 1.3727588044024714,
+            "predicted_angular_variance_mrad2": 0.43520053104098844,
+            "epipolar_angle_mrad2": 0.3304175188804846,
+            "q_above_9": 0.058823529411764705,
+            "epipolar_rms_mrad": 0.5748195533212876
+          },
+          "high": {
+            "condition_number": 9.038400223243013,
+            "predicted_angular_variance_mrad2": 0.4572744184901603,
+            "epipolar_angle_mrad2": 0.37447981508878464,
+            "q_above_9": 0.11764705882352941,
+            "epipolar_rms_mrad": 0.6119475591002751
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9188779189376882,
+            1.093529621639101
+          ]
+        },
+        {
+          "target_frame": 380,
+          "matches_sha256": "30ac7f31d4557a5e51272ff1b625372e3a246ef827c16d32f61fca3cfecbc376",
+          "eligible": 167,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 20,
+          "low": {
+            "condition_number": 1.3567740263752244,
+            "predicted_angular_variance_mrad2": 0.5588118820860883,
+            "epipolar_angle_mrad2": 0.8421952595430675,
+            "q_above_9": 0.2,
+            "epipolar_rms_mrad": 0.9177119698157301
+          },
+          "high": {
+            "condition_number": 9.800347662582391,
+            "predicted_angular_variance_mrad2": 0.5520990114049479,
+            "epipolar_angle_mrad2": 1.0242545583907467,
+            "q_above_9": 0.3,
+            "epipolar_rms_mrad": 1.0120546222367381
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9143898254300353,
+            1.0957648655610006
+          ]
+        },
+        {
+          "target_frame": 381,
+          "matches_sha256": "cc7a8c3188b1b07b092912a2b4f3f2030855e56d6059fa7e4d02f91bd7c2ee03",
+          "eligible": 165,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 17,
+          "low": {
+            "condition_number": 1.3922230359400098,
+            "predicted_angular_variance_mrad2": 0.2778554862792417,
+            "epipolar_angle_mrad2": 0.4020826234866578,
+            "q_above_9": 0.058823529411764705,
+            "epipolar_rms_mrad": 0.6340998529306389
+          },
+          "high": {
+            "condition_number": 7.715452629678426,
+            "predicted_angular_variance_mrad2": 0.29522384059974205,
+            "epipolar_angle_mrad2": 0.4345869959508187,
+            "q_above_9": 0.058823529411764705,
+            "epipolar_rms_mrad": 0.6592321260002569
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9159774822953979,
+            1.0901703836471661
+          ]
+        },
+        {
+          "target_frame": 382,
+          "matches_sha256": "9b73498ea9459c88f7d597b448bb798ec1649da87c4c66ada7217b4c5d7a839c",
+          "eligible": 163,
+          "low_available": 41,
+          "high_available": 41,
+          "matched_points_per_group": 23,
+          "low": {
+            "condition_number": 1.4408038135312011,
+            "predicted_angular_variance_mrad2": 0.4469002302658347,
+            "epipolar_angle_mrad2": 6.060012422873929,
+            "q_above_9": 0.2608695652173913,
+            "epipolar_rms_mrad": 2.461709248240728
+          },
+          "high": {
+            "condition_number": 10.56705115571168,
+            "predicted_angular_variance_mrad2": 0.46471138135218626,
+            "epipolar_angle_mrad2": 1.0032334671195955,
+            "q_above_9": 0.13043478260869565,
+            "epipolar_rms_mrad": 1.001615428754767
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9283052642447733,
+            1.0927874306960634
+          ]
+        },
+        {
+          "target_frame": 383,
+          "matches_sha256": "8cb9cbcfb09ed223e52016f4888acac3606d6b7ae24a784904643906e87f4890",
+          "eligible": 166,
+          "low_available": 42,
+          "high_available": 42,
+          "matched_points_per_group": 21,
+          "low": {
+            "condition_number": 1.3531739799136175,
+            "predicted_angular_variance_mrad2": 0.22903007709620157,
+            "epipolar_angle_mrad2": 0.49420916991745645,
+            "q_above_9": 0.14285714285714285,
+            "epipolar_rms_mrad": 0.7030001208516656
+          },
+          "high": {
+            "condition_number": 10.315157407963556,
+            "predicted_angular_variance_mrad2": 0.24244628035618973,
+            "epipolar_angle_mrad2": 0.5120810663927744,
+            "q_above_9": 0.09523809523809523,
+            "epipolar_rms_mrad": 0.715598397421888
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9401151106118057,
+            1.0928165679416206
+          ]
+        },
+        {
+          "target_frame": 384,
+          "matches_sha256": "067acacfc41d4c39f93a60e0ee28df75122fac0c8f50f88ac2bd5bc4653005b6",
+          "eligible": 180,
+          "low_available": 45,
+          "high_available": 45,
+          "matched_points_per_group": 26,
+          "low": {
+            "condition_number": 1.455045550466854,
+            "predicted_angular_variance_mrad2": 0.5403302969379621,
+            "epipolar_angle_mrad2": 4.272927050714684,
+            "q_above_9": 0.46153846153846156,
+            "epipolar_rms_mrad": 2.0671059602049153
+          },
+          "high": {
+            "condition_number": 10.357921321999632,
+            "predicted_angular_variance_mrad2": 0.5277397476228286,
+            "epipolar_angle_mrad2": 3.080764899360881,
+            "q_above_9": 0.5384615384615384,
+            "epipolar_rms_mrad": 1.7552107848805172
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9200676100318729,
+            1.0882840025181797
+          ]
+        },
+        {
+          "target_frame": 385,
+          "matches_sha256": "1cfa39cf0e940e2868bc43ceca31853aacb59377f2bda9f86b01405adce7e99f",
+          "eligible": 169,
+          "low_available": 43,
+          "high_available": 43,
+          "matched_points_per_group": 24,
+          "low": {
+            "condition_number": 1.4629053074007832,
+            "predicted_angular_variance_mrad2": 0.39318877529354346,
+            "epipolar_angle_mrad2": 0.4858722055853418,
+            "q_above_9": 0.08333333333333333,
+            "epipolar_rms_mrad": 0.697045339691287
+          },
+          "high": {
+            "condition_number": 10.681484625758548,
+            "predicted_angular_variance_mrad2": 0.3826694236390195,
+            "epipolar_angle_mrad2": 0.5170555219145951,
+            "q_above_9": 0.041666666666666664,
+            "epipolar_rms_mrad": 0.7190657285078987
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9171075250445673,
+            1.093093407914798
+          ]
+        },
+        {
+          "target_frame": 386,
+          "matches_sha256": "e49d180c1592193f1c381353e4daf40b9a254ea1d6b6f53b610e7a7076013151",
+          "eligible": 177,
+          "low_available": 45,
+          "high_available": 45,
+          "matched_points_per_group": 22,
+          "low": {
+            "condition_number": 1.4362931532109693,
+            "predicted_angular_variance_mrad2": 0.49290109274545346,
+            "epipolar_angle_mrad2": 0.23602559522450858,
+            "q_above_9": 0.09090909090909091,
+            "epipolar_rms_mrad": 0.48582465481334786
+          },
+          "high": {
+            "condition_number": 9.909276775556936,
+            "predicted_angular_variance_mrad2": 0.4795208892772073,
+            "epipolar_angle_mrad2": 0.38436849025985215,
+            "q_above_9": 0.045454545454545456,
+            "epipolar_rms_mrad": 0.6199745883984699
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9111643233305268,
+            1.0999523111973817
+          ]
+        },
+        {
+          "target_frame": 387,
+          "matches_sha256": "dea6a53c75b3be7e3e59085894746c8ec440fcf7a7e723ad0f936c16a030d08f",
+          "eligible": 176,
+          "low_available": 44,
+          "high_available": 44,
+          "matched_points_per_group": 24,
+          "low": {
+            "condition_number": 1.392441953215097,
+            "predicted_angular_variance_mrad2": 0.5247311736748584,
+            "epipolar_angle_mrad2": 0.21800410229761077,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.46690909425455696
+          },
+          "high": {
+            "condition_number": 10.049813519360345,
+            "predicted_angular_variance_mrad2": 0.5199654200732446,
+            "epipolar_angle_mrad2": 0.4747763231179379,
+            "q_above_9": 0.041666666666666664,
+            "epipolar_rms_mrad": 0.6890401462309275
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9119824607261788,
+            1.0940290210867742
+          ]
+        },
+        {
+          "target_frame": 388,
+          "matches_sha256": "25c944415584c87c7ba2217305895dba6ec101701abf6064ac96f74e2be81825",
+          "eligible": 185,
+          "low_available": 47,
+          "high_available": 47,
+          "matched_points_per_group": 30,
+          "low": {
+            "condition_number": 1.3919140138779325,
+            "predicted_angular_variance_mrad2": 0.8571061564049296,
+            "epipolar_angle_mrad2": 1.0182286704873362,
+            "q_above_9": 0.06666666666666667,
+            "epipolar_rms_mrad": 1.0090731740004468
+          },
+          "high": {
+            "condition_number": 9.469381848205197,
+            "predicted_angular_variance_mrad2": 0.8763697456908125,
+            "epipolar_angle_mrad2": 0.6776330349010945,
+            "q_above_9": 0.1,
+            "epipolar_rms_mrad": 0.8231846906381912
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.911280898050847,
+            1.0988655209658653
+          ]
+        },
+        {
+          "target_frame": 389,
+          "matches_sha256": "460f322bf97de5dd7ea6792caa98eb851c4ad0cf1833dff3d191401b62f8c940",
+          "eligible": 189,
+          "low_available": 48,
+          "high_available": 48,
+          "matched_points_per_group": 30,
+          "low": {
+            "condition_number": 1.4738474967232098,
+            "predicted_angular_variance_mrad2": 0.5227045523097293,
+            "epipolar_angle_mrad2": 0.8448467278069791,
+            "q_above_9": 0.1,
+            "epipolar_rms_mrad": 0.9191554426792995
+          },
+          "high": {
+            "condition_number": 10.097585365318775,
+            "predicted_angular_variance_mrad2": 0.5299835693968145,
+            "epipolar_angle_mrad2": 0.5307673454379044,
+            "q_above_9": 0.0,
+            "epipolar_rms_mrad": 0.7285378133205609
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9145089345629124,
+            1.08321730084037
+          ]
+        },
+        {
+          "target_frame": 390,
+          "matches_sha256": "1b02316c15b12d8359ef716b0ef8789de83fd0344f1914b1cc1838ac1ede4579",
+          "eligible": 183,
+          "low_available": 46,
+          "high_available": 46,
+          "matched_points_per_group": 25,
+          "low": {
+            "condition_number": 1.5676488830710704,
+            "predicted_angular_variance_mrad2": 0.4946779113132606,
+            "epipolar_angle_mrad2": 2.5342157997494015,
+            "q_above_9": 0.36,
+            "epipolar_rms_mrad": 1.5919220457514247
+          },
+          "high": {
+            "condition_number": 12.20898998261838,
+            "predicted_angular_variance_mrad2": 0.4995181341909764,
+            "epipolar_angle_mrad2": 1.9779165262867422,
+            "q_above_9": 0.36,
+            "epipolar_rms_mrad": 1.4063842029426887
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9160119528097056,
+            1.0971501252648657
+          ]
+        },
+        {
+          "target_frame": 391,
+          "matches_sha256": "eee59a0f8b3d2eab8933bc6f72336cf405595c2a57ac80832fa29d795ed43a05",
+          "eligible": 195,
+          "low_available": 49,
+          "high_available": 49,
+          "matched_points_per_group": 30,
+          "low": {
+            "condition_number": 1.467202238627904,
+            "predicted_angular_variance_mrad2": 0.5780332469104663,
+            "epipolar_angle_mrad2": 0.18382268197309262,
+            "q_above_9": 0.03333333333333333,
+            "epipolar_rms_mrad": 0.42874547458030693
+          },
+          "high": {
+            "condition_number": 12.172297649839772,
+            "predicted_angular_variance_mrad2": 0.5750759451125894,
+            "epipolar_angle_mrad2": 0.7071127163925582,
+            "q_above_9": 0.1,
+            "epipolar_rms_mrad": 0.8408999443409175
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9118058336603907,
+            1.0957575048127954
+          ]
+        },
+        {
+          "target_frame": 392,
+          "matches_sha256": "cc59d173a569943bead2174bb144cfee1eaee4db581d8522420a84f407d5bb34",
+          "eligible": 201,
+          "low_available": 51,
+          "high_available": 51,
+          "matched_points_per_group": 32,
+          "low": {
+            "condition_number": 1.4515906222330681,
+            "predicted_angular_variance_mrad2": 1.0990544756582856,
+            "epipolar_angle_mrad2": 0.4588649893599343,
+            "q_above_9": 0.09375,
+            "epipolar_rms_mrad": 0.6773957405829582
+          },
+          "high": {
+            "condition_number": 9.518480926636732,
+            "predicted_angular_variance_mrad2": 1.1253262764146954,
+            "epipolar_angle_mrad2": 0.671042850678361,
+            "q_above_9": 0.03125,
+            "epipolar_rms_mrad": 0.8191720519392498
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9119338319858871,
+            1.0861821776502047
+          ]
+        },
+        {
+          "target_frame": 393,
+          "matches_sha256": "0b3f5aaeb24cbb4d05524c6d9f65dc8818ec89aff353b6ec6ccc372143a245e7",
+          "eligible": 193,
+          "low_available": 49,
+          "high_available": 49,
+          "matched_points_per_group": 32,
+          "low": {
+            "condition_number": 1.4603580536924652,
+            "predicted_angular_variance_mrad2": 0.6254791625831542,
+            "epipolar_angle_mrad2": 0.2608074382655678,
+            "q_above_9": 0.03125,
+            "epipolar_rms_mrad": 0.5106930959642668
+          },
+          "high": {
+            "condition_number": 12.24977277958337,
+            "predicted_angular_variance_mrad2": 0.630798819292848,
+            "epipolar_angle_mrad2": 0.28921464030627014,
+            "q_above_9": 0.0625,
+            "epipolar_rms_mrad": 0.5377867981889014
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9166837326407286,
+            1.0942066181808163
+          ]
+        },
+        {
+          "target_frame": 394,
+          "matches_sha256": "78b82fa6c8dccfb187ce27a0f120d290aa2a24fc380fb25b66655cc75ac8a6b9",
+          "eligible": 195,
+          "low_available": 49,
+          "high_available": 49,
+          "matched_points_per_group": 35,
+          "low": {
+            "condition_number": 1.5258461221211248,
+            "predicted_angular_variance_mrad2": 0.5095320331662593,
+            "epipolar_angle_mrad2": 2.0207296103526065,
+            "q_above_9": 0.37142857142857144,
+            "epipolar_rms_mrad": 1.4215236932083146
+          },
+          "high": {
+            "condition_number": 13.532138461069295,
+            "predicted_angular_variance_mrad2": 0.5134972217907817,
+            "epipolar_angle_mrad2": 1.8946308950451822,
+            "q_above_9": 0.34285714285714286,
+            "epipolar_rms_mrad": 1.3764559183080227
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9107534750099026,
+            1.0967242781507083
+          ]
+        },
+        {
+          "target_frame": 395,
+          "matches_sha256": "a742ef9d43205710551c7bd24eaae469f8cfed6b1e72286409f4e83f50adf0b1",
+          "eligible": 205,
+          "low_available": 52,
+          "high_available": 52,
+          "matched_points_per_group": 33,
+          "low": {
+            "condition_number": 1.4832817844544341,
+            "predicted_angular_variance_mrad2": 1.5275770468621728,
+            "epipolar_angle_mrad2": 0.8308549795593193,
+            "q_above_9": 0.15151515151515152,
+            "epipolar_rms_mrad": 0.911512468131577
+          },
+          "high": {
+            "condition_number": 18.142911850182088,
+            "predicted_angular_variance_mrad2": 1.4899893399264215,
+            "epipolar_angle_mrad2": 0.6945969128207248,
+            "q_above_9": 0.030303030303030304,
+            "epipolar_rms_mrad": 0.8334248093383858
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9119320812395769,
+            1.0973212858443797
+          ]
+        },
+        {
+          "target_frame": 396,
+          "matches_sha256": "2ba1ee2be7c3d26689edad1a308dd7b9483feaf51cbac67321a49b7923b6b173",
+          "eligible": 187,
+          "low_available": 47,
+          "high_available": 47,
+          "matched_points_per_group": 30,
+          "low": {
+            "condition_number": 1.521247213103642,
+            "predicted_angular_variance_mrad2": 0.9873272230179142,
+            "epipolar_angle_mrad2": 0.7518853636453915,
+            "q_above_9": 0.1,
+            "epipolar_rms_mrad": 0.8671132357687729
+          },
+          "high": {
+            "condition_number": 13.195207635773878,
+            "predicted_angular_variance_mrad2": 0.9928482743769396,
+            "epipolar_angle_mrad2": 0.852891406845139,
+            "q_above_9": 0.1,
+            "epipolar_rms_mrad": 0.9235211999976713
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.914558846381699,
+            1.0994256010355803
+          ]
+        },
+        {
+          "target_frame": 397,
+          "matches_sha256": "f7b50a3e01762f65ddac761b1458b0d091ee0eca2e72c60bda90ec786d25b93d",
+          "eligible": 186,
+          "low_available": 47,
+          "high_available": 47,
+          "matched_points_per_group": 29,
+          "low": {
+            "condition_number": 1.5119958065400179,
+            "predicted_angular_variance_mrad2": 0.9953297345368445,
+            "epipolar_angle_mrad2": 0.7082630754177962,
+            "q_above_9": 0.06896551724137931,
+            "epipolar_rms_mrad": 0.8415836710736468
+          },
+          "high": {
+            "condition_number": 13.010835349887751,
+            "predicted_angular_variance_mrad2": 0.9924564251367516,
+            "epipolar_angle_mrad2": 0.6863003467438414,
+            "q_above_9": 0.10344827586206896,
+            "epipolar_rms_mrad": 0.8284324635984767
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9123397021089439,
+            1.0970939409773466
+          ]
+        },
+        {
+          "target_frame": 398,
+          "matches_sha256": "5d984cd077d9c261f803509388269e3237297c84efc2fa112cd9a9c86d93797d",
+          "eligible": 182,
+          "low_available": 46,
+          "high_available": 46,
+          "matched_points_per_group": 29,
+          "low": {
+            "condition_number": 1.5191515626820282,
+            "predicted_angular_variance_mrad2": 0.5950239139704465,
+            "epipolar_angle_mrad2": 0.465114633242931,
+            "q_above_9": 0.10344827586206896,
+            "epipolar_rms_mrad": 0.6819931328414759
+          },
+          "high": {
+            "condition_number": 14.553754717199674,
+            "predicted_angular_variance_mrad2": 0.6022231116519587,
+            "epipolar_angle_mrad2": 0.7822526634730949,
+            "q_above_9": 0.13793103448275862,
+            "epipolar_rms_mrad": 0.8844504867278297
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9277757916693072,
+            1.098218205605573
+          ]
+        },
+        {
+          "target_frame": 399,
+          "matches_sha256": "a6e78ccc86b04a6cd9137a80fb80adc2757ad439cf988765c23448ad4f354fd2",
+          "eligible": 190,
+          "low_available": 48,
+          "high_available": 48,
+          "matched_points_per_group": 22,
+          "low": {
+            "condition_number": 1.5813834845017825,
+            "predicted_angular_variance_mrad2": 1.8724832991474252,
+            "epipolar_angle_mrad2": 1.3289759514640738,
+            "q_above_9": 0.13636363636363635,
+            "epipolar_rms_mrad": 1.1528121926246588
+          },
+          "high": {
+            "condition_number": 16.722090069203016,
+            "predicted_angular_variance_mrad2": 1.8718088608483257,
+            "epipolar_angle_mrad2": 1.5389923879578686,
+            "q_above_9": 0.22727272727272727,
+            "epipolar_rms_mrad": 1.2405613197088923
+          },
+          "matched_predicted_variance_ratio_min_max": [
+            0.9091368265373291,
+            1.0907638033178138
+          ]
+        }
+      ]
+    }
+  ]
+}

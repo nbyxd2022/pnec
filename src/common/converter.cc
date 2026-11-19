@@ -74,6 +74,7 @@ pnec::features::KeyPoints KeyPointsFromOpticalFlow(
     pnec::features::KeyPoint keypoint(point,
                                       observation.covariance.cast<double>(),
                                       observation.hessian.cast<double>());
+    keypoint.fb_error_sq_px2_ = observation.fb_error_sq_px2;
 
     keypoints[id] = keypoint;
   }

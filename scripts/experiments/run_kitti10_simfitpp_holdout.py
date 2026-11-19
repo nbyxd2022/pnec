@@ -141,9 +141,13 @@ def score(args):
         raise ValueError("Ground truth differs from the archived KITTI 10 baseline")
     gt = project_rotations(np.loadtxt(gt_bytes.splitlines()).reshape(-1, 3, 4)[:, :, :3])
     config = replay_config(REPO, SEQUENCE)[0]
-    if digest(config) != manifest["config_sha256"][config.name]:
+    config_bytes = config.read_bytes()
+    expected_hash = manifest["config_sha256"][config.name]
+    canonical_bytes = config_bytes.replace(b"\r\n", b"\n")
+    if expected_hash not in (sha256(config_bytes).hexdigest(), sha256(canonical_bytes).hexdigest()):
         raise ValueError("Current camera config differs from the capture")
-    params = dict(line.split(":", 1) for line in config.read_text().splitlines() if line.startswith("Camera."))
+    params = dict(line.split(":", 1) for line in config_bytes.decode("utf-8").splitlines()
+                  if line.startswith("Camera."))
     if any(float(params["Camera." + name]) for name in ("k1", "k2", "p1", "p2")):
         raise ValueError("Expected rectified KITTI input")
     fx, fy, cx, cy = (float(params["Camera." + name]) for name in ("fx", "fy", "cx", "cy"))
