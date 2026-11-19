@@ -1,0 +1,122 @@
+{
+  "sequence": "09",
+  "source_run": "/home/yangxd/pnec_research/pnec_original_feedback_09_10.aup84u/09/pnec_increment_full_8smzbqan",
+  "source_report_sha256": "91270747010d305524f20fd1fa4056044d90e36f7740f70e300ab525970795b8",
+  "tool_git_commit": "a52d5e6e90e6d38792a3e0b3bcbf11eebe78b820",
+  "binary_sha256": "8621383eb427c9afcce88d37a8466d6f3a62c3c505ec7af54d16fb37c33d0c69",
+  "target_increment_scale": 0.03125,
+  "feedback_source": "original",
+  "feedback": "The feedback solution drives the next frame; weak estimates share inliers and Ceres initialization",
+  "baseline_exact_pose_rows_match": true,
+  "frames": 1591,
+  "tail_evaluation_start": 800,
+  "shared_feedback_metrics": {
+    "original": {
+      "rpe_1_deg": 0.14744868141151804,
+      "rpe_n_deg": 6.829390201270052,
+      "tail": {
+        "rpe_1_deg": 0.06277765300321518,
+        "rpe_n_deg": 1.7026903125754638
+      }
+    },
+    "weak_uniform": {
+      "rpe_1_deg": 0.14739035957435231,
+      "rpe_n_deg": 7.35899674357722,
+      "tail": {
+        "rpe_1_deg": 0.0599840196709022,
+        "rpe_n_deg": 1.6180289526567992
+      }
+    },
+    "weak_per_match": {
+      "rpe_1_deg": 0.14545836712374266,
+      "rpe_n_deg": 6.725977239308448,
+      "tail": {
+        "rpe_1_deg": 0.05695509327333139,
+        "rpe_n_deg": 1.6167326216022584
+      }
+    }
+  },
+  "independent_feedback_metrics": {
+    "original": {
+      "rpe_1_deg": 0.14744868141151804,
+      "rpe_n_deg": 6.829390201270052,
+      "tail": {
+        "rpe_1_deg": 0.06277765300321518,
+        "rpe_n_deg": 1.7026903125754638
+      }
+    }
+  },
+  "target_frame_errors_deg": [
+    {
+      "target_frame": 1057,
+      "original": 0.050083098875402465,
+      "weak_uniform": 0.050493645032444794,
+      "weak_per_match": 0.045258523014523114
+    },
+    {
+      "target_frame": 1058,
+      "original": 0.035593019579317826,
+      "weak_uniform": 0.02820166573487402,
+      "weak_per_match": 0.017919825744914523
+    },
+    {
+      "target_frame": 1059,
+      "original": 0.0892664329308552,
+      "weak_uniform": 0.018032635537682355,
+      "weak_per_match": 0.024577455961490944
+    },
+    {
+      "target_frame": 1103,
+      "original": 0.06467980227245675,
+      "weak_uniform": 0.0239623040926551,
+      "weak_per_match": 0.035407113525948525
+    },
+    {
+      "target_frame": 1104,
+      "original": 0.49719318713247884,
+      "weak_uniform": 0.4840055872056239,
+      "weak_per_match": 0.49539848758697275
+    },
+    {
+      "target_frame": 1105,
+      "original": 0.3266235889410031,
+      "weak_uniform": 0.3270527788456604,
+      "weak_per_match": 0.33661903622144734
+    },
+    {
+      "target_frame": 1106,
+      "original": 0.03207126162671166,
+      "weak_uniform": 0.025268018803300922,
+      "weak_per_match": 0.022198986101789893
+    },
+    {
+      "target_frame": 1107,
+      "original": 0.04276642415037284,
+      "weak_uniform": 0.0402493912085819,
+      "weak_per_match": 0.04341889073435486
+    },
+    {
+      "target_frame": 1118,
+      "original": 0.04715320621191242,
+      "weak_uniform": 0.046055051051838776,
+      "weak_per_match": 0.0355103600751493
+    },
+    {
+      "target_frame": 1119,
+      "original": 0.039173893330446,
+      "weak_uniform": 0.03345938392066988,
+      "weak_per_match": 0.04273092928293416
+    },
+    {
+      "target_frame": 1120,
+      "original": 0.036489293437428925,
+      "weak_uniform": 0.03976770209084097,
+      "weak_per_match": 0.037379137008335964
+    }
+  ],
+  "relative_poses_sha256": {
+    "original": "d676825b391e59f5a2f0a6f60fd6cfb9a5aaf00a98a1d25e2a7250a9a673f1a7",
+    "weak_uniform": "0b8b18e0e7adde6dc7dc4bc6f0b6224f1cb268b8466bbf1a832fc11f61dc3573",
+    "weak_per_match": "57b216b5e792419373e345dc6fcc70cfaaf911a205cb78c5fb160bcb87ce04fe"
+  }
+}

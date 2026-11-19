@@ -1,0 +1,55 @@
+{
+  "sequence": "10",
+  "source_run": "/home/yangxd/pnec_research/pnec_original_feedback_09_10.aup84u/10/pnec_increment_full_it3u1t2a",
+  "source_report_sha256": "94a902c93719fdd43b4ebaf3d9e8adf71f60a6eef59cef360ff3574fa8d681fe",
+  "tool_git_commit": "a52d5e6e90e6d38792a3e0b3bcbf11eebe78b820",
+  "binary_sha256": "8621383eb427c9afcce88d37a8466d6f3a62c3c505ec7af54d16fb37c33d0c69",
+  "target_increment_scale": 0.03125,
+  "feedback_source": "original",
+  "feedback": "The feedback solution drives the next frame; weak estimates share inliers and Ceres initialization",
+  "baseline_exact_pose_rows_match": true,
+  "frames": 1201,
+  "tail_evaluation_start": 800,
+  "shared_feedback_metrics": {
+    "original": {
+      "rpe_1_deg": 0.14558564259943532,
+      "rpe_n_deg": 8.851935763443333,
+      "tail": {
+        "rpe_1_deg": 0.20290559992045593,
+        "rpe_n_deg": 10.03409377732298
+      }
+    },
+    "weak_uniform": {
+      "rpe_1_deg": 0.142772387899332,
+      "rpe_n_deg": 9.249388101240346,
+      "tail": {
+        "rpe_1_deg": 0.1985370931657653,
+        "rpe_n_deg": 10.003444669048926
+      }
+    },
+    "weak_per_match": {
+      "rpe_1_deg": 0.13947402973048467,
+      "rpe_n_deg": 8.993591756624214,
+      "tail": {
+        "rpe_1_deg": 0.19664180368781795,
+        "rpe_n_deg": 9.85667043166164
+      }
+    }
+  },
+  "independent_feedback_metrics": {
+    "original": {
+      "rpe_1_deg": 0.14558564259943532,
+      "rpe_n_deg": 8.851935763443333,
+      "tail": {
+        "rpe_1_deg": 0.20290559992045593,
+        "rpe_n_deg": 10.03409377732298
+      }
+    }
+  },
+  "target_frame_errors_deg": [],
+  "relative_poses_sha256": {
+    "original": "b40711ca352c9dd66157f3e531814e33d63eaf03954065c28472ea3aa29c7abd",
+    "weak_uniform": "8a1287dc114a9a9ab651354bdf1010c175e8da4dea251834f3a6ab4478f898b3",
+    "weak_per_match": "01b1b59ddac8c6e7a78375bb1e5a4092a24397b80fc96ad499c2f57efe895ced"
+  }
+}
