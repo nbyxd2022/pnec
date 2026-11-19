@@ -43,7 +43,7 @@ def evaluate(out, solve_exe, reference, online_errors):
     return frames, hashes
 
 
-def replay_inputs(repo, dataset):
+def replay_inputs(repo, dataset, *, full=False):
     archive = repo / "docs/experiments/results"
     drift = read_json(archive / "pnec_kitti_09_weak_allocation_rotation_drift_741b480_user_report.json")
     original = Path(drift["source_run"])
@@ -63,7 +63,7 @@ def replay_inputs(repo, dataset):
         raise ValueError("Ground truth and timestamp coverage differ")
 
     source = dataset_sequence / "image_0"
-    end = max(TARGETS) + 1
+    end = len(times) if full else max(TARGETS) + 1
     for frame in range(end):
         name = f"{frame:06d}.png"
         checked_file(source / name, original_manifest["image_sha256"][name])

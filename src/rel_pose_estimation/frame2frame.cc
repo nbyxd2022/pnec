@@ -396,7 +396,42 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
     };
   }
   RefinementObserver observer;
+  const char *shared_setting = std::getenv("PNEC_SHARED_WEAK_OUTPUTS");
+  const bool shared_weak = shared_setting && *shared_setting;
   const char *audit_setting = std::getenv("PNEC_FIXED_INPUT_AUDIT");
+  if (shared_weak) {
+    if (std::string_view(shared_setting) != "1" || !ablation ||
+        mode != photometric::Mode::SymmetricAnalytic || (audit_setting && *audit_setting)) {
+      throw std::invalid_argument(
+          "Shared weak outputs require PNEC_SHARED_WEAK_OUTPUTS=1, analytic mode and a single observer");
+    }
+    observer = [&](const auto &left, const auto &right, const auto &nominal,
+                   const auto *source_covs, const auto &indices,
+                   const auto &init, const auto &) {
+      if (nominal.empty()) {
+        throw std::runtime_error("Shared weak outputs require inlier covariances");
+      }
+      auto per_match = nominal;
+      common::FrameTiming increment_timing(0);
+      AddPhotometricIncrements(*frame1, *frame2, matches, bvs2, indices,
+                               per_match, photometric::Mode::WeakPerMatch, increment_timing);
+      auto uniform = nominal;
+      const double half_mean = increment_timing.increment_trace_ / (2.0 * uniform.size());
+      for (size_t i = 0; i < uniform.size(); ++i) {
+        uniform[i] += half_mean * (Eigen::Matrix3d::Identity() - right[i] * right[i].transpose());
+      }
+      PNEC solver(options_);
+      const auto save = [&](const char *label, const auto &covariances) {
+        auto &poses = ablation_rel_poses_[label];
+        if (poses.empty()) {
+          poses.emplace_back(0.0, Sophus::SE3d());
+        }
+        poses.emplace_back(curr_timestamp_, solver.CeresSolver(left, right, covariances, init, source_covs));
+      };
+      save("weak_uniform", uniform);
+      save("weak_per_match", per_match);
+    };
+  }
   if (audit_setting && *audit_setting && std::string_view(audit_setting) != "1") {
     throw std::invalid_argument("PNEC_FIXED_INPUT_AUDIT expects 1 or unset");
   }

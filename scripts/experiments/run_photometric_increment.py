@@ -396,6 +396,7 @@ def run(args):
             env = dict(os.environ, PNEC_PHOTOMETRIC_INCREMENT=mode, OPENBLAS_NUM_THREADS="1")
             env.pop("PNEC_MATCH_DIAGNOSTICS_FRAMES", None)
             env.pop("PNEC_FIXED_INPUT_AUDIT", None)
+            env.pop("PNEC_SHARED_WEAK_OUTPUTS", None)
             env.pop("PNEC_PREVIOUS_ROTATION_BY_VIEW", None)
             if feedback:
                 env["PNEC_PREVIOUS_ROTATION_BY_VIEW"] = "1"

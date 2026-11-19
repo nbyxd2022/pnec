@@ -1,0 +1,489 @@
+{
+  "sequence": "09",
+  "source_run": "/home/yangxd/pnec_research/pnec_weak_allocation_full_09_10.p8Fgov/09/pnec_increment_full_7aqz3gl2",
+  "source_report_sha256": "2bc0d166babf858e3e8e7cfd35ded9dc2fac780afdb32e7d48682fe619a5e59b",
+  "tool_git_commit": "49cec8dd870e930e264402cd522d6ff2d0c95913",
+  "scope": "Ceres re-solves on archived online inliers and initializations for each target frame",
+  "replay_end_exclusive": 1121,
+  "target_increment_scale": 0.03125,
+  "exact_pose_prefix_match": {
+    "weak_uniform": true,
+    "weak_per_match": true
+  },
+  "binary_sha256": {
+    "pnec_vo": "2e9b1e834371cff69c14dd940986826415e17361440247e588aced0cb385fd15",
+    "pnec_fixed_refine": "5d072576895c7a7df9e373a935f46ca8657c6d828d0c17c8f0475be7c563b95c"
+  },
+  "capture_sha256": {
+    "weak_uniform": {
+      "capture/ablation/PNEC.txt": "39cafadc3ecb269b282c91701ff6165a13c751254f09973be94fed5131e4800d",
+      "capture/ablation/fixed_1056_1057_points.csv": "ea9d47ce2a728136df99c8202e8a9e430fd8d1b8739039f922de2b1062dc402e",
+      "capture/ablation/fixed_1056_1057_poses.csv": "392adeb3d1baa528d963b5d4d0978991bd00e9f735e9d94aef7e2c6bb729a8c7",
+      "capture/ablation/matches_1056_1057.csv": "ee17839e18ba7ea44d74dab33c2fd248b0370802b858a81d771b3ad0ed15967c",
+      "capture/ablation/fixed_1057_1058_points.csv": "5452916320b9368e9970219991e022ff64147fee32f1da3a64d040a26c9583bd",
+      "capture/ablation/fixed_1057_1058_poses.csv": "4b61216456bcedb40a3f2a0a06c0acb3b8a931c62073c1fa419e648723d4f60a",
+      "capture/ablation/matches_1057_1058.csv": "fe0ae75f9d774c1a1f9deaad7810227eebf679e69f992e2440f571cad46b3a7d",
+      "capture/ablation/fixed_1058_1059_points.csv": "5f83bd4869c322a3694df08dcb065501c1ccf0967a3b4a4553c0716b04e84b17",
+      "capture/ablation/fixed_1058_1059_poses.csv": "9962436fa874ad280dc9b7717054c9e79bdfb1a451bd17cfdaec6214036d10c6",
+      "capture/ablation/matches_1058_1059.csv": "b853126772c4437b61c143f1ccb9e25a572500c177616195e837b378f4f2c472",
+      "capture/ablation/fixed_1102_1103_points.csv": "310677af370bbf8199379f68eaec9ad7564dc8eec760f0cc679f6d4eb3add142",
+      "capture/ablation/fixed_1102_1103_poses.csv": "53261730d8585b6d295a55f908e14d1f6eb65bd6b3143ae364e95f14973079fb",
+      "capture/ablation/matches_1102_1103.csv": "938bacacc194688b6001072686ce7d00d4c53c43de39dfe88a15062de38969da",
+      "capture/ablation/fixed_1103_1104_points.csv": "d7f50610fd001b39ccc9d1797af8688d36cb610dff7e3bc353fd158518e8f1f6",
+      "capture/ablation/fixed_1103_1104_poses.csv": "deb128930261d77503c809b481f62fd0ae1df9611903dc8e3ddc11c8763ede55",
+      "capture/ablation/matches_1103_1104.csv": "3a9485d5f3fb3675bb1c905e8746aa7232665c0b00458cfac121b45961ada7f8",
+      "capture/ablation/fixed_1104_1105_points.csv": "8a2ec8767ef4855e44e944a70a6f3853fab397dd22968576439bd2405687f624",
+      "capture/ablation/fixed_1104_1105_poses.csv": "eb519a37e535aac1586635e6118657fbaff2452a57fff2ef4ce30ed163c78124",
+      "capture/ablation/matches_1104_1105.csv": "23d65cb0fda131095338b0c4f36b09d59d58013bbbf5eaba662f6748701e6af6",
+      "capture/ablation/fixed_1105_1106_points.csv": "4d3f51a6af167fd0cf6ec06f6ecef7755d815a248203e3f1ac1bdaa3cd0bf7bf",
+      "capture/ablation/fixed_1105_1106_poses.csv": "1c6baf11ada390e302fee428adbd056ce69f8bc6b2d78c9fe212c197ccc0ff81",
+      "capture/ablation/matches_1105_1106.csv": "83f5d3b1b0a8ab892c6d40e552bfd09c7ba1a4c1e504ab82cd377c3a5539c1c4",
+      "capture/ablation/fixed_1106_1107_points.csv": "b300fae13ce2255b3e2046e7118b46f5e1b24b1d50df7c19ddb1a8246d7de504",
+      "capture/ablation/fixed_1106_1107_poses.csv": "780e64a7997add881365d69cf232414abfe5447aed96eb717322a7cc742d9d6e",
+      "capture/ablation/matches_1106_1107.csv": "f449bbb1f1e1be5b7fdf6e99fe29a3f0229d8442824771d0e73b01c70aaf73c7",
+      "capture/ablation/fixed_1117_1118_points.csv": "68b6ff08b6f9accf8037db9931b073c37866674ed51b61b2fb3c53cc36f362d8",
+      "capture/ablation/fixed_1117_1118_poses.csv": "3826bd64eb2f257023abcc5d5e6bcf64c1ba8c92e40aaf9db4afc4d1ccf051c0",
+      "capture/ablation/matches_1117_1118.csv": "689d967c3b74116de1f06dd5f602b31e9d6b29eec97f97d16766e67addaff75e",
+      "capture/ablation/fixed_1118_1119_points.csv": "2c815d5633e565021cdba817a44f48f5e519488a630ec9f42b57aaa1aaba96a0",
+      "capture/ablation/fixed_1118_1119_poses.csv": "acf3578814f47422d067e4e5a248c4f927d6bbfb89d7e2ec5fcba5b8d0b594d3",
+      "capture/ablation/matches_1118_1119.csv": "3dfa57928dc2aae5555f4a087ceb71065ed5d37679e38df1b40bbdf580d92ca9",
+      "capture/ablation/fixed_1119_1120_points.csv": "f6f1c806701b8e944a0751571f7dee30e8c0873c2ad51e587ee89a0df8584cd5",
+      "capture/ablation/fixed_1119_1120_poses.csv": "b829b75dd779e1cccf2aa179480496e573fe7635c7a8430d0e1d41a26604b7ae",
+      "capture/ablation/matches_1119_1120.csv": "383e118152fc3005d020085435223912ea2e735414b24b46546e60abebad0859"
+    },
+    "weak_per_match": {
+      "capture/ablation/PNEC.txt": "253fa2a76ecaa7090b916532059ce41185a70a41319a9ec519fa91198fa02d16",
+      "capture/ablation/fixed_1056_1057_points.csv": "ea9d47ce2a728136df99c8202e8a9e430fd8d1b8739039f922de2b1062dc402e",
+      "capture/ablation/fixed_1056_1057_poses.csv": "2f7e533fdca53eeb9da2ae11203ffcbb9b5baa868b76c335ab2975b2dfa85d29",
+      "capture/ablation/matches_1056_1057.csv": "ee17839e18ba7ea44d74dab33c2fd248b0370802b858a81d771b3ad0ed15967c",
+      "capture/ablation/fixed_1057_1058_points.csv": "c2dfa92e0662dbb89e9021487ca9d3eb4fa73b92e327100d09bb99dbcd4ff3cd",
+      "capture/ablation/fixed_1057_1058_poses.csv": "13409d33df4adb972c28d07e01d63b8ffa96329d7441f15b85b19655b07fccdd",
+      "capture/ablation/matches_1057_1058.csv": "66fd811416b36cdfbaa5885cbea97e6a2648c8a77ac9958ebe2b362b67fee139",
+      "capture/ablation/fixed_1058_1059_points.csv": "63da009a4dfff2a803fef14d006123d0c3f5b71d1083f5670a3d4dd277841db7",
+      "capture/ablation/fixed_1058_1059_poses.csv": "a6bd1cede57ddb5f63cb58c2808510c3cd83fda6e3d66105539760bd3f374c21",
+      "capture/ablation/matches_1058_1059.csv": "c1d31eecbcd7b6a09cb381d5f919c3256b3e0b9db1ef12791c507651358cea9d",
+      "capture/ablation/fixed_1102_1103_points.csv": "310677af370bbf8199379f68eaec9ad7564dc8eec760f0cc679f6d4eb3add142",
+      "capture/ablation/fixed_1102_1103_poses.csv": "6b9a0365510c6166b5819ff236962b9e3bb8f03c88e3208e292cea5717f287b5",
+      "capture/ablation/matches_1102_1103.csv": "938bacacc194688b6001072686ce7d00d4c53c43de39dfe88a15062de38969da",
+      "capture/ablation/fixed_1103_1104_points.csv": "3d4b176e39c2b34d9c6847373bae1b455a3704f6f1f17e624126a650b67a6d66",
+      "capture/ablation/fixed_1103_1104_poses.csv": "59d4d42a65dd92be807751be6bb092ee350458f24c1d8974cdc18dadc8d7dd71",
+      "capture/ablation/matches_1103_1104.csv": "b43ca83c1ddf10b66ad7da61999c5bc774e411e7d0565e26043c6f232705b36b",
+      "capture/ablation/fixed_1104_1105_points.csv": "8a2ec8767ef4855e44e944a70a6f3853fab397dd22968576439bd2405687f624",
+      "capture/ablation/fixed_1104_1105_poses.csv": "066ef86a0b7afeef0cf8adf40acabbd2015f7c364841d4a18c99bea7a17f1bc7",
+      "capture/ablation/matches_1104_1105.csv": "23d65cb0fda131095338b0c4f36b09d59d58013bbbf5eaba662f6748701e6af6",
+      "capture/ablation/fixed_1105_1106_points.csv": "862e8610270b7d981ba5498ca3de4539bbf558265ad11ff6816e66001a317cc7",
+      "capture/ablation/fixed_1105_1106_poses.csv": "e0dd12adffc537ad576afe5921d2af70d93499446c8975e64300b941b5fada8b",
+      "capture/ablation/matches_1105_1106.csv": "603b8cad57ba3d2296f7c196ff3971c1213891833be1fbee257563455b0bd81a",
+      "capture/ablation/fixed_1106_1107_points.csv": "b300fae13ce2255b3e2046e7118b46f5e1b24b1d50df7c19ddb1a8246d7de504",
+      "capture/ablation/fixed_1106_1107_poses.csv": "11f8f01501a6735afe4aa4e6c53458e03c106e3a59c34d5b553e32b1e05c3503",
+      "capture/ablation/matches_1106_1107.csv": "f449bbb1f1e1be5b7fdf6e99fe29a3f0229d8442824771d0e73b01c70aaf73c7",
+      "capture/ablation/fixed_1117_1118_points.csv": "68b6ff08b6f9accf8037db9931b073c37866674ed51b61b2fb3c53cc36f362d8",
+      "capture/ablation/fixed_1117_1118_poses.csv": "a25db46554c81a5c42712270fc25ff918d32ed113289491153bb80333a65fd5b",
+      "capture/ablation/matches_1117_1118.csv": "689d967c3b74116de1f06dd5f602b31e9d6b29eec97f97d16766e67addaff75e",
+      "capture/ablation/fixed_1118_1119_points.csv": "d532fcef3d98e6af0535a56df8f8cc1e3c85ecb2afdc968028eea3a7db6fd80b",
+      "capture/ablation/fixed_1118_1119_poses.csv": "3f3beb02fd3d7a5e6483a4f5e1f877294d29865a3f225f905a81c60ca22b023e",
+      "capture/ablation/matches_1118_1119.csv": "fa2e03ff86585b578125f0ec6f4a343efd22db917e1d2fc266b0b05f2c3272d1",
+      "capture/ablation/fixed_1119_1120_points.csv": "f6f1c806701b8e944a0751571f7dee30e8c0873c2ad51e587ee89a0df8584cd5",
+      "capture/ablation/fixed_1119_1120_poses.csv": "49b05125b380b44258e1cd0f93d809e4dc5318c58ca3e1a905649ef6af62d3ca",
+      "capture/ablation/matches_1119_1120.csv": "383e118152fc3005d020085435223912ea2e735414b24b46546e60abebad0859"
+    }
+  },
+  "frames": [
+    {
+      "target_frame": 1057,
+      "inliers": {
+        "weak_uniform": 144,
+        "weak_per_match": 144
+      },
+      "shared_inlier_ids": 144,
+      "initial_rotation_difference_deg": 2.3092155261097407e-13,
+      "initial_translation_axis_difference_deg": 0.0,
+      "native_replay_difference_deg": {
+        "weak_uniform": 3.36819181470798e-11,
+        "weak_per_match": 2.669300771737715e-10
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.05039351720049584,
+            "weak_per_match": 0.0457511380418295
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.05039351719747237,
+            "weak_per_match": 0.04575113804370874
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.05039351720049584,
+            "weak_per_match": 0.0457511380418295
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.05039351719747237,
+            "weak_per_match": 0.04575113804370874
+          }
+        }
+      }
+    },
+    {
+      "target_frame": 1058,
+      "inliers": {
+        "weak_uniform": 145,
+        "weak_per_match": 141
+      },
+      "shared_inlier_ids": 128,
+      "initial_rotation_difference_deg": 0.15228772000055502,
+      "initial_translation_axis_difference_deg": 4.045034049938113,
+      "native_replay_difference_deg": {
+        "weak_uniform": 4.0706231885263957e-10,
+        "weak_per_match": 2.6415456076487583e-10
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.042568311375525664,
+            "weak_per_match": 0.025865945617017803
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.042545736007892736,
+            "weak_per_match": 0.02585378342824232
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.11949755103707954,
+            "weak_per_match": 0.108313510601416
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.11955631827014615,
+            "weak_per_match": 0.1083230046974943
+          }
+        }
+      }
+    },
+    {
+      "target_frame": 1059,
+      "inliers": {
+        "weak_uniform": 155,
+        "weak_per_match": 155
+      },
+      "shared_inlier_ids": 150,
+      "initial_rotation_difference_deg": 0.05727992607169903,
+      "initial_translation_axis_difference_deg": 0.6664367624489138,
+      "native_replay_difference_deg": {
+        "weak_uniform": 6.605413722302671e-10,
+        "weak_per_match": 5.775347766538337e-10
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.01777638630997732,
+            "weak_per_match": 0.024070936979664687
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.017772858593793486,
+            "weak_per_match": 0.024046755019988486
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.020565975353424297,
+            "weak_per_match": 0.01945949018310475
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.0205651538490757,
+            "weak_per_match": 0.01945780086608229
+          }
+        }
+      }
+    },
+    {
+      "target_frame": 1103,
+      "inliers": {
+        "weak_uniform": 255,
+        "weak_per_match": 255
+      },
+      "shared_inlier_ids": 255,
+      "initial_rotation_difference_deg": 7.22174621350643e-14,
+      "initial_translation_axis_difference_deg": 0.0,
+      "native_replay_difference_deg": {
+        "weak_uniform": 7.231223653442914e-10,
+        "weak_per_match": 1.4148001916536885e-09
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.023169550023687077,
+            "weak_per_match": 0.03527530107466178
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.023169550003543652,
+            "weak_per_match": 0.03527530106807086
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.023169550023687077,
+            "weak_per_match": 0.03527530107466178
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.023169550003543652,
+            "weak_per_match": 0.03527530106807086
+          }
+        }
+      }
+    },
+    {
+      "target_frame": 1104,
+      "inliers": {
+        "weak_uniform": 240,
+        "weak_per_match": 238
+      },
+      "shared_inlier_ids": 223,
+      "initial_rotation_difference_deg": 0.38301464872549507,
+      "initial_translation_axis_difference_deg": 10.780960271418108,
+      "native_replay_difference_deg": {
+        "weak_uniform": 4.73687831432737e-09,
+        "weak_per_match": 2.306175079685119e-09
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.1834460376908768,
+            "weak_per_match": 0.09147350294211723
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.18332418304721587,
+            "weak_per_match": 0.09153632127690912
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.48697101731120457,
+            "weak_per_match": 0.49770722160306224
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.4871054572840399,
+            "weak_per_match": 0.49765621177551167
+          }
+        }
+      }
+    },
+    {
+      "target_frame": 1105,
+      "inliers": {
+        "weak_uniform": 239,
+        "weak_per_match": 239
+      },
+      "shared_inlier_ids": 239,
+      "initial_rotation_difference_deg": 4.924687635319877e-12,
+      "initial_translation_axis_difference_deg": 0.0,
+      "native_replay_difference_deg": {
+        "weak_uniform": 1.9375552145109625e-09,
+        "weak_per_match": 5.591222884331147e-09
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.3276160493560783,
+            "weak_per_match": 0.3376039166263676
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.32761604931726485,
+            "weak_per_match": 0.33760391655127325
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.3276160493560783,
+            "weak_per_match": 0.3376039166263676
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.32761604931726485,
+            "weak_per_match": 0.33760391655127325
+          }
+        }
+      }
+    },
+    {
+      "target_frame": 1106,
+      "inliers": {
+        "weak_uniform": 260,
+        "weak_per_match": 254
+      },
+      "shared_inlier_ids": 239,
+      "initial_rotation_difference_deg": 0.8292841191679255,
+      "initial_translation_axis_difference_deg": 20.622507037946086,
+      "native_replay_difference_deg": {
+        "weak_uniform": 5.398164001991648e-10,
+        "weak_per_match": 4.68643772298676e-10
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.024210764408400417,
+            "weak_per_match": 0.02276660839186513
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.9461915808851649,
+            "weak_per_match": 1.9742340592430283
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.52382750335007,
+            "weak_per_match": 0.5151165689099219
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.8568884510938556,
+            "weak_per_match": 0.9751824218707517
+          }
+        }
+      }
+    },
+    {
+      "target_frame": 1107,
+      "inliers": {
+        "weak_uniform": 269,
+        "weak_per_match": 269
+      },
+      "shared_inlier_ids": 269,
+      "initial_rotation_difference_deg": 2.4752502994084085e-12,
+      "initial_translation_axis_difference_deg": 0.0,
+      "native_replay_difference_deg": {
+        "weak_uniform": 2.1359273408296206e-09,
+        "weak_per_match": 3.670422419112407e-09
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.04044556477034562,
+            "weak_per_match": 0.04317348270121666
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.04044556476716561,
+            "weak_per_match": 0.04317348271170422
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.04044556477034562,
+            "weak_per_match": 0.04317348270121666
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.04044556476716561,
+            "weak_per_match": 0.04317348271170422
+          }
+        }
+      }
+    },
+    {
+      "target_frame": 1118,
+      "inliers": {
+        "weak_uniform": 223,
+        "weak_per_match": 223
+      },
+      "shared_inlier_ids": 223,
+      "initial_rotation_difference_deg": 2.2674303380158985e-12,
+      "initial_translation_axis_difference_deg": 0.0,
+      "native_replay_difference_deg": {
+        "weak_uniform": 1.1421750746569266e-10,
+        "weak_per_match": 2.5736810536677834e-09
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.04780714752366813,
+            "weak_per_match": 0.037585418733173274
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.04780714754743915,
+            "weak_per_match": 0.03758541874788991
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.04780714752366813,
+            "weak_per_match": 0.037585418733173274
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.04780714754743915,
+            "weak_per_match": 0.03758541874788991
+          }
+        }
+      }
+    },
+    {
+      "target_frame": 1119,
+      "inliers": {
+        "weak_uniform": 219,
+        "weak_per_match": 216
+      },
+      "shared_inlier_ids": 202,
+      "initial_rotation_difference_deg": 0.057320246688200675,
+      "initial_translation_axis_difference_deg": 3.1397962443376026,
+      "native_replay_difference_deg": {
+        "weak_uniform": 3.455103963221662e-09,
+        "weak_per_match": 1.0392811764425334e-09
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.06201290980944273,
+            "weak_per_match": 0.07081937060973746
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.06202339306268239,
+            "weak_per_match": 0.07085060208224052
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.03504915248626416,
+            "weak_per_match": 0.04268545384871742
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.035041806603116135,
+            "weak_per_match": 0.042636751152883366
+          }
+        }
+      }
+    },
+    {
+      "target_frame": 1120,
+      "inliers": {
+        "weak_uniform": 221,
+        "weak_per_match": 221
+      },
+      "shared_inlier_ids": 221,
+      "initial_rotation_difference_deg": 9.17491929709739e-13,
+      "initial_translation_axis_difference_deg": 0.0,
+      "native_replay_difference_deg": {
+        "weak_uniform": 8.842045817190485e-10,
+        "weak_per_match": 2.948774422448925e-09
+      },
+      "errors_deg_by_inlier_source_then_init_source": {
+        "weak_uniform": {
+          "weak_uniform": {
+            "weak_uniform": 0.039633668152166936,
+            "weak_per_match": 0.03781269348163669
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.039633668152729916,
+            "weak_per_match": 0.03781269349847673
+          }
+        },
+        "weak_per_match": {
+          "weak_uniform": {
+            "weak_uniform": 0.039633668152166936,
+            "weak_per_match": 0.03781269348163669
+          },
+          "weak_per_match": {
+            "weak_uniform": 0.039633668152729916,
+            "weak_per_match": 0.03781269349847673
+          }
+        }
+      }
+    }
+  ]
+}
