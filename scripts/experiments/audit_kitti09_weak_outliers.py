@@ -43,7 +43,7 @@ def evaluate(out, solve_exe, reference, online_errors):
     return frames, hashes
 
 
-def run(repo, build, dataset, output_root):
+def replay_inputs(repo, dataset):
     archive = repo / "docs/experiments/results"
     drift = read_json(archive / "pnec_kitti_09_weak_allocation_rotation_drift_741b480_user_report.json")
     original = Path(drift["source_run"])
@@ -72,6 +72,12 @@ def run(repo, build, dataset, output_root):
         raise ValueError("Current KITTI config differs from original replay")
     poses = {mode: checked_file(original / "09" / mode / "ablation/PNEC.txt", sha)
              for mode, sha in saved["relative_poses"].items()}
+    return original, saved, times, reference, source, config, poses
+
+
+def run(repo, build, dataset, output_root):
+    original, saved, times, reference, source, config, poses = replay_inputs(repo, dataset)
+    end = max(TARGETS) + 1
     online_errors = {mode: gap_errors(reference, restore_rotations(path, times, 0), 1)
                      for mode, path in poses.items()}
 

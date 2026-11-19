@@ -191,6 +191,8 @@ Sophus::SE3d PNEC::Solve(const opengv::bearingVectors_t &bvs1,
     }
     Sophus::SE3d solution;
     if (options_.use_ceres_) {
+      // Diagnostic re-solves consume the covariances before the online increment.
+      const auto nominal_covs = observer && update ? in_proj_covs : std::vector<Eigen::Matrix3d>{};
       if (update) {
         update(in_proj_covs, inliers);
       }
@@ -217,8 +219,8 @@ Sophus::SE3d PNEC::Solve(const opengv::bearingVectors_t &bvs1,
       timing.ceres_ =
           std::chrono::duration_cast<std::chrono::milliseconds>(toc - tic);
       if (observer) {
-        observer(in_bvs1, in_bvs2, in_proj_covs, refinement_host_covariances,
-                 inliers, ceres_init, solution);
+        observer(in_bvs1, in_bvs2, update ? nominal_covs : in_proj_covs,
+                 refinement_host_covariances, inliers, ceres_init, solution);
       }
     } else {
       solution = ceres_init;

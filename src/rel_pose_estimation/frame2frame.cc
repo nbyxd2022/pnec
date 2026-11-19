@@ -248,8 +248,8 @@ void WriteFixedInputAudit(
     const std::vector<Eigen::Matrix3d> &nominal,
     const std::vector<Eigen::Matrix3d> *source_covariances,
     const std::vector<int> &indices, const Sophus::SE3d &init,
-    const Sophus::SE3d &baseline, const Options &options,
-    const std::string &folder) {
+    const Sophus::SE3d &online_solution, photometric::Mode online_mode,
+    const Options &options, const std::string &folder) {
   if (!source_covariances || source_covariances->size() != nominal.size() ||
       nominal.empty() || left.size() != nominal.size() ||
       right.size() != nominal.size() || indices.size() != nominal.size()) {
@@ -273,6 +273,8 @@ void WriteFixedInputAudit(
         (Eigen::Matrix3d::Identity() - right[i] * right[i].transpose());
   }
   PNEC solver(options);
+  const auto baseline = online_mode == photometric::Mode::SymmetricAnalytic
+      ? online_solution : solver.CeresSolver(left, right, nominal, init, source_covariances);
   const auto uniform_pose = solver.CeresSolver(left, right, uniform, init,
                                               source_covariances);
   const auto per_match_pose = solver.CeresSolver(left, right, per_match, init,
@@ -399,16 +401,17 @@ Sophus::SE3d Frame2Frame::Align(pnec::frames::BaseFrame::Ptr frame1,
     throw std::invalid_argument("PNEC_FIXED_INPUT_AUDIT expects 1 or unset");
   }
   if (audit_setting && *audit_setting) {
-    if (!ablation || mode != photometric::Mode::SymmetricAnalytic) {
-      throw std::invalid_argument("Fixed-input audit requires the symmetric analytic baseline with ablations");
+    if (!ablation || (mode != photometric::Mode::SymmetricAnalytic &&
+                      mode != photometric::Mode::WeakUniform && mode != photometric::Mode::WeakPerMatch)) {
+      throw std::invalid_argument("Fixed-input audit requires analytic or weak allocation mode with ablations");
     }
     if (MatchDiagnosticsEnabled(frame2->id())) {
       observer = [&](const auto &left, const auto &right, const auto &nominal,
                      const auto *source_covs, const auto &indices,
-                     const auto &init, const auto &baseline) {
+                     const auto &init, const auto &online_solution) {
         WriteFixedInputAudit(*frame1, *frame2, matches, bvs2, left, right,
-                             nominal, source_covs, indices, init, baseline,
-                             options_, ablation_folder);
+                             nominal, source_covs, indices, init, online_solution,
+                             mode, options_, ablation_folder);
       };
     }
   }

@@ -283,8 +283,9 @@ def analyze(out, dataset):
     return report
 
 
-def record_pairs(repo, executable, config, source, start_frame, times, targets, out, *, rotation_feedback=False):
-    """Run with local frame IDs starting at zero and only analytic feedback."""
+def record_pairs(repo, executable, config, source, start_frame, times, targets, out, *,
+                 rotation_feedback=False, mode=MODES[0]):
+    """Record selected frame pairs from the requested continuous replay."""
     images = out / "images"
     images.mkdir()
     for frame in range(start_frame, start_frame + len(times)):
@@ -293,7 +294,7 @@ def record_pairs(repo, executable, config, source, start_frame, times, targets, 
     np.savetxt(out / "times.txt", times, fmt="%.12f")
     target = out / "capture"
     target.mkdir()
-    environment = dict(os.environ, PNEC_PHOTOMETRIC_INCREMENT=MODES[0], PNEC_FIXED_INPUT_AUDIT="1",
+    environment = dict(os.environ, PNEC_PHOTOMETRIC_INCREMENT=mode, PNEC_FIXED_INPUT_AUDIT="1",
                        PNEC_MATCH_DIAGNOSTICS_FRAMES=",".join(map(str, targets)),
                        OPENBLAS_NUM_THREADS="1")
     environment.pop("PNEC_PREVIOUS_ROTATION_BY_VIEW", None)
