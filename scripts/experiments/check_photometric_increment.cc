@@ -68,7 +68,7 @@ int main() {
     std::cerr << "Far-peak retention differs from the fixed-input rule\n";
     return 1;
   }
-  std::vector<double> weak{4, 2, 0}, tapered = weak, matched = weak;
+  std::vector<double> weak{4, 2, 0}, tapered = weak, matched = weak, uniform = weak;
   const std::vector<double> retention{far, 1, 1};
   const double weak_total = ApplyWeakIncrement(Mode::WeakPerMatch, {}, 6, weak);
   const double tapered_total = ApplyWeakIncrement(Mode::FarPeakTaper, retention, 6, tapered);
@@ -80,6 +80,16 @@ int main() {
       matched[0] != 2 * matched[1] || matched[2] != 0 ||
       ApplyWeakIncrement(Mode::MatchedBudget, retention, 0, zero) != 0) {
     std::cerr << "Target traces differ from the weak or equal-total control\n";
+    return 1;
+  }
+  const double uniform_total = ApplyWeakIncrement(Mode::WeakUniform, {}, 6, uniform);
+  std::vector<double> empty;
+  if (uniform_total != weak_total ||
+      uniform != std::vector<double>(3, 2.0 / 32) ||
+      ApplyWeakIncrement(Mode::WeakUniform, {}, 0, empty) != 0 ||
+      ApplyWeakIncrement(Mode::WeakUniform, {}, 0, zero) != 0 ||
+      zero != std::vector<double>(3, 0)) {
+    std::cerr << "Weak uniform must share the per-match total across all inliers\n";
     return 1;
   }
   std::cout << "Photometric search and weak increment reference cases passed\n";

@@ -1,6 +1,7 @@
 #ifndef PNEC_PHOTOMETRIC_INCREMENT_H_
 #define PNEC_PHOTOMETRIC_INCREMENT_H_
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstddef>
@@ -15,7 +16,8 @@ namespace pnec::rel_pose_estimation::photometric {
 
 enum class Mode {
   Disabled, Original, Uniform, PerMatch, SymmetricAnalytic,
-  SymmetricUniform, SymmetricPerMatch, WeakPerMatch, MatchedBudget, FarPeakTaper
+  SymmetricUniform, SymmetricPerMatch, WeakPerMatch, MatchedBudget, FarPeakTaper,
+  WeakUniform
 };
 
 inline Mode ExperimentMode() {
@@ -46,6 +48,9 @@ inline Mode ExperimentMode() {
     if (value == "weak_per_match") {
       return Mode::WeakPerMatch;
     }
+    if (value == "weak_uniform") {
+      return Mode::WeakUniform;
+    }
     if (value == "matched_budget") {
       return Mode::MatchedBudget;
     }
@@ -55,7 +60,7 @@ inline Mode ExperimentMode() {
     throw std::invalid_argument(
         "PNEC_PHOTOMETRIC_INCREMENT expects original, uniform, per_match, "
         "symmetric_analytic, symmetric_uniform, symmetric_per_match, "
-        "weak_per_match, matched_budget or far_peak_taper");
+        "weak_per_match, weak_uniform, matched_budget or far_peak_taper");
   }();
   return mode;
 }
@@ -100,8 +105,8 @@ struct Measurement {
 };
 
 inline bool IsWeakIncrement(Mode mode) {
-  return mode == Mode::WeakPerMatch || mode == Mode::MatchedBudget ||
-         mode == Mode::FarPeakTaper;
+  return mode == Mode::WeakPerMatch || mode == Mode::WeakUniform ||
+         mode == Mode::MatchedBudget || mode == Mode::FarPeakTaper;
 }
 
 inline bool UsesFarPeakRetention(Mode mode) {
@@ -130,6 +135,14 @@ inline double FarPeakRetention(const Measurement &measurement,
 inline double ApplyWeakIncrement(Mode mode, const std::vector<double> &retention,
                                  double original_total, std::vector<double> &traces) {
   constexpr double scale = 1.0 / 32;
+  if (mode == Mode::WeakUniform) {
+    if (traces.empty()) {
+      return 0;
+    }
+    const double total = scale * original_total;
+    std::fill(traces.begin(), traces.end(), total / traces.size());
+    return total;
+  }
   const bool matched = mode == Mode::MatchedBudget;
   const bool tapered = mode == Mode::FarPeakTaper;
   double factor = 1;

@@ -17,6 +17,7 @@ MODES = ("original", "uniform", "per_match")
 ANALYTIC_COMPARISON_MODES = ("original", "per_match", "symmetric_analytic")
 SYMMETRIC_MODES = ("symmetric_analytic", "symmetric_uniform", "symmetric_per_match")
 TAPER_FEEDBACK_MODES = (SYMMETRIC_MODES[0], "weak_per_match", "matched_budget", "far_peak_taper")
+WEAK_ALLOCATION_MODES = (SYMMETRIC_MODES[0], "weak_uniform", "weak_per_match")
 ROTATION_FEEDBACK_LOG = "Previous-view PNEC rotation feedback active after graph pruning"
 SYMMETRIC_CONTROL = {
     "source": "CVPR 2023, Section 3.2, equations 2-3",
@@ -82,7 +83,8 @@ def timing_summary(path, frames, warmup, mode):
             raise ValueError(f"{path}: {mode} applied a photometric increment")
     elif (not np.any(nonzero > 0) or np.any(nonzero > inliers)
           or not np.array_equal(trace > 0, nonzero > 0)
-          or (mode in ("uniform", "symmetric_uniform") and np.any(nonzero[trace > 0] != inliers[trace > 0]))):
+          or (mode in ("uniform", "symmetric_uniform", "weak_uniform")
+              and np.any(nonzero[trace > 0] != inliers[trace > 0]))):
         raise ValueError(f"{path}: invalid activity in {mode} mode")
     return {"median_total_ms": float(np.median(total)), "p95_total_ms": float(np.percentile(total, 95)),
             "median_increment_ms": float(np.median(added)), "p95_increment_ms": float(np.percentile(added, 95)),
@@ -102,7 +104,7 @@ def rotation_metrics(reference, estimate):
 
 
 def validate_symmetric_activity(target, mode, *, feedback=False):
-    if mode not in (*SYMMETRIC_MODES, *TAPER_FEEDBACK_MODES):
+    if mode not in (*SYMMETRIC_MODES, *TAPER_FEEDBACK_MODES, *WEAK_ALLOCATION_MODES):
         return
     symmetric_logged = feedback_logged = False
     with (target / "run.log").open(encoding="utf-8", errors="replace") as log:
@@ -238,10 +240,12 @@ def run(args):
         end, full_gt, input_hashes = full_sequence_inputs(args.dataset.resolve(strict=True), args.sequence)
         start = first = 0
     warmup = first - start
-    feedback = args.compare_taper_feedback
+    feedback = args.compare_taper_feedback or args.compare_weak_allocation
     modes = MODES
-    if feedback:
+    if args.compare_taper_feedback:
         modes = TAPER_FEEDBACK_MODES
+    elif args.compare_weak_allocation:
+        modes = WEAK_ALLOCATION_MODES
     elif args.reference_symmetric_full_run:
         modes = SYMMETRIC_MODES[1:]
     elif args.compare_symmetric_increments:
@@ -289,15 +293,23 @@ def run(args):
             path.name: digest(path) for path in
             (sequence_dir / "image_0" / f"{frame:06d}.png" for frame in range(start, end))
         }
-        manifest["taper_feedback"] = {
+        feedback_protocol = {
             "previous_rotation": "predecessor edge in the currently retained view graph",
             "feedback": "each mode feeds its own previous relative rotation into the next solve",
             "target_increment_scale": 1 / 32,
-            "best_within_px": 2,
-            "second_beyond_px": 12,
-            "taper": "(12 / second_to_endpoint_px)^2 for eligible matches",
-            "matched_budget": "same-pair taper total computed on this mode's own inliers",
         }
+        if args.compare_taper_feedback:
+            manifest["taper_feedback"] = {
+                **feedback_protocol, "best_within_px": 2, "second_beyond_px": 12,
+                "taper": "(12 / second_to_endpoint_px)^2 for eligible matches",
+                "matched_budget": "same-pair taper total computed on this mode's own inliers",
+            }
+        else:
+            manifest["weak_allocation_feedback"] = {
+                **feedback_protocol,
+                "weak_per_match": "scaled photometric trace for each inlier",
+                "weak_uniform": "sum of scaled traces divided by this mode's inlier count",
+            }
     if args.compare_symmetric_increments or args.reference_symmetric_full_run:
         manifest["symmetric_increment_ablation"] = {
             "base": "Host and target KLT covariances in final Ceres refinement",
@@ -429,10 +441,11 @@ def run(args):
     report = {"manifest": manifest, "runner_git_commit": revision, "results": scores}
     if feedback:
         sequence_scores = scores[args.sequence]
-        report["far_peak_taper_minus_control_deg"] = {
-            mode: {metric: sequence_scores["far_peak_taper"][metric] - sequence_scores[mode][metric]
+        candidate = "far_peak_taper" if args.compare_taper_feedback else "weak_per_match"
+        report[f"{candidate}_minus_control_deg"] = {
+            mode: {metric: sequence_scores[candidate][metric] - sequence_scores[mode][metric]
                    for metric in ("rpe_1_deg", "rpe_n_deg")}
-            for mode in TAPER_FEEDBACK_MODES[:-1]
+            for mode in modes if mode != candidate
         }
     if full_reference is not None:
         report["reference_full_run"] = full_reference
@@ -486,6 +499,8 @@ def main():
                           help="Replay only symmetric uniform/per-match increments and reuse a recorded KITTI 08 full symmetric baseline")
     analytic.add_argument("--compare-taper-feedback", action="store_true",
                           help="Run the four taper comparison modes with previous rotation feedback on KITTI 09 or 10")
+    analytic.add_argument("--compare-weak-allocation", action="store_true",
+                          help="Compare weak uniform and per-match increments with analytic PNEC on KITTI 09 or 10")
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--dataset", required=True, type=Path)
     location = parser.add_mutually_exclusive_group(required=True)
@@ -505,8 +520,9 @@ def main():
     if args.compare_symmetric_increments and (
             args.action == "full" or (args.action == "holdout" and args.sequence != "08")):
         parser.error("--compare-symmetric-increments supports smoke or holdout --sequence 08")
-    if args.compare_taper_feedback and (args.action != "holdout" or args.sequence not in ("09", "10")):
-        parser.error("--compare-taper-feedback requires holdout --sequence 09 or 10")
+    if (args.compare_taper_feedback or args.compare_weak_allocation) and (
+            args.action != "holdout" or args.sequence not in ("09", "10")):
+        parser.error("Feedback comparisons require holdout --sequence 09 or 10")
     if args.reference_symmetric_full_run and (args.action != "full" or args.sequence != "08"):
         parser.error("--reference-symmetric-full-run requires full --sequence 08")
     run(args)
