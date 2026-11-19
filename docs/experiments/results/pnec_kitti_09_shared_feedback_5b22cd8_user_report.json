@@ -1,0 +1,137 @@
+{
+  "sequence": "09",
+  "source_run": "/home/yangxd/pnec_research/pnec_weak_allocation_full_09_10.p8Fgov/09/pnec_increment_full_7aqz3gl2",
+  "source_report_sha256": "2bc0d166babf858e3e8e7cfd35ded9dc2fac780afdb32e7d48682fe619a5e59b",
+  "tool_git_commit": "5b22cd8c69102405acc0758cfec16796ef714abe",
+  "binary_sha256": "ffd1b8d4b91f4d3e8ec5092cb62973a7b5a60c3b114743f9e70f493622ebe72c",
+  "target_increment_scale": 0.03125,
+  "feedback": "Analytic solution drives the next frame; weak estimates share inliers and Ceres initialization",
+  "baseline_exact_pose_rows_match": true,
+  "frames": 1591,
+  "tail_evaluation_start": 800,
+  "shared_feedback_metrics": {
+    "symmetric_analytic": {
+      "rpe_1_deg": 0.1840426759892407,
+      "rpe_n_deg": 11.529443936445029,
+      "tail": {
+        "rpe_1_deg": 0.059095595124485235,
+        "rpe_n_deg": 1.5129966562111261
+      }
+    },
+    "weak_uniform": {
+      "rpe_1_deg": 0.18490078666483512,
+      "rpe_n_deg": 11.749032450595918,
+      "tail": {
+        "rpe_1_deg": 0.057156364995474565,
+        "rpe_n_deg": 1.5315717496729824
+      }
+    },
+    "weak_per_match": {
+      "rpe_1_deg": 0.18168827180992497,
+      "rpe_n_deg": 11.633312793695017,
+      "tail": {
+        "rpe_1_deg": 0.053625365088694706,
+        "rpe_n_deg": 1.261179075685617
+      }
+    }
+  },
+  "independent_feedback_metrics": {
+    "symmetric_analytic": {
+      "rpe_1_deg": 0.1840426759892407,
+      "rpe_n_deg": 11.529443936445029,
+      "tail": {
+        "rpe_1_deg": 0.059095595124485235,
+        "rpe_n_deg": 1.5129966562111261
+      }
+    },
+    "weak_uniform": {
+      "rpe_1_deg": 0.1525548966478949,
+      "rpe_n_deg": 9.71382015385021,
+      "tail": {
+        "rpe_1_deg": 0.058134607404008345,
+        "rpe_n_deg": 1.5305069206871709
+      }
+    },
+    "weak_per_match": {
+      "rpe_1_deg": 0.17998963242751137,
+      "rpe_n_deg": 11.93735162597269,
+      "tail": {
+        "rpe_1_deg": 0.06692689291130936,
+        "rpe_n_deg": 2.0212750559238892
+      }
+    }
+  },
+  "target_frame_errors_deg": [
+    {
+      "target_frame": 1057,
+      "symmetric_analytic": 0.04890541655345225,
+      "weak_uniform": 0.05039348019442963,
+      "weak_per_match": 0.04575109998015366
+    },
+    {
+      "target_frame": 1058,
+      "symmetric_analytic": 0.049453735470745684,
+      "weak_uniform": 0.04256826767059948,
+      "weak_per_match": 0.02586587779682882
+    },
+    {
+      "target_frame": 1059,
+      "symmetric_analytic": 0.08085987769428914,
+      "weak_uniform": 0.01777628118738174,
+      "weak_per_match": 0.024070864046888726
+    },
+    {
+      "target_frame": 1103,
+      "symmetric_analytic": 0.06528430267592501,
+      "weak_uniform": 0.02316946693435981,
+      "weak_per_match": 0.035275248793387656
+    },
+    {
+      "target_frame": 1104,
+      "symmetric_analytic": 0.1852862340520278,
+      "weak_uniform": 0.24006502096564755,
+      "weak_per_match": 0.17932696435426584
+    },
+    {
+      "target_frame": 1105,
+      "symmetric_analytic": 0.04206840353266529,
+      "weak_uniform": 0.024040967774455163,
+      "weak_per_match": 0.042030677040019365
+    },
+    {
+      "target_frame": 1106,
+      "symmetric_analytic": 0.03107686532544431,
+      "weak_uniform": 0.024210684719119375,
+      "weak_per_match": 0.02276652681093385
+    },
+    {
+      "target_frame": 1107,
+      "symmetric_analytic": 0.04285704079178514,
+      "weak_uniform": 0.04044551665527875,
+      "weak_per_match": 0.04317344175334476
+    },
+    {
+      "target_frame": 1118,
+      "symmetric_analytic": 0.04919022547952253,
+      "weak_uniform": 0.04780710675798001,
+      "weak_per_match": 0.03758536825031657
+    },
+    {
+      "target_frame": 1119,
+      "symmetric_analytic": 0.0406474124604373,
+      "weak_uniform": 0.03504174842435585,
+      "weak_per_match": 0.042636707126426074
+    },
+    {
+      "target_frame": 1120,
+      "symmetric_analytic": 0.029239537503272798,
+      "weak_uniform": 0.04738468221911942,
+      "weak_per_match": 0.05171794251164758
+    }
+  ],
+  "relative_poses_sha256": {
+    "symmetric_analytic": "f4c0cbb9812adc7e84eb07c4bf2941e1200a233cc8204a7e5b2e5ea7cecb9b62",
+    "weak_uniform": "cbd340d63bd193041e5e1d2234ba33eb76dc4a5d2f2e6323b77da0026ed75d58",
+    "weak_per_match": "0e0a97d7f7ca3afe98ec67855cf82b5acf54f74f518ae7304f49d6b1b47bdc03"
+  }
+}

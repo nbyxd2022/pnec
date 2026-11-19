@@ -43,21 +43,25 @@ def evaluate(out, solve_exe, reference, online_errors):
     return frames, hashes
 
 
-def replay_inputs(repo, dataset, *, full=False):
+def replay_inputs(repo, dataset, *, full=False, sequence=SEQUENCE):
+    if not full and sequence != SEQUENCE:
+        raise ValueError("Selected-frame capture is defined only for KITTI 09")
     archive = repo / "docs/experiments/results"
-    drift = read_json(archive / "pnec_kitti_09_weak_allocation_rotation_drift_741b480_user_report.json")
+    drift = read_json(archive / f"pnec_kitti_{sequence}_weak_allocation_rotation_drift_741b480_user_report.json")
+    if drift["sequence"] != sequence:
+        raise ValueError("Drift archive sequence does not match requested sequence")
     original = Path(drift["source_run"])
     saved = drift["input_sha256"]
     online_report_path = checked_file(original / "report.json", saved["report"])
     original_manifest = read_json(checked_file(original / "manifest.json", saved["manifest"]))
-    if original_manifest != read_json(online_report_path)["manifest"]:
-        raise ValueError("Original replay manifest differs from its report")
-    dataset_sequence = dataset / "sequences/09"
+    if original_manifest != read_json(online_report_path)["manifest"] or original_manifest["sequences"] != [sequence]:
+        raise ValueError("Original replay manifest differs from its report or requested sequence")
+    dataset_sequence = dataset / "sequences" / sequence
     times_file = checked_file(dataset_sequence / "times.txt", saved["times"])
-    gt = checked_file(dataset / "poses/09.txt", saved["ground_truth"])
+    gt = checked_file(dataset / "poses" / f"{sequence}.txt", saved["ground_truth"])
     times = np.loadtxt(times_file, ndmin=1)
     times -= times[0]
-    np.testing.assert_allclose(np.loadtxt(original / "09/times.txt", ndmin=1), times, rtol=0, atol=6e-13)
+    np.testing.assert_allclose(np.loadtxt(original / sequence / "times.txt", ndmin=1), times, rtol=0, atol=6e-13)
     reference = project_rotations(np.loadtxt(gt, ndmin=2).reshape(-1, 3, 4)[:, :, :3])
     if len(reference) != len(times):
         raise ValueError("Ground truth and timestamp coverage differ")
@@ -67,10 +71,10 @@ def replay_inputs(repo, dataset, *, full=False):
     for frame in range(end):
         name = f"{frame:06d}.png"
         checked_file(source / name, original_manifest["image_sha256"][name])
-    config = replay_config(repo, SEQUENCE)
-    if {p.name: digest(p) for p in config} != read_json(original / "09/config_sha256.json"):
+    config = replay_config(repo, sequence)
+    if {p.name: digest(p) for p in config} != read_json(original / sequence / "config_sha256.json"):
         raise ValueError("Current KITTI config differs from original replay")
-    poses = {mode: checked_file(original / "09" / mode / "ablation/PNEC.txt", sha)
+    poses = {mode: checked_file(original / sequence / mode / "ablation/PNEC.txt", sha)
              for mode, sha in saved["relative_poses"].items()}
     return original, saved, times, reference, source, config, poses
 
