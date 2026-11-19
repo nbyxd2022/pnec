@@ -105,7 +105,7 @@ def score_bundle(bundle, sequence, dataset, focal, center, regularizer):
         old = read_archive("pnec_kitti_10_simfitpp_holdout_497bab6_report.json")
         legacy = {row["target_frame"]: row["matches_sha256"] for row in old["pairs"]}
 
-    frames, group_means = [], []
+    frames, group_means, tracked_fb_errors = [], [], []
     with tarfile.open(bundle, "r:gz") as tar:
         members = tar.getmembers()
         names = set(FILE_BY_TARGET.values())
@@ -133,9 +133,14 @@ def score_bundle(bundle, sequence, dataset, focal, center, regularizer):
             available = values[:, 0] >= 0
             if np.any(values[available, 0] >= gate):
                 raise ValueError(f"Accepted match exceeds the original KLT threshold in {name}")
-            n_low, n_high, paired = matched_groups(values[available])
-            row = {"target_frame": target, "matches_sha256": checksum, "eligible": int(available.sum()),
-                   "unavailable": int((~available).sum()), "low_available": n_low, "high_available": n_high}
+            usable = values[available]
+            fb_errors = usable[:, 0]
+            tracked_fb_errors.append(fb_errors)
+            n_low, n_high, paired = matched_groups(usable)
+            row = {"target_frame": target, "matches_sha256": checksum, "eligible": len(usable),
+                   "unavailable": int((~available).sum()), "zero_fb_error": int(np.sum(fb_errors == 0)),
+                   "coincident_fb_quartiles": len(usable) >= 4 and n_low == n_high == 0,
+                   "low_available": n_low, "high_available": n_high}
             if paired is not None:
                 count, means, ratios = paired
                 row.update(matched_points_per_group=count, low=angle_stats(means[0]), high=angle_stats(means[1]),
@@ -143,18 +148,26 @@ def score_bundle(bundle, sequence, dataset, focal, center, regularizer):
                 group_means.append(means)
             frames.append(row)
 
-    if not group_means:
-        raise ValueError(f"No comparable frames in KITTI {sequence}")
-    means = np.stack(group_means)
+    means = np.asarray(group_means).reshape(-1, 2, 4)
     tail_delta = means[:, 1, 3] - means[:, 0, 3]
+    fb_errors = np.concatenate(tracked_fb_errors)
+    zero_count = int(np.sum(fb_errors == 0))
+    positive_px = np.sqrt(fb_errors[fb_errors > 0])
     return {
         "sequence": sequence, "binary_sha256": manifest["binary_sha256"], "bundle_sha256": digest(bundle),
         "ground_truth_sha256_lf": gt_hash, "legacy_csv_prefixes_verified": len(legacy),
         "klt_fb_gate_sq_px2": gate, "frame_pairs": len(frames), "comparable_frame_pairs": len(means),
         "matched_points_per_group": sum(row.get("matched_points_per_group", 0) for row in frames),
+        "fb_signal_coverage": {
+            "eligible_inliers": len(fb_errors), "zero_error_inliers": zero_count,
+            "zero_error_fraction": zero_count / len(fb_errors) if len(fb_errors) else None,
+            "positive_error_median_px": float(np.median(positive_px)) if len(positive_px) else None,
+            "coincident_quartile_frames": sum(row["coincident_fb_quartiles"] for row in frames),
+        },
         "frames_with_higher_q_tail_in_high_group": int(np.sum(tail_delta > 0)),
-        "median_high_minus_low_q_tail": float(np.median(tail_delta)),
-        "low": angle_stats(means[:, 0].mean(axis=0)), "high": angle_stats(means[:, 1].mean(axis=0)),
+        "median_high_minus_low_q_tail": float(np.median(tail_delta)) if len(means) else None,
+        "low": angle_stats(means[:, 0].mean(axis=0)) if len(means) else None,
+        "high": angle_stats(means[:, 1].mean(axis=0)) if len(means) else None,
         "frames": frames,
     }
 
