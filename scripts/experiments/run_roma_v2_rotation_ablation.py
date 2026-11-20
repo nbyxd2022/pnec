@@ -1,15 +1,17 @@
-"""Compare full RoMa v2 and per-endpoint equal-trace isotropic covariance in PNEC."""
+"""Compare RoMa v2 covariance direction and per-match scale in PNEC."""
 
 import argparse
 from functools import partial
 from importlib.metadata import version
 import json
+from itertools import groupby
 from pathlib import Path
 import subprocess
 from unittest.mock import patch
 
 import numpy as np
 
+from analyze_photometric_drift import compose_steps, gap_errors, rmse
 from audit_pnec_bearing_covariance import REPO, bearing, load_truth, project_covariance, read_archive
 from run_fixed_input_audit import atomic_json
 from run_photometric_increment import digest, replay_config
@@ -17,18 +19,20 @@ from run_weak_scale_audit import control_difference_deg, solve_pair
 
 
 SEQUENCES = ("09", "10")
-TARGETS = tuple(range(300, 400, 10))
+PILOT_TARGETS = range(300, 400, 10)
+CONTIGUOUS_TARGETS = range(800, 900)
+ROTATION_GAPS = (10, 30, 50)
 SAMPLE_COUNT = 512
 SEED = 17
 CHECKPOINT_SHA = "1557dec0d21b62366465f7ff4d5fdf228cc695d0582e196ad2b80e05230828b7"
 DINOV3_COMMIT = "adc254450203739c8149213a7a69d8d905b4fcfa"
 
 
-def image_pairs(dataset, sequence):
+def image_pairs(dataset, sequence, targets):
     images = dataset / "sequences" / sequence / "image_0"
     expected = read_archive(f"pnec_kitti_{sequence}_original_feedback_a89d06a_user_report.json")
     hashes = expected["manifest"]["image_sha256"]
-    for target in TARGETS:
+    for target in targets:
         names = [f"{frame:06d}.png" for frame in (target - 1, target)]
         pair = tuple(images / name for name in names)
         if any(digest(path) != hashes[name] for path, name in zip(pair, names)):
@@ -99,8 +103,9 @@ def capture(args):
     if not (hub / f"facebookresearch_dinov3_{DINOV3_COMMIT}/hubconf.py").is_file():
         raise ValueError("Missing pinned DINOv3 cache")
 
+    targets = CONTIGUOUS_TARGETS if args.contiguous else PILOT_TARGETS
     pairs = [(seq, target, paths, hashes) for seq in SEQUENCES
-             for target, paths, hashes in image_pairs(args.dataset, seq)]
+             for target, paths, hashes in image_pairs(args.dataset, seq, targets)]
     args.run.mkdir(parents=True, exist_ok=False)
     torch.manual_seed(SEED)
     torch.set_float32_matmul_precision("highest")
@@ -229,30 +234,55 @@ def check_replayed_frame(actual, expected):
             raise ValueError(f"Archived {label} rotation differs at frame {expected['target']}")
 
 
+def contiguous_metrics(frames, reference):
+    """Pool rotation errors only across uninterrupted shared frame pairs."""
+    chunks = [list(chunk) for valid, chunk in groupby(frames, key=lambda row: row["status"] == "ok") if valid]
+    modes = ("initial", "frame_uniform", "equal_trace", "full")
+    series = [
+        (reference[chunk[0]["target"] - 1:chunk[-1]["target"] + 1],
+         {mode: compose_steps([row["rotations"][mode] for row in chunk]) for mode in modes})
+        for chunk in chunks
+    ]
+    summary = {}
+    for gap in ROTATION_GAPS:
+        windows = [(truth, estimates) for truth, estimates in series if len(truth) > gap]
+        count = sum(len(truth) - gap for truth, _ in windows)
+        rms = {mode: rmse(np.concatenate([gap_errors(truth, est[mode], gap) for truth, est in windows]))
+               for mode in modes} if windows else None
+        summary[str(gap)] = {"common_intervals": count, "requested_intervals": len(frames) + 1 - gap,
+                             "rotation_rms_deg": rms}
+    return summary
+
+
 def score(args):
     import cv2
 
+    if args.contiguous and args.scale_control:
+        raise ValueError("--scale-control is the frozen pilot comparison; --contiguous includes the same control")
+    targets = CONTIGUOUS_TARGETS if args.contiguous else PILOT_TARGETS
+    scale_control = args.scale_control or args.contiguous
     path = args.run / "capture.json"
     captured = json.loads(path.read_bytes())
     if (captured["checkpoint_sha256"] != CHECKPOINT_SHA or captured["input_hw"] != [512, 512]
             or captured["samples_per_pair"] != SAMPLE_COUNT or
             [(row["sequence"], row["target"]) for row in captured["frames"]]
-            != [(seq, target) for seq in SEQUENCES for target in TARGETS]):
+            != [(seq, target) for seq in SEQUENCES for target in targets]):
         raise ValueError("Unexpected capture protocol")
 
     capture_sha = digest(path)
     binary_sha = digest(args.executable)
-    reference_archive = None
-    if args.scale_control:
-        reference_archive = read_archive(ORIGINAL_REPORT)
-        for key, value in (("capture_sha256", capture_sha), ("native_binary_sha256", binary_sha),
-                           ("opencv", cv2.__version__)):
+    reference_archive = read_archive(ORIGINAL_REPORT) if scale_control else None
+    if reference_archive is not None:
+        checks = {"native_binary_sha256": binary_sha, "opencv": cv2.__version__}
+        if args.scale_control:
+            checks["capture_sha256"] = capture_sha
+        for key, value in checks.items():
             if reference_archive[key] != value:
-                raise ValueError(f"Scale control requires archived {key} {reference_archive[key]}, got {value}")
+                raise ValueError(f"Control requires archived {key} {reference_archive[key]}, got {value}")
     results = []
     for sequence in SEQUENCES:
         frozen_frames = {}
-        if reference_archive is not None:
+        if args.scale_control:
             archived = next(row for row in reference_archive["sequences"] if row["sequence"] == sequence)
             frozen_frames = {row["target"]: row for row in archived["frames"]}
         intrinsics, regularizer = camera(sequence)
@@ -264,13 +294,13 @@ def score(args):
                 if digest(file) != row["sha256"]:
                     raise ValueError(f"Changed match capture: {file}")
                 frame = {"target": target, **estimate_pair(
-                    cv2, file, args.executable, intrinsics, regularizer, scale_control=args.scale_control,
+                    cv2, file, args.executable, intrinsics, regularizer, scale_control=scale_control,
                 )}
-                if reference_archive is not None:
+                if args.scale_control:
                     check_replayed_frame(frame, frozen_frames[target])
                 frames.append(frame)
         reference, _, gt_hash = load_truth(args.ground_truth_dir, sequence)
-        if reference_archive is not None and gt_hash != archived["gt_sha256_lf"]:
+        if args.scale_control and gt_hash != archived["gt_sha256_lf"]:
             raise ValueError(f"KITTI {sequence} ground truth differs from the archived comparison")
         for row in frames:
             if row["status"] == "ok":
@@ -281,17 +311,26 @@ def score(args):
                     for name, rotation in row["rotations"].items()
                 }
         result = {"sequence": sequence, "gt_sha256_lf": gt_hash,
-                  **metrics(frames, scale_control=args.scale_control), "frames": frames}
+                  **metrics(frames, scale_control=scale_control), "frames": frames}
+        if args.contiguous:
+            result["rotation_by_gap_frames"] = contiguous_metrics(frames, reference)
         results.append(result)
         print(json.dumps({key: value for key, value in result.items() if key != "frames"}, indent=2), flush=True)
-    output = args.run / ("rotation_scale_control.json" if args.scale_control else "rotation_ablation.json")
+    output = args.run / "rotation_ablation.json"
+    if args.contiguous:
+        output = args.run / "rotation_contiguous.json"
+    elif args.scale_control:
+        output = args.run / "rotation_scale_control.json"
     report = {"capture_sha256": capture_sha, "native_binary_sha256": binary_sha,
               "scorer_sha256": digest(Path(__file__)), "opencv": cv2.__version__,
               "residual": "native PNEC with both endpoints; equal trace in original pixel coordinates",
               "sequences": results}
-    if args.scale_control:
+    if reference_archive is not None:
         report["reference_report_sha256"] = digest(REPO / "docs/experiments/results" / ORIGINAL_REPORT)
         report["frame_uniform"] = "Each endpoint uses its own mean isotropic pixel variance over the shared inliers"
+    if args.contiguous:
+        report["scope"] = "Independent adjacent-pair refinements composed only within uninterrupted shared intervals"
+        report["target_frames_inclusive"] = [targets.start, targets.stop - 1]
     atomic_json(output, report)
     print(f"Report: {output}")
 
@@ -303,6 +342,7 @@ if __name__ == "__main__":
                                   ("score", score, ("run", "executable", "ground-truth-dir"))):
         sub = actions.add_parser(action)
         sub.set_defaults(method=method)
+        sub.add_argument("--contiguous", action="store_true", help="KITTI 09/10 target frames 800 through 899")
         for name in names:
             sub.add_argument("--" + name, type=Path, required=True)
         if action == "score":
