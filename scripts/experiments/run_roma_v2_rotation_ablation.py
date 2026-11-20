@@ -156,7 +156,7 @@ def camera(sequence):
     return np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]]), float(values["PNEC.regularization"])
 
 
-def estimate_pair(cv2, file, executable, intrinsics, regularizer):
+def estimate_pair(cv2, file, executable, intrinsics, regularizer, *, scale_control=False):
     with np.load(file, allow_pickle=False) as saved:
         host, target = saved["pixels"]
         cov = saved["covariance_px2"]
@@ -173,13 +173,21 @@ def estimate_pair(cv2, file, executable, intrinsics, regularizer):
     rows["regularization"] = regularizer
     stats = {"valid_matches": len(host), "inliers": int(inliers.sum()), "cheirality_for_init": int(cheiral)}
     rotations = {"initial": pose[0].tolist()}
-    for label, covariances in (("equal_trace", isotropic(cov)), ("full", cov)):
+    equal_trace = isotropic(cov)
+    models = [("equal_trace", equal_trace), ("full", cov)]
+    if scale_control:
+        # Preserve each endpoint's sum of pixel variances, while removing their per-match assignment.
+        uniform = np.broadcast_to(equal_trace.mean(axis=1, keepdims=True), cov.shape)
+        models.append(("frame_uniform", uniform))
+    for label, covariances in models:
         host_cov, target_cov = (project_covariance(coords, matrix, focal, center, np.sqrt(3))
                                  for coords, matrix in zip(pixels, covariances))
         try:
             # Zero trace increments in the legacy executable make its auxiliary modes identical.
             result = solve_pair(executable, (rows, left, right, host_cov, target_cov), pose)
         except subprocess.CalledProcessError:
+            if scale_control:
+                stats["rotations"] = rotations
             return {**stats, "status": "native_refinement_failed", "failed_mode": label}
         rotation = result["symmetric_analytic"]
         if any(control_difference_deg(other, rotation) > 1e-8 for other in result.values()):
@@ -188,15 +196,37 @@ def estimate_pair(cv2, file, executable, intrinsics, regularizer):
     return {**stats, "status": "ok", "rotations": rotations}
 
 
-def metrics(frames):
+def metrics(frames, *, scale_control=False):
     rows = [row["rotation_error_deg"] for row in frames if row["status"] == "ok"]
     scores = {}
-    for label in ("initial", "equal_trace", "full"):
+    modes = ("initial", "equal_trace", "full")
+    if scale_control:
+        modes += ("frame_uniform",)
+    for label in modes:
         values = np.array([row[label] for row in rows])
         scores[label] = ({"rms": float(np.sqrt(np.mean(values**2))), "median": float(np.median(values)),
                           "p90": float(np.percentile(values, 90))} if len(values) else None)
-    return {"common_pairs": len(rows), "requested_pairs": len(frames), "rotation_deg": scores,
-            "full_wins": sum(row["full"] < row["equal_trace"] - 1e-8 for row in rows)}
+    result = {"common_pairs": len(rows), "requested_pairs": len(frames), "rotation_deg": scores,
+              "full_wins": sum(row["full"] < row["equal_trace"] - 1e-8 for row in rows)}
+    if scale_control:
+        result["equal_trace_wins_vs_frame_uniform"] = sum(
+            row["equal_trace"] < row["frame_uniform"] - 1e-8 for row in rows)
+    return result
+
+
+ORIGINAL_REPORT = "pnec_kitti_09_10_roma_v2_rotation_ablation_bea6f2c_user_report.json"
+
+
+def check_replayed_frame(actual, expected):
+    for key in ("target", "valid_matches", "inliers", "cheirality_for_init"):
+        if actual.get(key) != expected[key]:
+            raise ValueError(f"Archived {key} differs at frame {expected['target']}")
+    if expected["status"] != "ok":
+        raise ValueError("Expected a successful archived pair")
+    rotations = actual.get("rotations", {})
+    for label, frozen in expected["rotations"].items():
+        if label not in rotations or control_difference_deg(np.array(rotations[label]), np.array(frozen)) > 1e-8:
+            raise ValueError(f"Archived {label} rotation differs at frame {expected['target']}")
 
 
 def score(args):
@@ -210,8 +240,21 @@ def score(args):
             != [(seq, target) for seq in SEQUENCES for target in TARGETS]):
         raise ValueError("Unexpected capture protocol")
 
+    capture_sha = digest(path)
+    binary_sha = digest(args.executable)
+    reference_archive = None
+    if args.scale_control:
+        reference_archive = read_archive(ORIGINAL_REPORT)
+        for key, value in (("capture_sha256", capture_sha), ("native_binary_sha256", binary_sha),
+                           ("opencv", cv2.__version__)):
+            if reference_archive[key] != value:
+                raise ValueError(f"Scale control requires archived {key} {reference_archive[key]}, got {value}")
     results = []
     for sequence in SEQUENCES:
+        frozen_frames = {}
+        if reference_archive is not None:
+            archived = next(row for row in reference_archive["sequences"] if row["sequence"] == sequence)
+            frozen_frames = {row["target"]: row for row in archived["frames"]}
         intrinsics, regularizer = camera(sequence)
         frames = []
         for row in captured["frames"]:
@@ -220,8 +263,15 @@ def score(args):
                 file = args.run / f"{sequence}_{target}.npz"
                 if digest(file) != row["sha256"]:
                     raise ValueError(f"Changed match capture: {file}")
-                frames.append({"target": target, **estimate_pair(cv2, file, args.executable, intrinsics, regularizer)})
+                frame = {"target": target, **estimate_pair(
+                    cv2, file, args.executable, intrinsics, regularizer, scale_control=args.scale_control,
+                )}
+                if reference_archive is not None:
+                    check_replayed_frame(frame, frozen_frames[target])
+                frames.append(frame)
         reference, _, gt_hash = load_truth(args.ground_truth_dir, sequence)
+        if reference_archive is not None and gt_hash != archived["gt_sha256_lf"]:
+            raise ValueError(f"KITTI {sequence} ground truth differs from the archived comparison")
         for row in frames:
             if row["status"] == "ok":
                 target = row["target"]
@@ -230,14 +280,19 @@ def score(args):
                     name: control_difference_deg(np.array(rotation), expected)
                     for name, rotation in row["rotations"].items()
                 }
-        result = {"sequence": sequence, "gt_sha256_lf": gt_hash, **metrics(frames), "frames": frames}
+        result = {"sequence": sequence, "gt_sha256_lf": gt_hash,
+                  **metrics(frames, scale_control=args.scale_control), "frames": frames}
         results.append(result)
         print(json.dumps({key: value for key, value in result.items() if key != "frames"}, indent=2), flush=True)
-    output = args.run / "rotation_ablation.json"
-    atomic_json(output, {"capture_sha256": digest(path), "native_binary_sha256": digest(args.executable),
-                         "scorer_sha256": digest(Path(__file__)), "opencv": cv2.__version__,
-                         "residual": "native PNEC with both endpoints; equal trace in original pixel coordinates",
-                         "sequences": results})
+    output = args.run / ("rotation_scale_control.json" if args.scale_control else "rotation_ablation.json")
+    report = {"capture_sha256": capture_sha, "native_binary_sha256": binary_sha,
+              "scorer_sha256": digest(Path(__file__)), "opencv": cv2.__version__,
+              "residual": "native PNEC with both endpoints; equal trace in original pixel coordinates",
+              "sequences": results}
+    if args.scale_control:
+        report["reference_report_sha256"] = digest(REPO / "docs/experiments/results" / ORIGINAL_REPORT)
+        report["frame_uniform"] = "Each endpoint uses its own mean isotropic pixel variance over the shared inliers"
+    atomic_json(output, report)
     print(f"Report: {output}")
 
 
@@ -250,5 +305,7 @@ if __name__ == "__main__":
         sub.set_defaults(method=method)
         for name in names:
             sub.add_argument("--" + name, type=Path, required=True)
+        if action == "score":
+            sub.add_argument("--scale-control", action="store_true")
     args = parser.parse_args()
     args.method(args)
